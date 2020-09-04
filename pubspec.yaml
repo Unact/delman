@@ -1,0 +1,50 @@
+name: delman
+description: An application for couriers
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  equatable: any
+  dio: any
+  flutter_user_agent: any
+  pub_semver: any
+  shared_preferences: any
+  sqflite: any
+  path_provider: any
+  device_info: any
+  package_info: any
+  sentry: any
+  flutter_dotenv: any
+  provider: any
+  url_launcher: any
+  location: any
+  yandex_mapkit: any
+  flutter_bluetooth_serial: any
+  flutter_blue: any
+  # https://github.com/johnpryan/signature-pad-dart/pull/2
+  signature_pad_flutter:
+    git:
+      url: git://github.com/remicode/signature-pad-dart
+      ref: fix-picture-to-image-now-returns-future-not-image
+      path: signature_pad_flutter
+  iboxpro_flutter:
+    git:
+      url: ssh://git@github.com/Unact/iboxpro_flutter.git
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - lib/app/data/schema.sql
+    - lib/app/assets/images/placeicon.png
+    - .env

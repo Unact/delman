@@ -1,0 +1,119 @@
+PODS:
+  - device_info (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+  - flutter_blue (0.0.1):
+    - Flutter
+    - flutter_blue/Protos (= 0.0.1)
+  - flutter_blue/Protos (0.0.1):
+    - Flutter
+    - Protobuf (~> 3.11.4)
+  - flutter_bluetooth_serial (0.0.1):
+    - Flutter
+  - flutter_user_agent (1.2.2):
+    - Flutter
+  - FMDB (2.7.5):
+    - FMDB/standard (= 2.7.5)
+  - FMDB/standard (2.7.5)
+  - iboxpro_flutter (0.0.1):
+    - Flutter
+  - location (0.0.1):
+    - Flutter
+  - package_info (0.0.1):
+    - Flutter
+  - path_provider (0.0.1):
+    - Flutter
+  - Protobuf (3.11.4)
+  - shared_preferences (0.0.1):
+    - Flutter
+  - sqflite (0.0.1):
+    - Flutter
+    - FMDB (~> 2.7.2)
+  - url_launcher (0.0.1):
+    - Flutter
+  - yandex_mapkit (0.0.1):
+    - Flutter
+    - YandexMapKit (= 3.5.0)
+    - YandexMapKitSearch (= 3.5.0)
+    - YandexRuntime (= 3.5.0)
+  - YandexMapKit (3.5.0):
+    - YandexRuntime (= 3.5.0)
+  - YandexMapKitSearch (3.5.0):
+    - YandexMapKit (= 3.5.0)
+    - YandexRuntime (= 3.5.0)
+  - YandexRuntime (3.5.0)
+
+DEPENDENCIES:
+  - device_info (from `.symlinks/plugins/device_info/ios`)
+  - Flutter (from `Flutter`)
+  - flutter_blue (from `.symlinks/plugins/flutter_blue/ios`)
+  - flutter_bluetooth_serial (from `.symlinks/plugins/flutter_bluetooth_serial/ios`)
+  - flutter_user_agent (from `.symlinks/plugins/flutter_user_agent/ios`)
+  - iboxpro_flutter (from `.symlinks/plugins/iboxpro_flutter/ios`)
+  - location (from `.symlinks/plugins/location/ios`)
+  - package_info (from `.symlinks/plugins/package_info/ios`)
+  - path_provider (from `.symlinks/plugins/path_provider/ios`)
+  - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
+  - sqflite (from `.symlinks/plugins/sqflite/ios`)
+  - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
+  - yandex_mapkit (from `.symlinks/plugins/yandex_mapkit/ios`)
+
+SPEC REPOS:
+  trunk:
+    - FMDB
+    - Protobuf
+    - YandexMapKit
+    - YandexMapKitSearch
+    - YandexRuntime
+
+EXTERNAL SOURCES:
+  device_info:
+    :path: ".symlinks/plugins/device_info/ios"
+  Flutter:
+    :path: Flutter
+  flutter_blue:
+    :path: ".symlinks/plugins/flutter_blue/ios"
+  flutter_bluetooth_serial:
+    :path: ".symlinks/plugins/flutter_bluetooth_serial/ios"
+  flutter_user_agent:
+    :path: ".symlinks/plugins/flutter_user_agent/ios"
+  iboxpro_flutter:
+    :path: ".symlinks/plugins/iboxpro_flutter/ios"
+  location:
+    :path: ".symlinks/plugins/location/ios"
+  package_info:
+    :path: ".symlinks/plugins/package_info/ios"
+  path_provider:
+    :path: ".symlinks/plugins/path_provider/ios"
+  shared_preferences:
+    :path: ".symlinks/plugins/shared_preferences/ios"
+  sqflite:
+    :path: ".symlinks/plugins/sqflite/ios"
+  url_launcher:
+    :path: ".symlinks/plugins/url_launcher/ios"
+  yandex_mapkit:
+    :path: ".symlinks/plugins/yandex_mapkit/ios"
+
+SPEC CHECKSUMS:
+  device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  flutter_blue: eeb381dc4727a0954dede73515f683865494b370
+  flutter_bluetooth_serial: a42f785e4f7d2a6390d415cc39da5474ec2fef4f
+  flutter_user_agent: 27c45d034dc31b80948d29998cea52cd3a7bf936
+  FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  iboxpro_flutter: fe944bd0a3f50fa4f18a7c633ead63603611016d
+  location: 3a2eed4dd2fab25e7b7baf2a9efefe82b512d740
+  package_info: 873975fc26034f0b863a300ad47e7f1ac6c7ec62
+  path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
+  Protobuf: 176220c526ad8bd09ab1fb40a978eac3fef665f7
+  shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
+  sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
+  url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
+  yandex_mapkit: 808e1857438445c61e2789a9e4374b230a0a97ca
+  YandexMapKit: ecd4b78de34a35df63d066ac299e6fd0fe46d1ba
+  YandexMapKitSearch: b46ddd1c80e2e35d006cdfc4ab88070a50cebeda
+  YandexRuntime: 2d55244d06267106cf9b00c25a1e63f72a73b6fd
+
+PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
+
+COCOAPODS: 1.9.1
