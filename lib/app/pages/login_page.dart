@@ -60,18 +60,6 @@ class _LoginPageState extends State<LoginPage> {
         break;
       case LoginState.LoggedIn:
         closeDialog();
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (BuildContext context) => ChangeNotifierProvider<HomeViewModel>(
-                create: (context) => HomeViewModel(context: context),
-                child: HomePage(),
-              )
-            ),
-            (Route<dynamic> route) => false
-          );
-        });
         break;
       default:
     }
@@ -161,7 +149,7 @@ class _LoginPageState extends State<LoginPage> {
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
                     child: Container(
-                      width: 152.0,
+                      width: 192.0,
                       child: RaisedButton(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
                         onPressed: () {
@@ -170,7 +158,7 @@ class _LoginPageState extends State<LoginPage> {
                         },
                         color: Colors.blueAccent,
                         textColor: Colors.white,
-                        child: Text('Получить пароль'),
+                        child: Text('Получить пароль', textAlign: TextAlign.center,),
                       ),
                     )
                   ),

@@ -58,19 +58,10 @@ class _PersonPageState extends State<PersonPage> {
         break;
       case PersonState.LoggedOut:
         closeDialog();
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (BuildContext context) => ChangeNotifierProvider<LoginViewModel>(
-                  create: (context) => LoginViewModel(context: context),
-                  child: LoginPage(),
-                )
-              ),
-              (Route<dynamic> route) => false
-            );
-          });
-          break;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.of(context).pop();
+        });
+        break;
       default:
     }
   }
