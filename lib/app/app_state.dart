@@ -261,6 +261,7 @@ class AppState extends ChangeNotifier {
     );
     List<OrderLine> updatedOrderLines = orderLines.map((orderLine) => OrderLine(
       id: orderLine.id,
+      orderId: orderLine.orderId,
       name: orderLine.name,
       price: orderLine.price,
       amount: orderLine.amount,
