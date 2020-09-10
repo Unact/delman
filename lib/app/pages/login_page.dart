@@ -94,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
     LoginViewModel vm = Provider.of<LoginViewModel>(context);
 
     return ListView(
-      padding: EdgeInsets.only(top: 24, left: 16, right: 16, bottom: 24),
+      padding: EdgeInsets.symmetric(vertical: 24, horizontal: 8),
       children: <Widget>[
         Container(
           child: Column(

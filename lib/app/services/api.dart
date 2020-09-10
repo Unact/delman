@@ -41,7 +41,6 @@ class Api {
   }
 
   Future<ApiData> login(String url, String login, String password) async {
-    await repo.resetApiData();
     ApiData loginData = ApiData(login: login, password: password, url: url);
 
     ApiData authData = await _authenticate(loginData);

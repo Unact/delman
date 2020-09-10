@@ -23,6 +23,7 @@ class OrderViewModel extends BaseViewModel {
   Order order;
   List<OrderLine> orderLines = [];
   String _message;
+  Function _confirmationCallback;
   OrderState _state = OrderState.Initial;
   double _total;
   bool _cardPayment = false;
@@ -48,6 +49,7 @@ class OrderViewModel extends BaseViewModel {
 
   OrderState get state => _state;
   String get message => _message;
+  Function get confirmationCallback => _confirmationCallback;
   bool get cardPayment => _cardPayment;
   double get total => payment?.summ ?? _total;
   bool get totalEditable => !order.isFinished && payment == null;
@@ -57,10 +59,12 @@ class OrderViewModel extends BaseViewModel {
   );
   List<OrderLine> get sortedOrderLines => orderLines..sort((a, b) => a.name.compareTo(b.name));
 
-  double get _orderLinesTotal => orderLines.fold(0, (prev, element) => prev + element.currentAmount * element.price);
+  double get _orderLinesTotal {
+    return orderLines.fold(0, (prev, element) => prev + (element.factAmount ?? 0) * element.price);
+  }
 
   Future<void> callPhone() async {
-    String url = 'tel://${order.phone}';
+    String url = 'tel://${order.phone.replaceAll(RegExp(r'\s|\(|\)|\-'), '')}';
 
     if (await canLaunch(url)) {
       await launch(url);
@@ -99,16 +103,24 @@ class OrderViewModel extends BaseViewModel {
     _total = _orderLinesTotal;
   }
 
-  Future<void> startPayment(bool cardPayment) async {
-    if (_total != null && _total != 0 && _total > 0) {
-      _cardPayment = cardPayment;
-      _setState(OrderState.PaymentStarted);
+  void tryStartPayment(bool cardPayment) {
+    if (_total == null || _total == 0 || _total < 0) {
+      _setMessage('Указана некорректная сумма');
+      _setState(OrderState.Failure);
 
       return;
     }
 
-    _setMessage('Указана некорректная сумма');
-    _setState(OrderState.Failure);
+    _cardPayment = cardPayment;
+    _message = 'Вы действительно хотите оплатить заказ ${cardPayment ? 'картой' : 'наличными'}?';
+    _confirmationCallback = startPayment;
+    _setState(OrderState.NeedUserConfirmation);
+  }
+
+  Future<void> startPayment(bool confirmed) async {
+    if (!confirmed) return;
+
+    _setState(OrderState.PaymentStarted);
   }
 
   void finishPayment(String result) {
@@ -116,7 +128,7 @@ class OrderViewModel extends BaseViewModel {
     _setState(OrderState.PaymentFinished);
   }
 
-  Future<void> tryConfirmOrder() async {
+  void tryConfirmOrder() {
     if (orderLines.any((e) => e.factAmount == null || e.factAmount < 0)) {
       _setMessage('Не для всех позиций указан факт');
       _setState(OrderState.Failure);
@@ -124,13 +136,9 @@ class OrderViewModel extends BaseViewModel {
       return;
     }
 
-    if (payment == null) {
-      _setState(OrderState.NeedUserConfirmation);
-
-      return;
-    }
-
-    confirmOrder(true);
+    _message = payment == null ? 'Заказ не оплачен!' : 'Вы действительно хотите завершить заказ?';
+    _confirmationCallback = confirmOrder;
+    _setState(OrderState.NeedUserConfirmation);
   }
 
   Future<void> confirmOrder(bool confirmed) async {
@@ -150,7 +158,15 @@ class OrderViewModel extends BaseViewModel {
     }
   }
 
-  Future<void> cancelOrder() async {
+  void tryCancelOrder() {
+    _message = 'Вы действительно хотите отменить заказ?';
+    _confirmationCallback = cancelOrder;
+    _setState(OrderState.NeedUserConfirmation);
+  }
+
+  Future<void> cancelOrder(bool confirmed) async {
+    if (!confirmed) return;
+
     _setState(OrderState.InProgress);
 
     try {

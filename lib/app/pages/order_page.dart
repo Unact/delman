@@ -9,6 +9,7 @@ import 'package:delman/app/pages/accept_payment_page.dart';
 import 'package:delman/app/utils/format.dart';
 import 'package:delman/app/view_models/accept_payment_view_model.dart';
 import 'package:delman/app/view_models/order_view_model.dart';
+import 'package:delman/app/widgets/widgets.dart';
 
 class OrderPage extends StatefulWidget {
   const OrderPage({Key key}) : super(key: key);
@@ -72,14 +73,14 @@ class _OrderPageState extends State<OrderPage> {
     );
   }
 
-  Future<bool> showConfirmationDialog() async {
+  Future<bool> showConfirmationDialog(String message) async {
     return await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Предупреждение'),
-          content: SingleChildScrollView(child: ListBody(children: <Widget>[Text('Заказ не оплачен!')])),
+          content: SingleChildScrollView(child: ListBody(children: <Widget>[Text(message)])),
           actions: <Widget>[
             FlatButton(child: Text(Strings.ok), onPressed: () => Navigator.of(context).pop(true)),
             FlatButton(child: Text(Strings.cancel), onPressed: () => Navigator.of(context).pop(false))
@@ -107,7 +108,7 @@ class _OrderPageState extends State<OrderPage> {
         closeDialog();
         break;
       case OrderState.NeedUserConfirmation:
-        _orderViewModel.confirmOrder(await showConfirmationDialog());
+        _orderViewModel.confirmationCallback(await showConfirmationDialog(_orderViewModel.message));
         break;
       default:
     }
@@ -132,14 +133,32 @@ class _OrderPageState extends State<OrderPage> {
             centerTitle: true
           ),
           persistentFooterButtons: vm.order.isFinished ? null : <Widget>[
+            !vm.totalEditable ? null : FlatButton(
+              onPressed: () {
+                unfocus();
+                vm.tryStartPayment(false);
+              },
+              child: Icon(Icons.account_balance_wallet),
+              textColor: Colors.redAccent,
+            ),
+            !vm.totalEditable ? null : FlatButton(
+              onPressed: () {
+                unfocus();
+                vm.tryStartPayment(true);
+              },
+              child: Icon(Icons.credit_card),
+              textColor: Colors.redAccent,
+            ),
             FlatButton(
+              textColor: Colors.red,
               child: Text('Отменить'),
               onPressed: () {
                 unfocus();
-                vm.cancelOrder();
+                vm.tryCancelOrder();
               }
             ),
             FlatButton(
+              textColor: Colors.red,
               child: Text('Завершить'),
               onPressed: () {
                 unfocus();
@@ -153,145 +172,46 @@ class _OrderPageState extends State<OrderPage> {
               physics: AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.only(top: 24, bottom: 24),
               children: [
-                ListTile(
-                  leading: Text('Статус'),
+                InfoRow(
+                  title: Text('Статус'),
                   trailing: Text(
-                    vm.order.isCanceled ?
-                      'Отменен' :
-                      (vm.order.isFinished ? 'Доставлен' : 'Ожидает доставки')
-                  ),
-                  dense: true
+                    vm.order.isCanceled ? 'Отменен' : (vm.order.isFinished ? 'Доставлен' : 'Ожидает доставки')
+                  )
                 ),
-                ListTile(
-                  leading: Text('ИМ'),
-                  trailing: Text(vm.order.sellerName),
-                  dense: true
+                InfoRow(title: Text('ИМ'), trailing: Text(vm.order.sellerName)),
+                InfoRow(title: Text('Номер в ИМ'), trailing: Text(vm.order.number)),
+                InfoRow(title: Text('Покупатель'), trailing: Text(vm.order.buyerName)),
+                InfoRow(
+                  title: Text('Телефон'),
+                  trailing: GestureDetector(
+                    onTap: vm.callPhone,
+                    child: Text(vm.order.phone ?? '', style: TextStyle(color: Colors.blue))
+                  )
                 ),
-                ListTile(
-                  leading: Text('Номер в ИМ'),
-                  trailing: Text(vm.order.number),
-                  dense: true
+                vm.order.deliveryFrom == null ? Container() : InfoRow(
+                  title: Text('Время доставки'),
+                  trailing: Text(Format.timeStr(vm.order.deliveryFrom) + ' - ' + Format.timeStr(vm.order.deliveryTo))
                 ),
-                ListTile(
-                  leading: Text('Покупатель'),
-                  trailing: Text(vm.order.buyerName),
-                  dense: true
+                InfoRow(
+                  title: Text('Доставка'),
+                  trailing: ExpandingText(
+                    vm.order.deliveryTypeName +
+                      (vm.order.hasElevator ? '\nлифт' : '\nпешком') +
+                      (vm.order.floor == null ? '' : '\nэтаж ' + vm.order.floor.toString())+
+                      (vm.order.flat == null ? '' : ' квартира ' + vm.order.flat.toString())
+                  )
                 ),
-                ListTile(
-                  leading: Text('Телефон'),
-                  trailing: GestureDetector(onTap: vm.callPhone, child: Text(vm.order.phone ?? '')),
-                  dense: true
+                InfoRow(title: Text('Оплата'), trailing: Text(vm.order.paymentTypeName)),
+                InfoRow(
+                  title: Text('Примечание'),
+                  trailing: ExpandingText(vm.order.comment ?? '')
                 ),
-                vm.order.deliveryFrom == null ? Container() : ListTile(
-                  leading: Text('Время доставки'),
-                  trailing: Text(Format.timeStr(vm.order.deliveryFrom) + ' - ' + Format.timeStr(vm.order.deliveryTo)),
-                  dense: true
-                ),
-                ListTile(
-                  leading: Text('Доставка'),
-                  trailing: RichText(
-                    text: TextSpan(
-                      children: <TextSpan>[
-                        TextSpan(
-                          text: '${vm.order.deliveryTypeName} (',
-                          style: TextStyle(color: Colors.black, fontSize: 14.0)
-                        ),
-                        TextSpan(
-                          text: '${vm.order.hasElevator ? 'лифт' : 'пешком'}',
-                          style: TextStyle(color: Colors.black, fontSize: 14.0)
-                        ),
-                        vm.order.floor == null ? TextSpan() : TextSpan(
-                          text: ', этаж ${vm.order.floor}',
-                          style: TextStyle(color: Colors.black, fontSize: 14.0)
-                        ),
-                        vm.order.flat == null ? TextSpan() : TextSpan(
-                          text: ', квартира ${vm.order.flat}',
-                          style: TextStyle(color: Colors.black, fontSize: 14.0)
-                        ),
-                        TextSpan(
-                          text: ')',
-                          style: TextStyle(color: Colors.black, fontSize: 14.0)
-                        )
-                      ]
-                    )
-                  ),
-                  dense: true
-                ),
-                ListTile(
-                  leading: Text('Оплата'),
-                  trailing: Text(vm.order.paymentTypeName),
-                  dense: true
-                ),
-                ListTile(
-                  leading: Text('Примечание'),
-                  trailing: Text(vm.order.comment ?? ''),
-                  dense: true
-                ),
-                ListTile(
-                  leading: Text('К оплате'),
-                  trailing: !vm.totalEditable ? Text(Format.numberStr(vm.total)) : null,
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      !vm.totalEditable ? Container() : Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SizedBox(
-                            width: 120,
-                            height: 36,
-                            child: TextField(
-                              textAlign: TextAlign.end,
-                              controller: TextEditingController(text: Format.numberStr(vm.total, true)),
-                              onChanged: vm.updateTotal,
-                              keyboardType: TextInputType.numberWithOptions(decimal: true),
-                              maxLines: 1,
-                              style: TextStyle(fontSize: 15),
-                              decoration: InputDecoration(
-                                contentPadding: EdgeInsets.only(bottom: 12, left: 8.0, right: 8.0),
-                                hintText: Format.numberStr(vm.total)
-                              )
-                            )
-                          ),
-                          SizedBox(
-                            width: 52,
-                            child: RaisedButton(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.horizontal(left: Radius.circular(18))
-                              ),
-                              onPressed: () {
-                                unfocus();
-                                vm.startPayment(false);
-                              },
-                              child: Icon(Icons.account_balance_wallet),
-                              color: Colors.blueAccent,
-                              textColor: Colors.white,
-                            )
-                          ),
-                          SizedBox(
-                            width: 52,
-                            child: RaisedButton(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.horizontal(right: Radius.circular(18))
-                              ),
-                              onPressed: () {
-                                unfocus();
-                                vm.startPayment(true);
-                              },
-                              child: Icon(Icons.credit_card),
-                              color: Colors.blueAccent,
-                              textColor: Colors.white,
-                            )
-                          ),
-                        ]
-                      ),
-                    ]
-                  ),
-                ),
+                InfoRow(title: Text('К оплате'), trailing: Text(Format.numberStr(vm.total))),
                 ExpansionTile(
                   title: Text('Позиции'),
                   initiallyExpanded: true,
+                  tilePadding: EdgeInsets.symmetric(horizontal: 8),
                   children: vm.sortedOrderLines.map<Widget>((e) => _buildOrderLineTile(context, e)).toList()
-                    ..add(Divider(height: 1, indent: 32))
                 ),
               ],
             )
@@ -308,7 +228,15 @@ class _OrderPageState extends State<OrderPage> {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(orderLine.name),
+          Flexible(
+            child: Container(
+              height: 36,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: ExpandingText(orderLine.name, textAlign: TextAlign.left, style: TextStyle(fontSize: 12)),
+              )
+            )
+          ),
           Row(
             children: <Widget>[
               Text(Format.numberStr(orderLine.price) + ' x '),
@@ -319,7 +247,7 @@ class _OrderPageState extends State<OrderPage> {
                   initialValue: orderLine.factAmount?.toString(),
                   textAlign: TextAlign.center,
                   onChanged: (newValue) => vm.updateOrderLineAmount(orderLine, newValue),
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.numberWithOptions(signed: true),
                   decoration: InputDecoration(
                     contentPadding: EdgeInsets.only(bottom: 12)
                   ),
@@ -330,7 +258,7 @@ class _OrderPageState extends State<OrderPage> {
         ]
       ),
       dense: true,
-      contentPadding: EdgeInsets.only(left: 32, right: 16),
+      contentPadding: EdgeInsets.symmetric(horizontal: 16),
     );
   }
 }

@@ -39,6 +39,7 @@ class DeliveryPage extends StatelessWidget {
 
     return ExpansionTile(
       initiallyExpanded: false,
+      tilePadding: EdgeInsets.all(0),
       leading: GestureDetector(
         child: CircleAvatar(
           child: Text(deliveryPoint.seq.toString(), style: TextStyle(color: Colors.black)),
@@ -76,11 +77,11 @@ class DeliveryPage extends StatelessWidget {
         ),
       ),
       children: [
-        Divider(height: 1, indent: 36),
+        Divider(height: 1, indent: 20),
         ...vm.getOrdersForDeliveryPoint(deliveryPoint).map((Order order) {
           return ListTile(
             title: Text('Заказ ${order.trackingNumber}'),
-            contentPadding: EdgeInsets.only(left: 36, right: 36),
+            contentPadding: EdgeInsets.symmetric(horizontal: 20),
             onTap: () {
               Navigator.push(
                 context,

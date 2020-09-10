@@ -3,9 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:delman/app/pages/login_page.dart';
-import 'package:delman/app/view_models/login_view_model.dart';
 import 'package:delman/app/view_models/person_view_model.dart';
+import 'package:delman/app/widgets/widgets.dart';
 
 class PersonPage extends StatefulWidget {
   const PersonPage({Key key}) : super(key: key);
@@ -86,28 +85,12 @@ class _PersonPageState extends State<PersonPage> {
     return ListView(
       padding: EdgeInsets.only(top: 24, bottom: 24),
       children: [
-        ListTile(
-          leading: Text('Логин'),
-          trailing: Text(vm.username),
-          dense: true
-        ),
-        ListTile(
-          leading: Text('Курьер'),
-          trailing: Text(vm.courierName),
-          dense: true
-        ),
-        ListTile(
-          leading: Text('Обновление БД'),
-          trailing: Text(vm.lastSyncTime),
-          dense: true
-        ),
-        ListTile(
-          leading: Text('Версия'),
-          trailing: Text(vm.version),
-          dense: true
-        ),
+        InfoRow(title: Text('Логин'), trailing: Text(vm.username)),
+        InfoRow(title: Text('Курьер'), trailing: Text(vm.courierName)),
+        InfoRow(title: Text('Обновление БД'), trailing: Text(vm.lastSyncTime)),
+        InfoRow(title: Text('Версия'), trailing: Text(vm.version)),
         !vm.newVersionAvailable ? Container() : Padding(
-          padding: EdgeInsets.only(left: 16.0, right: 16.0),
+          padding: EdgeInsets.symmetric(horizontal: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -123,7 +106,7 @@ class _PersonPageState extends State<PersonPage> {
           )
         ),
         Padding(
-          padding: EdgeInsets.only(left: 16.0, right: 16.0),
+          padding: EdgeInsets.symmetric(horizontal: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.center,

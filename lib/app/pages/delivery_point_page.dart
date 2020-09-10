@@ -5,6 +5,7 @@ import 'package:yandex_mapkit/yandex_mapkit.dart';
 import 'package:delman/app/constants/strings.dart';
 import 'package:delman/app/utils/format.dart';
 import 'package:delman/app/view_models/delivery_point_view_model.dart';
+import 'package:delman/app/widgets/widgets.dart';
 
 class DeliveryPointPage extends StatefulWidget {
   const DeliveryPointPage({Key key}) : super(key: key);
@@ -61,11 +62,9 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
                   physics: AlwaysScrollableScrollPhysics(),
                   padding: EdgeInsets.only(top: 24, bottom: 24),
                   children: [
-                    ListTile(
-                      leading: Text(Strings.address),
-                      trailing: Text(vm.deliveryPoint.addressName),
-                      dense: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                    InfoRow(
+                      title: Text(Strings.address),
+                      trailing: ExpandingText(vm.deliveryPoint.addressName, style: TextStyle(color: Colors.black)),
                     ),
                     ListTile(
                       leading: Text(Strings.planArrival),

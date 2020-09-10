@@ -29,6 +29,7 @@ class PaymentsPage extends StatelessWidget {
                 isThreeLine: true,
                 dense: true,
                 title: Text('Заказ ${order.trackingNumber}', style: TextStyle(fontSize: 14.0)),
+                contentPadding: EdgeInsets.all(0),
                 subtitle: RichText(
                   text: TextSpan(
                     style: TextStyle(color: Colors.grey),
