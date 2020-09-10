@@ -25,7 +25,9 @@ dependencies:
   provider: any
   url_launcher: any
   location: any
-  yandex_mapkit: any
+  yandex_mapkit:
+    git:
+      url: ssh://git@github.com/Unact/yandex_mapkit.git
   flutter_bluetooth_serial: any
   flutter_blue: any
   # https://github.com/johnpryan/signature-pad-dart/pull/2
