@@ -74,14 +74,6 @@ class OrderViewModel extends BaseViewModel {
     }
   }
 
-  void updateTotal(String totalStr) {
-    String formattedValue = totalStr.replaceAll(',', '.').replaceAll(RegExp(r'\s\b|\b\s'), '');
-
-    try {
-      _total = double.parse(formattedValue);
-    } on FormatException {}
-  }
-
   void updateOrderLineAmount(OrderLine orderLine, String amount) {
     _updateOrderLineAmount(orderLine, int.tryParse(amount));
     _setState(OrderState.OrderLineChanged);
