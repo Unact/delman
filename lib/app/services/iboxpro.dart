@@ -25,8 +25,8 @@ class Iboxpro {
     await PaymentController.login(
       email: login,
       password: password,
-      onLogin: (res) async {
-        int errorCode = res['errorCode'];
+      onLogin: (Result res) async {
+        int errorCode = res.errorCode;
 
         if (errorCode == 0) {
           onLogin.call();
@@ -84,25 +84,25 @@ class Iboxpro {
       description: description,
       inputType: InputType.NFC,
       singleStepAuth: true,
-      onReaderEvent: (res) async {
-        if (res['readerEventType'] == ReaderEventType.Disconnected) {
+      onReaderEvent: (ReaderEvent res) async {
+        if (res.type == ReaderEventType.Disconnected) {
           onError.call('Прервана связь с терминалом');
         }
       },
-      onPaymentStart: (res) async {
-        _transactionId = res['id'];
+      onPaymentStart: (String id) async {
+        _transactionId = id;
         onPaymentStart.call(_transactionId);
       },
-      onPaymentError: (res) async {
-        int errorType = res['errorType'];
-        String errorMessage = res['errorMessage'];
+      onPaymentError: (PaymentError res) async {
+        int errorType = res.type;
+        String errorMessage = res.message;
 
         onError.call('Ошибка обработки оплаты $errorType; $errorMessage');
       },
-      onPaymentComplete: (res) async {
-        _transaction = res['transaction'];
+      onPaymentComplete: (Transaction transaction, bool requiredSignature) async {
+        _transaction = transaction.toMap();
         _transaction['deviceName'] = _deviceName;
-        onPaymentComplete.call(_transaction, res['requiredSignature']);
+        onPaymentComplete.call(_transaction, requiredSignature);
       }
     );
   }
@@ -113,10 +113,10 @@ class Iboxpro {
     @required onPaymentAdjust
   }) async {
     await PaymentController.adjustPayment(
-      trId: _transactionId,
+      id: _transactionId,
       signature: signature,
-      onPaymentAdjust: (res) async {
-        int errorCode = res['errorCode'];
+      onPaymentAdjust: (Result res) async {
+        int errorCode = res.errorCode;
 
         if (errorCode == 0) {
           onPaymentAdjust.call(_transaction);

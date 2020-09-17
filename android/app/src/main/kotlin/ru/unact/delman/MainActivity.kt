@@ -1,12 +1,14 @@
 package ru.unact.delman
 
-import android.os.Bundle
+import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.android.FlutterActivity
+import io.flutter.plugins.GeneratedPluginRegistrant
+
 import com.yandex.mapkit.MapKitFactory
 
 class MainActivity: FlutterActivity() {
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    MapKitFactory.setApiKey(BuildConfig.YANDEX_API_KEY);
+  override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+    MapKitFactory.setApiKey(BuildConfig.YANDEX_API_KEY)
+    GeneratedPluginRegistrant.registerWith(flutterEngine)
   }
 }

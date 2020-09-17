@@ -3,9 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:delman/app/pages/home_page.dart';
 import 'package:delman/app/view_models/login_view_model.dart';
-import 'package:delman/app/view_models/home_view_model.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key key}) : super(key: key);
