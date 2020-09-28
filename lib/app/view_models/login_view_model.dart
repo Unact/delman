@@ -31,6 +31,7 @@ class LoginViewModel extends BaseViewModel {
 
   LoginState get state => _state;
   String get message => _message;
+  String get fullVersion => appState.fullVersion;
 
   String get login => _login;
   String get password => _password;

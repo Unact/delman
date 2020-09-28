@@ -82,90 +82,95 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: Consumer<LoginViewModel>(
         builder: (context, vm, _) {
-          return _buildBody(context);
+          return Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              _buildLoginForm(context),
+              Expanded(child: Container()),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                child: Text('Версия ${vm.fullVersion}')
+              )
+            ]
+          );
         }
       )
     );
   }
 
-  Widget _buildBody(BuildContext context) {
+  Widget _buildLoginForm(BuildContext context) {
     LoginViewModel vm = Provider.of<LoginViewModel>(context);
 
-    return ListView(
-      padding: EdgeInsets.symmetric(vertical: 24, horizontal: 8),
-      children: <Widget>[
-        Container(
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
+    return Container(
+      height: 320,
+      child: ListView(
+        padding: EdgeInsets.symmetric(vertical: 24, horizontal: 8),
+        children: <Widget>[
+          TextField(
+            controller: TextEditingController(text: vm.login),
+            onChanged: vm.setLogin,
+            keyboardType: TextInputType.url,
+            decoration: InputDecoration(
+              labelText: 'Телефон или e-mail или login',
+            ),
+          ),
+          TextField(
+            controller: TextEditingController(text: vm.password),
+            onChanged: vm.setPassword,
+            keyboardType: TextInputType.number,
+            obscureText: true,
+            decoration: InputDecoration(
+              labelText: 'Пароль'
+            ),
+          ),
+          vm.showUrl ? TextField(
+            controller: TextEditingController(text: vm.url),
+            onChanged: vm.setUrl,
+            keyboardType: TextInputType.url,
+            decoration: InputDecoration(
+              labelText: 'Url'
+            ),
+          ) : Container(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              TextField(
-                controller: TextEditingController(text: vm.login),
-                onChanged: vm.setLogin,
-                keyboardType: TextInputType.url,
-                decoration: InputDecoration(
-                  labelText: 'Телефон или e-mail или login',
-                ),
-              ),
-              TextField(
-                controller: TextEditingController(text: vm.password),
-                onChanged: vm.setPassword,
-                keyboardType: TextInputType.number,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Пароль'
-                ),
-              ),
-              vm.showUrl ? TextField(
-                controller: TextEditingController(text: vm.url),
-                onChanged: vm.setUrl,
-                keyboardType: TextInputType.url,
-                decoration: InputDecoration(
-                  labelText: 'Url'
-                ),
-              ) : Container(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-                    child: Container(
-                      width: 80.0,
-                      child: RaisedButton(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-                        onPressed: () {
-                          unfocus();
-                          vm.apiLogin();
-                        },
-                        color: Colors.blueAccent,
-                        textColor: Colors.white,
-                        child: Text('Войти'),
-                      ),
-                    )
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                child: Container(
+                  width: 192,
+                  child: RaisedButton(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+                    onPressed: () {
+                      unfocus();
+                      vm.apiLogin();
+                    },
+                    color: Colors.blueAccent,
+                    textColor: Colors.white,
+                    child: Text('Войти'),
                   ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-                    child: Container(
-                      width: 192.0,
-                      child: RaisedButton(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-                        onPressed: () {
-                          unfocus();
-                          vm.getNewPassword();
-                        },
-                        color: Colors.blueAccent,
-                        textColor: Colors.white,
-                        child: Text('Получить пароль', textAlign: TextAlign.center,),
-                      ),
-                    )
+                )
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                child: Container(
+                  width: 192,
+                  child: RaisedButton(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+                    onPressed: () {
+                      unfocus();
+                      vm.getNewPassword();
+                    },
+                    color: Colors.blueAccent,
+                    textColor: Colors.white,
+                    child: Text('Получить пароль', textAlign: TextAlign.center,),
                   ),
-                ],
-              )
-            ]
-          )
-        )
-      ],
+                )
+              ),
+            ],
+          ),
+        ],
+      )
     );
   }
 }

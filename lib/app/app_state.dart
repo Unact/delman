@@ -30,6 +30,8 @@ class AppState extends ChangeNotifier {
     return remoteVersion != null && Version.parse(remoteVersion) > Version.parse(currentVersion);
   }
 
+  String get fullVersion => app.version + '+' + app.buildNumber;
+
   AppState({@required this.app}) {
     _appData = app.appDataRepo.getAppData();
     _user = app.userRepo.getUser();

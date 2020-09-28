@@ -19,6 +19,7 @@ class App {
   final Api api;
   final bool isDebug;
   final String version;
+  final String buildNumber;
   final AppDataRepository appDataRepo;
   final DeliveryPointRepository deliveryPointRepo;
   final DeliveryRepository deliveryRepo;
@@ -32,6 +33,7 @@ class App {
     @required this.api,
     @required this.isDebug,
     @required this.version,
+    @required this.buildNumber,
     @required this.appDataRepo,
     @required this.deliveryPointRepo,
     @required this.deliveryRepo,
@@ -74,6 +76,7 @@ class App {
     }
 
     String version = packageInfo.version;
+    String buildNumber = packageInfo.buildNumber;
     Storage storage = await Storage.init();
     AppDataRepository appDataRepo = AppDataRepository(storage: storage);
     DeliveryPointRepository deliveryPointRepo = DeliveryPointRepository(storage: storage);
@@ -105,6 +108,7 @@ class App {
       api: api,
       isDebug: isDebug,
       version: version,
+      buildNumber: buildNumber,
       appDataRepo: appDataRepo,
       deliveryPointRepo: deliveryPointRepo,
       deliveryRepo: deliveryRepo,
