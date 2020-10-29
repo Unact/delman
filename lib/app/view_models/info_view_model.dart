@@ -45,6 +45,12 @@ class InfoViewModel extends BaseViewModel {
   int get paymentsCnt => appState.payments.length;
   int get cashPaymentsCnt => appState.payments.where((e) => !e.isCard).toList().length;
   int get cardPaymentsCnt => appState.payments.where((e) => e.isCard).toList().length;
+  double get paymentsSum =>
+    appState.payments.fold(0, (prev, el) => prev + el.summ);
+  double get cashPaymentsSum =>
+    appState.payments.where((e) => !e.isCard).toList().fold(0, (prev, el) => prev + el.summ);
+  double get cardPaymentsSum =>
+    appState.payments.where((e) => e.isCard).toList().fold(0, (prev, el) => prev + el.summ);
 
   Future<void> getData() async {
     _setState(InfoState.InProgress);

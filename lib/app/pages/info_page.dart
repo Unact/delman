@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'package:delman/app/constants/strings.dart';
 import 'package:delman/app/pages/person_page.dart';
+import 'package:delman/app/utils/format.dart';
 import 'package:delman/app/view_models/info_view_model.dart';
 import 'package:delman/app/view_models/person_view_model.dart';
 
@@ -153,9 +154,18 @@ class _InfoPageState extends State<InfoPage> {
       text: TextSpan(
         style: TextStyle(color: Colors.grey),
         children: <TextSpan>[
-          TextSpan(text: 'Всего: ${vm.paymentsCnt}\n', style: TextStyle(fontSize: 12.0)),
-          TextSpan(text: 'Наличными: ${vm.cashPaymentsCnt}\n', style: TextStyle(fontSize: 12.0)),
-          TextSpan(text: 'Картой: ${vm.cardPaymentsCnt}\n', style: TextStyle(fontSize: 12.0))
+          TextSpan(
+            text: 'Всего: ${vm.paymentsCnt} на сумму ${Format.numberStr(vm.paymentsSum)}\n',
+            style: TextStyle(fontSize: 12.0)
+          ),
+          TextSpan(
+            text: 'Наличными: ${vm.cashPaymentsCnt} на сумму ${Format.numberStr(vm.cashPaymentsSum)}\n',
+            style: TextStyle(fontSize: 12.0)
+          ),
+          TextSpan(
+            text: 'Картой: ${vm.cardPaymentsCnt} на сумму ${Format.numberStr(vm.cardPaymentsSum)}\n',
+            style: TextStyle(fontSize: 12.0)
+          )
         ]
       )
     );

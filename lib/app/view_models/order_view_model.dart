@@ -60,7 +60,7 @@ class OrderViewModel extends BaseViewModel {
   List<OrderLine> get sortedOrderLines => orderLines..sort((a, b) => a.name.compareTo(b.name));
 
   double get _orderLinesTotal {
-    return orderLines.fold(0, (prev, element) => prev + (element.factAmount ?? 0) * element.price);
+    return orderLines.fold(0, (prev, el) => prev + (el.factAmount ?? 0) * el.price);
   }
 
   Future<void> callPhone() async {
