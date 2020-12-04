@@ -63,7 +63,7 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
               Flexible(
                 child: ListView(
                   physics: AlwaysScrollableScrollPhysics(),
-                  padding: EdgeInsets.only(top: 24, bottom: 24),
+                  padding: EdgeInsets.only(top: 24, bottom: 0),
                   children: [
                     InfoRow(
                       title: Text(Strings.address),
@@ -113,16 +113,16 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
                       tilePadding: EdgeInsets.symmetric(horizontal: 8),
                       children: vm.getOrders().map<Widget>((e) => _buildOrderTile(context, e)).toList()
                     ),
+                    Container(
+                      height: screenHeight/3,
+                      child: YandexMap(
+                        onMapCreated: (YandexMapController controller) async {
+                          await controller.addPlacemark(vm.placemark);
+                          await controller.move(point: vm.placemark.point, zoom: 17.0);
+                        }
+                      )
+                    )
                   ]
-                )
-              ),
-              Container(
-                height: screenHeight/3,
-                child: YandexMap(
-                  onMapCreated: (YandexMapController controller) async {
-                    await controller.addPlacemark(vm.placemark);
-                    await controller.move(point: vm.placemark.point, zoom: 17.0);
-                  }
                 )
               )
             ]
