@@ -13,11 +13,4 @@ class DeliveryViewModel extends BaseViewModel {
       .toList()
       ..sort((a, b) => a.seq.compareTo(b.seq));
   }
-
-  List<Order> getOrdersForDeliveryPoint(DeliveryPoint deliveryPoint) {
-    return appState.orders
-      .where((e) => e.deliveryPointId == deliveryPoint.id)
-      .toList()
-      ..sort((a, b) => a.trackingNumber.compareTo(b.trackingNumber));
-  }
 }

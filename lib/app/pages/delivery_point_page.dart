@@ -3,8 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 import 'package:delman/app/constants/strings.dart';
+import 'package:delman/app/entities/entities.dart';
 import 'package:delman/app/utils/format.dart';
+import 'package:delman/app/pages/order_page.dart';
 import 'package:delman/app/view_models/delivery_point_view_model.dart';
+import 'package:delman/app/view_models/order_view_model.dart';
 import 'package:delman/app/widgets/widgets.dart';
 
 class DeliveryPointPage extends StatefulWidget {
@@ -92,12 +95,29 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
                       trailing: Text(Format.timeStr(vm.deliveryPoint.factDeparture)),
                       dense: true,
                       contentPadding: EdgeInsets.symmetric(horizontal: 8)
-                    )
+                    ),
+                    InfoRow(title: Text('ИМ'), trailing: Text(vm.deliveryPoint.sellerName ?? '')),
+                    InfoRow(title: Text('Покупатель'), trailing: Text(vm.deliveryPoint.buyerName ?? '')),
+                    InfoRow(
+                      title: Text('Телефон'),
+                      trailing: GestureDetector(
+                        onTap: vm.callPhone,
+                        child: Text(vm.deliveryPoint.phone ?? '', style: TextStyle(color: Colors.blue))
+                      )
+                    ),
+                    InfoRow(title: Text('Доставка'), trailing: Text(vm.deliveryPoint.deliveryTypeName ?? '')),
+                    InfoRow(title: Text('Оплата'), trailing: Text(vm.deliveryPoint.paymentTypeName ?? '')),
+                    ExpansionTile(
+                      title: Text('Заказы'),
+                      initiallyExpanded: true,
+                      tilePadding: EdgeInsets.symmetric(horizontal: 8),
+                      children: vm.getOrders().map<Widget>((e) => _buildOrderTile(context, e)).toList()
+                    ),
                   ]
                 )
               ),
               Container(
-                height: screenHeight/2,
+                height: screenHeight/3,
                 child: YandexMap(
                   onMapCreated: (YandexMapController controller) async {
                     await controller.addPlacemark(vm.placemark);
@@ -109,6 +129,27 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
           )
         );
       }
+    );
+  }
+
+  Widget _buildOrderTile(BuildContext context, Order order) {
+    return ListTile(
+      title: Text('Заказ ${order.trackingNumber}'),
+      contentPadding: EdgeInsets.symmetric(horizontal: 20),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (BuildContext context) => ChangeNotifierProvider<OrderViewModel>(
+              create: (context) => OrderViewModel(
+                context: context,
+                order: order
+              ),
+              child: OrderPage(),
+            )
+          )
+        );
+      },
     );
   }
 }

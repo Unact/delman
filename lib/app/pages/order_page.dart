@@ -157,7 +157,7 @@ class _OrderPageState extends State<OrderPage> {
                 vm.tryCancelOrder();
               }
             ),
-            FlatButton(
+            !vm.isInProgress ? null : FlatButton(
               textColor: Colors.red,
               child: Text('Завершить'),
               onPressed: () {
@@ -240,7 +240,7 @@ class _OrderPageState extends State<OrderPage> {
           Row(
             children: <Widget>[
               Text(Format.numberStr(orderLine.price) + ' x '),
-              vm.order.isFinished ? Text(orderLine.factAmount.toString()) : SizedBox(
+              !vm.isInProgress ? Text(orderLine.factAmount.toString()) : SizedBox(
                 width: 40,
                 height: 36,
                 child: TextFormField(

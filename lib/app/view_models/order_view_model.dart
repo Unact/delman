@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:delman/app/app_state.dart';
 import 'package:delman/app/constants/strings.dart';
 import 'package:delman/app/entities/entities.dart';
 import 'package:delman/app/utils/geo_loc.dart';
+import 'package:delman/app/utils/misc.dart';
 import 'package:delman/app/view_models/base_view_model.dart';
 
 enum OrderState {
@@ -49,10 +49,12 @@ class OrderViewModel extends BaseViewModel {
 
   OrderState get state => _state;
   String get message => _message;
+  DeliveryPoint get deliveryPoint => appState.deliveryPoints.firstWhere((e) => e.id == order.deliveryPointId);
   Function get confirmationCallback => _confirmationCallback;
   bool get cardPayment => _cardPayment;
   double get total => payment?.summ ?? _total;
-  bool get totalEditable => !order.isFinished && payment == null;
+  bool get isInProgress => !order.isFinished && deliveryPoint.inProgress;
+  bool get totalEditable => isInProgress && payment == null;
   Payment get payment => appState.payments.firstWhere(
     (e) => e.deliveryPointOrderId == order.deliveryPointOrderId,
     orElse: () => null
@@ -64,14 +66,10 @@ class OrderViewModel extends BaseViewModel {
   }
 
   Future<void> callPhone() async {
-    String url = 'tel://${order.phone.replaceAll(RegExp(r'\s|\(|\)|\-'), '')}';
-
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
+    await Misc.callPhone(order.phone, onFailure: () {
       _setMessage(Strings.genericErrorMsg);
       _setState(OrderState.Failure);
-    }
+    });
   }
 
   void updateOrderLineAmount(OrderLine orderLine, String amount) {

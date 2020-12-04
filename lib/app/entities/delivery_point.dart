@@ -14,6 +14,12 @@ class DeliveryPoint extends Equatable {
   final double latitude;
   final double longitude;
 
+  final String phone;
+  final String paymentTypeName;
+  final String buyerName;
+  final String sellerName;
+  final String deliveryTypeName;
+
   const DeliveryPoint({
     this.id,
     this.deliveryId,
@@ -25,6 +31,11 @@ class DeliveryPoint extends Equatable {
     this.addressName,
     this.latitude,
     this.longitude,
+    this.phone,
+    this.paymentTypeName,
+    this.buyerName,
+    this.sellerName,
+    this.deliveryTypeName
   });
 
   bool get inProgress => factArrival != null;
@@ -55,7 +66,12 @@ class DeliveryPoint extends Equatable {
       factDeparture: Nullify.parseDate(map['factDeparture']),
       addressName: map['addressName'],
       latitude: Nullify.parseDouble(map['latitude']),
-      longitude: Nullify.parseDouble(map['longitude'])
+      longitude: Nullify.parseDouble(map['longitude']),
+      phone: map['phone'],
+      paymentTypeName: map['paymentTypeName'],
+      buyerName: map['buyerName'],
+      sellerName: map['sellerName'],
+      deliveryTypeName: map['deliveryTypeName']
     );
   }
 
@@ -71,6 +87,11 @@ class DeliveryPoint extends Equatable {
       'addressName': addressName,
       'latitude': latitude,
       'longitude': longitude,
+      'phone' : phone,
+      'paymentTypeName' : paymentTypeName,
+      'buyerName' : buyerName,
+      'sellerName' : sellerName,
+      'deliveryTypeName' : deliveryTypeName,
     };
   }
 

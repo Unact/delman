@@ -17,6 +17,11 @@ CREATE TABLE deliveryPoints(
     addressName TEXT,
     latitude NUMERIC,
     longitude NUMERIC,
+    phone TEXT,
+    paymentTypeName TEXT,
+    buyerName TEXT,
+    sellerName TEXT,
+    deliveryTypeName TEXT,
 
     localTs DATETIME DEFAULT CURRENT_TIMESTAMP,
     localId INTEGER PRIMARY KEY

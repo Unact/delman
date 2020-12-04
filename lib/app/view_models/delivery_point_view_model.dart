@@ -6,6 +6,7 @@ import 'package:delman/app/app_state.dart';
 import 'package:delman/app/constants/strings.dart';
 import 'package:delman/app/entities/entities.dart';
 import 'package:delman/app/utils/geo_loc.dart';
+import 'package:delman/app/utils/misc.dart';
 import 'package:delman/app/view_models/base_view_model.dart';
 
 enum DeliveryPointState {
@@ -48,6 +49,20 @@ class DeliveryPointViewModel extends BaseViewModel {
   String get message => _message;
 
   Placemark get placemark => _placemark;
+
+  List<Order> getOrders() {
+    return appState.orders
+      .where((e) => e.deliveryPointId == deliveryPoint.id)
+      .toList()
+      ..sort((a, b) => a.trackingNumber.compareTo(b.trackingNumber));
+  }
+
+  Future<void> callPhone() async {
+    await Misc.callPhone(deliveryPoint.phone, onFailure: () {
+      _setMessage(Strings.genericErrorMsg);
+      _setState(DeliveryPointState.Failure);
+    });
+  }
 
   Future<void> arrive() async {
     _setState(DeliveryPointState.InProgress);
