@@ -153,6 +153,11 @@ class AppState extends ChangeNotifier {
       addressName: deliveryPoint.addressName,
       latitude: deliveryPoint.latitude,
       longitude: deliveryPoint.longitude,
+      phone: deliveryPoint.phone,
+      paymentTypeName: deliveryPoint.paymentTypeName,
+      buyerName: deliveryPoint.buyerName,
+      sellerName: deliveryPoint.sellerName,
+      deliveryTypeName: deliveryPoint.deliveryTypeName,
     );
 
     try {
@@ -185,6 +190,11 @@ class AppState extends ChangeNotifier {
       addressName: deliveryPoint.addressName,
       latitude: deliveryPoint.latitude,
       longitude: deliveryPoint.longitude,
+      phone: deliveryPoint.phone,
+      paymentTypeName: deliveryPoint.paymentTypeName,
+      buyerName: deliveryPoint.buyerName,
+      sellerName: deliveryPoint.sellerName,
+      deliveryTypeName: deliveryPoint.deliveryTypeName,
     );
 
     _deliveryPoints.removeWhere((e) => e.id == updatedDeliveryPoint.id);

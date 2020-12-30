@@ -53,6 +53,11 @@ class DeliveryPoint extends Equatable {
     addressName,
     latitude,
     longitude,
+    phone,
+    paymentTypeName,
+    buyerName,
+    sellerName,
+    deliveryTypeName,
   ];
 
   static DeliveryPoint fromJson(dynamic map) {
