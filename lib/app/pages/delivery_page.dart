@@ -30,7 +30,6 @@ class DeliveryPage extends StatelessWidget {
   }
 
   Widget _deliveryPointTile(BuildContext context, DeliveryPoint deliveryPoint) {
-    DeliveryViewModel vm = Provider.of<DeliveryViewModel>(context);
     Color color = deliveryPoint.isFinished ?
       Colors.green[400] :
       (deliveryPoint.inProgress ? Colors.yellow[400] : Colors.blue[400]);

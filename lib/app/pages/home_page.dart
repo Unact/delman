@@ -43,15 +43,15 @@ class HomePage extends StatelessWidget {
       items: [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
-          title: Text(Strings.infoPageName)
+          label: Strings.infoPageName
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.departure_board),
-          title: Text(Strings.deliveryPageName),
+          label: Strings.deliveryPageName
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.payment),
-          title: Text(Strings.paymentsPageName),
+          label: Strings.paymentsPageName
         )
       ],
     );

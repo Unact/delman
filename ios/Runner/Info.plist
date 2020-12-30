@@ -46,8 +46,6 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
-	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>Для связи с платежным терминалом</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>Для связи с платежным терминалом</string>
 	<key>NSLocationAlwaysUsageDescription</key>

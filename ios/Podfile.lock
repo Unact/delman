@@ -1,6 +1,4 @@
 PODS:
-  - device_info (0.0.1):
-    - Flutter
   - Flutter (1.0.0)
   - flutter_blue (0.0.1):
     - Flutter
@@ -24,6 +22,12 @@ PODS:
   - path_provider (0.0.1):
     - Flutter
   - Protobuf (3.11.4)
+  - Sentry (6.0.12):
+    - Sentry/Core (= 6.0.12)
+  - Sentry/Core (6.0.12)
+  - sentry_flutter (0.0.1):
+    - Flutter
+    - Sentry (~> 6.0.10)
   - shared_preferences (0.0.1):
     - Flutter
   - sqflite (0.0.1):
@@ -44,7 +48,6 @@ PODS:
   - YandexRuntime (3.5.0)
 
 DEPENDENCIES:
-  - device_info (from `.symlinks/plugins/device_info/ios`)
   - Flutter (from `Flutter`)
   - flutter_blue (from `.symlinks/plugins/flutter_blue/ios`)
   - flutter_bluetooth_serial (from `.symlinks/plugins/flutter_bluetooth_serial/ios`)
@@ -53,6 +56,7 @@ DEPENDENCIES:
   - location (from `.symlinks/plugins/location/ios`)
   - package_info (from `.symlinks/plugins/package_info/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
+  - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
   - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
@@ -62,13 +66,12 @@ SPEC REPOS:
   trunk:
     - FMDB
     - Protobuf
+    - Sentry
     - YandexMapKit
     - YandexMapKitSearch
     - YandexRuntime
 
 EXTERNAL SOURCES:
-  device_info:
-    :path: ".symlinks/plugins/device_info/ios"
   Flutter:
     :path: Flutter
   flutter_blue:
@@ -85,6 +88,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/package_info/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
+  sentry_flutter:
+    :path: ".symlinks/plugins/sentry_flutter/ios"
   shared_preferences:
     :path: ".symlinks/plugins/shared_preferences/ios"
   sqflite:
@@ -95,7 +100,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/yandex_mapkit/ios"
 
 SPEC CHECKSUMS:
-  device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_blue: eeb381dc4727a0954dede73515f683865494b370
   flutter_bluetooth_serial: a42f785e4f7d2a6390d415cc39da5474ec2fef4f
@@ -106,6 +110,8 @@ SPEC CHECKSUMS:
   package_info: 873975fc26034f0b863a300ad47e7f1ac6c7ec62
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   Protobuf: 176220c526ad8bd09ab1fb40a978eac3fef665f7
+  Sentry: 8ffcfe3416e0a58b90bb1ae319e8e8a13022a03e
+  sentry_flutter: e57e33f56d5791e4effa48e85e44505367686b27
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef

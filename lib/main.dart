@@ -23,24 +23,24 @@ void main() async {
         ],
         child: Consumer<AppState>(
           builder: (context, vm, _) => MaterialApp(
-          title: Strings.ruAppName,
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-            platform: TargetPlatform.android,
-            visualDensity: VisualDensity.adaptivePlatformDensity
-          ),
-          home: LandingPage(),
-          locale: Locale('ru', 'RU'),
-          localizationsDelegates: [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          supportedLocales: [
-            Locale('en', 'US'),
-            Locale('ru', 'RU'),
-          ]
+            title: Strings.ruAppName,
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+              platform: TargetPlatform.android,
+              visualDensity: VisualDensity.adaptivePlatformDensity
+            ),
+            home: LandingPage(),
+            locale: Locale('ru', 'RU'),
+            localizationsDelegates: [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            supportedLocales: [
+              Locale('en', 'US'),
+              Locale('ru', 'RU'),
+            ]
+          )
         )
-      )
       )
     );
   }, (Object error, StackTrace stackTrace) {
