@@ -55,6 +55,7 @@ class OrderViewModel extends BaseViewModel {
   double get total => payment?.summ ?? _total;
   bool get isInProgress => !order.isFinished && deliveryPoint.inProgress;
   bool get totalEditable => isInProgress && payment == null;
+  bool get needPayment => payment == null && orderLines.any((el) => el.price != 0);
   Payment get payment => appState.payments.firstWhere(
     (e) => e.deliveryPointOrderId == order.deliveryPointOrderId,
     orElse: () => null
@@ -126,7 +127,7 @@ class OrderViewModel extends BaseViewModel {
       return;
     }
 
-    _message = payment == null ? 'Заказ не оплачен!' : 'Вы действительно хотите завершить заказ?';
+    _message = needPayment ? 'Заказ не оплачен!' : 'Вы действительно хотите завершить заказ?';
     _confirmationCallback = confirmOrder;
     _setState(OrderState.NeedUserConfirmation);
   }
