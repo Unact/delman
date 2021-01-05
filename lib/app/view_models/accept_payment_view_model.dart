@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 
 import 'package:delman/app/app_state.dart';
 import 'package:delman/app/entities/entities.dart';
 import 'package:delman/app/services/iboxpro.dart';
 import 'package:delman/app/utils/geo_loc.dart';
+import 'package:delman/app/utils/misc.dart';
 import 'package:delman/app/view_models/base_view_model.dart';
 
 enum AcceptPaymentState {
@@ -179,6 +181,8 @@ class AcceptPaymentViewModel extends BaseViewModel {
   }
 
   void _setState(AcceptPaymentState state) {
+    FLog.info(methodName: Misc.stackFrame(1)['methodName'], text: state.toString());
+
     _state = state;
     if (!disposed) notifyListeners();
   }

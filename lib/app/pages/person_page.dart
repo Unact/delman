@@ -51,6 +51,7 @@ class _PersonPageState extends State<PersonPage> {
       case PersonState.InProgress:
         openDialog();
         break;
+      case PersonState.LogsSent:
       case PersonState.Failure:
         _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(_personViewModel.message)));
         closeDialog();
@@ -67,15 +68,23 @@ class _PersonPageState extends State<PersonPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Пользователь')
-      ),
-      body: Consumer<PersonViewModel>(
-        builder: (context, vm, _) {
-          return _buildBody(context);
-        }
-      )
+    return Consumer<PersonViewModel>(
+      builder: (context, vm, _) {
+        return Scaffold(
+          key: _scaffoldKey,
+          appBar: AppBar(
+            title: Text('Пользователь'),
+            actions: [
+              IconButton(
+                color: Colors.white,
+                icon: Icon(Icons.send),
+                onPressed: vm.sendLogs
+              )
+            ],
+          ),
+          body: _buildBody(context)
+        );
+      }
     );
   }
 

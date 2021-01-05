@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:flutter_user_agent/flutter_user_agent.dart';
 import 'package:meta/meta.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:delman/app/constants/strings.dart';
 import 'package:delman/app/entities/entities.dart';
@@ -126,6 +129,22 @@ class Api {
       'paymentTransaction': transaction,
       'location': location
     });
+  }
+
+  Future<void> saveLogs(List<Log> logs, String deviceModel, String osVersion) async {
+    Directory dir = await getTemporaryDirectory();
+    DateTime date = DateTime.now();
+    File file = File('${dir.path}/${date.toIso8601String()}-log.json');
+
+    await file.writeAsString(jsonEncode(logs.map((e) => e.toMap()).toList()));
+
+    await _post('v1/delman/save_log',
+      data: <String, dynamic>{
+        'deviceModel': deviceModel,
+        'osVersion': osVersion
+      },
+      file: file
+    );
   }
 
   Future<dynamic> _get(

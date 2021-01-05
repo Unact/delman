@@ -1,17 +1,20 @@
 import 'dart:io';
 
+import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:delman/app/app_state.dart';
 import 'package:delman/app/constants/strings.dart';
 import 'package:delman/app/utils/format.dart';
+import 'package:delman/app/utils/misc.dart';
 import 'package:delman/app/view_models/base_view_model.dart';
 
 enum PersonState {
   Initial,
   InProgress,
   LoggedOut,
+  LogsSent,
   Failure
 }
 
@@ -60,7 +63,22 @@ class PersonViewModel extends BaseViewModel {
     }
   }
 
+  Future<void> sendLogs() async {
+    _setState(PersonState.InProgress);
+
+    try {
+      await appState.sendLogs();
+      _setMessage('Информация успешно отправлена');
+      _setState(PersonState.LogsSent);
+    } on AppError catch(e) {
+      _setMessage(e.message);
+      _setState(PersonState.Failure);
+    }
+  }
+
   void _setState(PersonState state) {
+    FLog.info(methodName: Misc.stackFrame(1)['methodName'], text: state.toString());
+
     _state = state;
     if (!disposed) notifyListeners();
   }

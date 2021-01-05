@@ -1,5 +1,7 @@
+import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'package:stack_trace/stack_trace.dart';
 
 import 'package:delman/app/app.dart';
 import 'package:delman/app/constants/strings.dart';
@@ -369,7 +371,27 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  Future<void> sendLogs() async {
+    try {
+      List<Log> logs = await FLog.getAllLogsByFilter(filterType: FilterType.TODAY);
+
+      await app.api.saveLogs(logs, app.deviceModel, app.osVersion);
+      await FLog.clearLogs();
+    } on ApiException catch(e) {
+      throw AppError(e.errorMsg);
+    } catch(e, trace) {
+      _reportError(e, trace);
+      throw AppError(Strings.genericErrorMsg);
+    }
+  }
+
   Future<void> _reportError(dynamic error, dynamic stackTrace) async {
     await app.reportError(error, stackTrace);
+    FLog.error(
+      methodName: Trace.current().frames[1].member.split('.')[1],
+      text: error.toString(),
+      exception: error,
+      stacktrace: stackTrace
+    );
   }
 }

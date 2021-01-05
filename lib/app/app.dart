@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:device_info/device_info.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -18,6 +21,8 @@ class App {
   final bool isDebug;
   final String version;
   final String buildNumber;
+  final String osVersion;
+  final String deviceModel;
   final AppDataRepository appDataRepo;
   final DeliveryPointRepository deliveryPointRepo;
   final DeliveryRepository deliveryRepo;
@@ -31,6 +36,8 @@ class App {
     @required this.isDebug,
     @required this.version,
     @required this.buildNumber,
+    @required this.osVersion,
+    @required this.deviceModel,
     @required this.appDataRepo,
     @required this.deliveryPointRepo,
     @required this.deliveryRepo,
@@ -49,6 +56,10 @@ class App {
     if (_instance != null)
       return _instance;
 
+    AndroidDeviceInfo androidDeviceInfo;
+    IosDeviceInfo iosDeviceInfo;
+    String osVersion;
+    String deviceModel;
     bool isDebug = false;
     assert(isDebug = true);
 
@@ -57,6 +68,16 @@ class App {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     await FlutterUserAgent.init();
     await DotEnv().load('.env');
+
+    if (Platform.isIOS) {
+      iosDeviceInfo = await DeviceInfoPlugin().iosInfo;
+      osVersion = iosDeviceInfo.systemVersion;
+      deviceModel = iosDeviceInfo.utsname.machine;
+    } else {
+      androidDeviceInfo = await DeviceInfoPlugin().androidInfo;
+      osVersion = androidDeviceInfo.version.release;
+      deviceModel = androidDeviceInfo.brand + ' - ' + androidDeviceInfo.model;
+    }
 
     String version = packageInfo.version;
     String buildNumber = packageInfo.buildNumber;
@@ -71,12 +92,17 @@ class App {
     Api api = Api.init(repo: ApiDataRepository(storage: storage), version: version);
 
     await _initSentry(dsn: DotEnv().env['SENTRY_DSN'], userRepo: userRepo, capture: !isDebug);
+    _intFlogs(isDebug: isDebug);
+
+    FLog.info(text: 'App Initialized');
 
     return App._(
       api: api,
       isDebug: isDebug,
       version: version,
       buildNumber: buildNumber,
+      osVersion: osVersion,
+      deviceModel: deviceModel,
       appDataRepo: appDataRepo,
       deliveryPointRepo: deliveryPointRepo,
       deliveryRepo: deliveryRepo,
@@ -91,6 +117,19 @@ class App {
     print(error);
     print(stackTrace);
     await sentryLib.Sentry.captureException(error, stackTrace: stackTrace);
+  }
+
+  static void _intFlogs({
+    @required bool isDebug
+  }) {
+    LogsConfig config = LogsConfig();
+
+    // В прод режими логируем все
+    config.activeLogLevel = isDebug ? LogLevel.INFO : LogLevel.ALL;
+    config.formatType = FormatType.FORMAT_SQUARE;
+    config.timestampFormat = TimestampFormat.TIME_FORMAT_FULL_3;
+
+    FLog.applyConfigurations(config);
   }
 
   static Future<void> _initSentry({

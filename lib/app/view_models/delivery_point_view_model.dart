@@ -1,3 +1,4 @@
+import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
@@ -80,6 +81,8 @@ class DeliveryPointViewModel extends BaseViewModel {
   }
 
   void _setState(DeliveryPointState state) {
+    FLog.info(methodName: Misc.stackFrame(1)['methodName'], text: state.toString());
+
     _state = state;
     if (!disposed) notifyListeners();
   }

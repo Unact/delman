@@ -1,3 +1,4 @@
+import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 
 import 'package:delman/app/app_state.dart';
@@ -74,8 +75,12 @@ class OrderViewModel extends BaseViewModel {
   }
 
   void updateOrderLineAmount(OrderLine orderLine, String amount) {
-    _updateOrderLineAmount(orderLine, int.tryParse(amount));
+    int intAmount = int.tryParse(amount);
+    _updateOrderLineAmount(orderLine, intAmount);
     _setState(OrderState.OrderLineChanged);
+    String text = '$intAmount';
+
+    FLog.debug(text: text);
   }
 
   void _updateOrderLineAmount(OrderLine orderLine, int amount) {
@@ -173,6 +178,8 @@ class OrderViewModel extends BaseViewModel {
   }
 
   void _setState(OrderState state) {
+    FLog.info(methodName: Misc.stackFrame(1)['methodName'], text: state.toString());
+
     _state = state;
     if (!disposed) notifyListeners();
   }

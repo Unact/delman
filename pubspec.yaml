@@ -13,6 +13,9 @@ dependencies:
     sdk: flutter
   equatable: any
   dio: any
+  device_info: any
+  stack_trace: any
+  f_logs: any
   flutter_user_agent: any
   pub_semver: any
   shared_preferences: any

@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 
 import 'package:delman/app/app_state.dart';
 import 'package:delman/app/constants/strings.dart';
+import 'package:delman/app/utils/misc.dart';
 import 'package:delman/app/view_models/base_view_model.dart';
 
 enum LoginState {
@@ -40,14 +42,20 @@ class LoginViewModel extends BaseViewModel {
 
   void setLogin(String login) {
     _login = login;
+
+    FLog.debug(text: login);
   }
 
   void setPassword(String password) {
     _password = password;
+
+    FLog.debug(text: password.replaceAll(new RegExp('.'), '*'));
   }
 
   void setUrl(String url) {
     _url = url;
+
+    FLog.debug(text: url);
   }
 
   Future<void> apiLogin() async {
@@ -92,6 +100,8 @@ class LoginViewModel extends BaseViewModel {
   }
 
   void _setState(LoginState state) {
+    FLog.info(methodName: Misc.stackFrame(1)['methodName'], text: state.toString());
+
     _state = state;
     if (!disposed) notifyListeners();
   }
