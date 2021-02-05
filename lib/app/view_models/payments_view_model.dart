@@ -12,6 +12,6 @@ class PaymentsViewModel extends BaseViewModel {
   }
 
   Order getOrderForPayment(Payment payment) {
-    return appState.orders.firstWhere((e) => e.deliveryPointOrderId == payment.deliveryPointOrderId);
+    return appState.orders.firstWhere((e) => e.id == payment.deliveryPointOrderId);
   }
 }

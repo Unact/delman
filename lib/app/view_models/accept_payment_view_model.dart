@@ -165,7 +165,7 @@ class AcceptPaymentViewModel extends BaseViewModel {
 
     Location location = await GeoLoc.getCurrentLocation();
     Payment payment = Payment(
-      deliveryPointOrderId: order.deliveryPointOrderId,
+      deliveryPointOrderId: order.id,
       summ: total,
       transactionId: transaction != null ? transaction['id'] : null
     );

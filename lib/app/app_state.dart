@@ -144,23 +144,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<DeliveryPoint> arriveAtDeliveryPoint(DeliveryPoint deliveryPoint, Location location) async {
-    DeliveryPoint updatedDeliveryPoint = DeliveryPoint(
-      id: deliveryPoint.id,
-      deliveryId: deliveryPoint.deliveryId,
-      seq: deliveryPoint.seq,
-      planArrival: deliveryPoint.planArrival,
-      planDeparture: deliveryPoint.planDeparture,
-      factArrival: DateTime.now(),
-      factDeparture: deliveryPoint.factDeparture,
-      addressName: deliveryPoint.addressName,
-      latitude: deliveryPoint.latitude,
-      longitude: deliveryPoint.longitude,
-      phone: deliveryPoint.phone,
-      paymentTypeName: deliveryPoint.paymentTypeName,
-      buyerName: deliveryPoint.buyerName,
-      sellerName: deliveryPoint.sellerName,
-      deliveryTypeName: deliveryPoint.deliveryTypeName,
-    );
+    DeliveryPoint updatedDeliveryPoint = deliveryPoint.copyWith(factArrival: DateTime.now());
 
     try {
       await app.api.arriveAtDeliveryPoint(updatedDeliveryPoint, location);
@@ -181,23 +165,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<DeliveryPoint> departFromDeliveryPoint(DeliveryPoint deliveryPoint, Location location) async {
-    DeliveryPoint updatedDeliveryPoint = DeliveryPoint(
-      id: deliveryPoint.id,
-      deliveryId: deliveryPoint.deliveryId,
-      seq: deliveryPoint.seq,
-      planArrival: deliveryPoint.planArrival,
-      planDeparture: deliveryPoint.planDeparture,
-      factArrival: deliveryPoint.factArrival,
-      factDeparture: DateTime.now(),
-      addressName: deliveryPoint.addressName,
-      latitude: deliveryPoint.latitude,
-      longitude: deliveryPoint.longitude,
-      phone: deliveryPoint.phone,
-      paymentTypeName: deliveryPoint.paymentTypeName,
-      buyerName: deliveryPoint.buyerName,
-      sellerName: deliveryPoint.sellerName,
-      deliveryTypeName: deliveryPoint.deliveryTypeName,
-    );
+    DeliveryPoint updatedDeliveryPoint = deliveryPoint.copyWith(factDeparture: DateTime.now());
 
     _deliveryPoints.removeWhere((e) => e.id == updatedDeliveryPoint.id);
     _deliveryPoints.add(updatedDeliveryPoint);
@@ -209,26 +177,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<Order> cancelOrder(Order order, Location location) async {
-    Order updatedOrder = Order(
-      id: order.id,
-      deliveryPointId: order.deliveryPointId,
-      deliveryPointOrderId: order.deliveryPointOrderId,
-      deliveryFrom: order.deliveryFrom,
-      deliveryTo: order.deliveryTo,
-      number: order.number,
-      trackingNumber: order.trackingNumber,
-      buyerName: order.buyerName,
-      phone: order.phone,
-      comment: order.comment,
-      deliveryTypeName: order.deliveryTypeName,
-      floor: order.floor,
-      flat: order.flat,
-      elevator: order.elevator,
-      paymentTypeName: order.paymentTypeName,
-      sellerName: order.sellerName,
-      canceled: 1,
-      finished: 1
-    );
+    Order updatedOrder = order.copyWith(canceled: 1, finished: 1);
 
     try {
       await app.api.cancelOrder(order, location);
@@ -253,34 +202,8 @@ class AppState extends ChangeNotifier {
   }
 
   Future<Order> confirmOrder(Order order, List<OrderLine> orderLines, Location location) async {
-    Order updatedOrder = Order(
-      id: order.id,
-      deliveryPointId: order.deliveryPointId,
-      deliveryPointOrderId: order.deliveryPointOrderId,
-      deliveryFrom: order.deliveryFrom,
-      deliveryTo: order.deliveryTo,
-      number: order.number,
-      trackingNumber: order.trackingNumber,
-      buyerName: order.buyerName,
-      phone: order.phone,
-      comment: order.comment,
-      deliveryTypeName: order.deliveryTypeName,
-      floor: order.floor,
-      flat: order.flat,
-      elevator: order.elevator,
-      paymentTypeName: order.paymentTypeName,
-      sellerName: order.sellerName,
-      canceled: order.canceled,
-      finished: 1
-    );
-    List<OrderLine> updatedOrderLines = orderLines.map((orderLine) => OrderLine(
-      id: orderLine.id,
-      orderId: orderLine.orderId,
-      name: orderLine.name,
-      price: orderLine.price,
-      amount: orderLine.amount,
-      factAmount: orderLine.factAmount
-    )).toList();
+    Order updatedOrder = order.copyWith(finished: 1);
+    List<OrderLine> updatedOrderLines = orderLines;
 
     try {
       await app.api.confirmOrder(order, orderLines, location);

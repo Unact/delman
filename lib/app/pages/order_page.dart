@@ -174,13 +174,14 @@ class _OrderPageState extends State<OrderPage> {
               children: [
                 InfoRow(
                   title: Text('Статус'),
-                  trailing: Text(
-                    vm.order.isCanceled ? 'Отменен' : (vm.order.isFinished ? 'Доставлен' : 'Ожидает доставки')
-                  )
+                  trailing: Text(vm.orderStatus)
                 ),
                 InfoRow(title: Text('ИМ'), trailing: Text(vm.order.sellerName)),
                 InfoRow(title: Text('Номер в ИМ'), trailing: Text(vm.order.number)),
-                InfoRow(title: Text('Покупатель'), trailing: Text(vm.order.buyerName)),
+                InfoRow(
+                  title: Text(vm.order.isPickup ? 'Отправитель' : 'Покупатель'),
+                  trailing: Text(vm.order.personName ?? '')
+                ),
                 InfoRow(
                   title: Text('Телефон'),
                   trailing: GestureDetector(
@@ -188,12 +189,12 @@ class _OrderPageState extends State<OrderPage> {
                     child: Text(vm.order.phone ?? '', style: TextStyle(color: Colors.blue))
                   )
                 ),
-                vm.order.deliveryFrom == null ? Container() : InfoRow(
-                  title: Text('Время доставки'),
-                  trailing: Text(Format.timeStr(vm.order.deliveryFrom) + ' - ' + Format.timeStr(vm.order.deliveryTo))
+                vm.order.timeFrom == null ? Container() : InfoRow(
+                  title: Text('Время ${vm.order.isPickup ? 'забора' : 'доставки'}'),
+                  trailing: Text(Format.timeStr(vm.order.timeFrom) + ' - ' + Format.timeStr(vm.order.timeTo))
                 ),
                 InfoRow(
-                  title: Text('Доставка'),
+                  title: Text(vm.order.isPickup ? 'Забор' : 'Доставка'),
                   trailing: ExpandingText(
                     vm.order.deliveryTypeName +
                       (vm.order.hasElevator ? '\nлифт' : '\nпешком') +
@@ -201,12 +202,15 @@ class _OrderPageState extends State<OrderPage> {
                       (vm.order.flat == null ? '' : ' квартира ' + vm.order.flat.toString())
                   )
                 ),
-                InfoRow(title: Text('Оплата'), trailing: Text(vm.order.paymentTypeName)),
-                InfoRow(
-                  title: Text('Примечание'),
-                  trailing: ExpandingText(vm.order.comment ?? '')
-                ),
-                InfoRow(title: Text('К оплате'), trailing: Text(Format.numberStr(vm.total))),
+                vm.order.isPickup ?
+                  Container() :
+                  InfoRow(title: Text('Оплата'), trailing: Text(vm.order.paymentTypeName)),
+                vm.order.isPickup ?
+                  Container() :
+                  InfoRow(title: Text('Примечание'), trailing: ExpandingText(vm.order.comment ?? '')),
+                vm.order.isPickup ?
+                  Container() :
+                  InfoRow(title: Text('К оплате'), trailing: Text(Format.numberStr(vm.total))),
                 ExpansionTile(
                   title: Text('Позиции'),
                   initiallyExpanded: true,
@@ -240,7 +244,7 @@ class _OrderPageState extends State<OrderPage> {
           Row(
             children: <Widget>[
               Text(Format.numberStr(orderLine.price) + ' x '),
-              !vm.isInProgress ? Text(orderLine.factAmount.toString()) : SizedBox(
+              !vm.isInProgress || vm.order.isPickup ? Text(orderLine.factAmount.toString()) : SizedBox(
                 width: 40,
                 height: 36,
                 child: TextFormField(

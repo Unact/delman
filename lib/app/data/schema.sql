@@ -17,25 +17,30 @@ CREATE TABLE deliveryPoints(
     addressName TEXT,
     latitude NUMERIC,
     longitude NUMERIC,
+    sellerName TEXT,
+    buyerName TEXT,
     phone TEXT,
     paymentTypeName TEXT,
-    buyerName TEXT,
-    sellerName TEXT,
     deliveryTypeName TEXT,
+
+    pickupSellerName TEXT,
+    senderName TEXT,
+    senderPhone TEXT,
 
     localTs DATETIME DEFAULT CURRENT_TIMESTAMP,
     localId INTEGER PRIMARY KEY
 );
 CREATE TABLE orders(
     id INTEGER UNIQUE,
+    orderId INTEGER,
     deliveryPointId INTEGER,
-    deliveryPointOrderId INTEGER,
 
-    deliveryFrom DATETIME,
-    deliveryTo DATETIME,
+    pickup INTEGER,
+    timeFrom DATETIME,
+    timeTo DATETIME,
     number TEXT,
     trackingNumber TEXT,
-    buyerName TEXT,
+    personName TEXT,
     phone TEXT,
     comment TEXT,
     deliveryTypeName TEXT,

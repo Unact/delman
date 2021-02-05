@@ -105,14 +105,14 @@ class Api {
 
   Future<void> cancelOrder(Order order, Location location) async {
     await _post('v1/delman/cancel_order', data: {
-      'deliveryPointOrderId': order.deliveryPointOrderId,
+      'deliveryPointOrderId': order.id,
       'location': location
     });
   }
 
   Future<void> confirmOrder(Order order, List<OrderLine> orderLines, Location location) async {
     await _post('v1/delman/confirm_order', data: {
-      'deliveryPointOrderId': order.deliveryPointOrderId,
+      'deliveryPointOrderId': order.id,
       'orderLines': orderLines.map((e) => {'id': e.id, 'factAmount': e.factAmount}).toList(),
       'location': location
     });

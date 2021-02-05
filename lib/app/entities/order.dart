@@ -4,13 +4,14 @@ import 'package:delman/app/utils/nullify.dart';
 
 class Order extends Equatable {
   final int id;
+  final int orderId;
   final int deliveryPointId;
-  final int deliveryPointOrderId;
-  final DateTime deliveryFrom;
-  final DateTime deliveryTo;
+  final int pickup;
+  final DateTime timeFrom;
+  final DateTime timeTo;
   final String number;
   final String trackingNumber;
-  final String buyerName;
+  final String personName;
   final String phone;
   final String comment;
   final String deliveryTypeName;
@@ -24,13 +25,14 @@ class Order extends Equatable {
 
   const Order({
     this.id,
+    this.orderId,
     this.deliveryPointId,
-    this.deliveryPointOrderId,
-    this.deliveryFrom,
-    this.deliveryTo,
+    this.pickup,
+    this.timeFrom,
+    this.timeTo,
     this.number,
     this.trackingNumber,
-    this.buyerName,
+    this.personName,
     this.phone,
     this.comment,
     this.deliveryTypeName,
@@ -46,17 +48,19 @@ class Order extends Equatable {
   bool get hasElevator => elevator == 1;
   bool get isFinished => finished == 1;
   bool get isCanceled => canceled == 1;
+  bool get isPickup => pickup == 1;
 
   @override
   List<Object> get props => [
     id,
+    orderId,
     deliveryPointId,
-    deliveryPointOrderId,
-    deliveryFrom,
-    deliveryTo,
+    pickup,
+    timeFrom,
+    timeTo,
     number,
     trackingNumber,
-    buyerName,
+    personName,
     phone,
     comment,
     deliveryTypeName,
@@ -72,13 +76,14 @@ class Order extends Equatable {
   static Order fromJson(dynamic json) {
     return Order(
       id: json['id'],
+      orderId: json['orderId'],
       deliveryPointId: json['deliveryPointId'],
-      deliveryPointOrderId: json['deliveryPointOrderId'],
-      deliveryFrom: Nullify.parseDate(json['deliveryFrom']),
-      deliveryTo: Nullify.parseDate(json['deliveryTo']),
+      pickup: json['pickup'],
+      timeFrom: Nullify.parseDate(json['timeFrom']),
+      timeTo: Nullify.parseDate(json['timeTo']),
       number: json['number'],
       trackingNumber: json['trackingNumber'],
-      buyerName: json['buyerName'],
+      personName: json['personName'],
       phone: json['phone'],
       comment: json['comment'],
       deliveryTypeName: json['deliveryTypeName'],
@@ -95,13 +100,14 @@ class Order extends Equatable {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'orderId': orderId,
       'deliveryPointId': deliveryPointId,
-      'deliveryPointOrderId': deliveryPointOrderId,
-      'deliveryFrom': deliveryFrom?.toIso8601String(),
-      'deliveryTo': deliveryTo?.toIso8601String(),
+      'pickup': pickup,
+      'timeFrom': timeFrom?.toIso8601String(),
+      'timeTo': timeTo?.toIso8601String(),
       'number': number,
       'trackingNumber': trackingNumber,
-      'buyerName': buyerName,
+      'personName': personName,
       'phone': phone,
       'comment': comment,
       'deliveryTypeName': deliveryTypeName,
@@ -113,6 +119,50 @@ class Order extends Equatable {
       'canceled': canceled,
       'finished': finished,
     };
+  }
+
+  Order copyWith({
+    int id,
+    int orderId,
+    int deliveryPointId,
+    int pickup,
+    DateTime timeFrom,
+    DateTime timeTo,
+    String number,
+    String trackingNumber,
+    String personName,
+    String phone,
+    String comment,
+    String deliveryTypeName,
+    int floor,
+    String flat,
+    int elevator,
+    String paymentTypeName,
+    String sellerName,
+    int canceled,
+    int finished,
+  }) {
+    return Order(
+      id: id ?? this.id,
+      orderId: orderId ?? this.orderId,
+      deliveryPointId: deliveryPointId ?? this.deliveryPointId,
+      pickup: pickup ?? this.pickup,
+      timeFrom: timeFrom ?? this.timeFrom,
+      timeTo: timeTo ?? this.timeTo,
+      number: number ?? this.number,
+      trackingNumber: trackingNumber ?? this.trackingNumber,
+      personName: personName ?? this.personName,
+      phone: phone ?? this.phone,
+      comment: comment ?? this.comment,
+      deliveryTypeName: deliveryTypeName ?? this.deliveryTypeName,
+      floor: floor ?? this.floor,
+      flat: flat ?? this.flat,
+      elevator: elevator ?? this.elevator,
+      paymentTypeName: paymentTypeName ?? this.paymentTypeName,
+      sellerName: sellerName ?? this.sellerName,
+      canceled: canceled ?? this.canceled,
+      finished: finished ?? this.finished,
+    );
   }
 
   @override

@@ -34,17 +34,9 @@ class OrderViewModel extends BaseViewModel {
     @required this.order
   }) : super(context: context) {
     orderLines = appState.orderLines
-      .where((e) => e.orderId == order.id)
-      .map((e) {
-        return OrderLine(
-          id: e.id,
-          orderId: e.orderId,
-          name: e.name,
-          amount: e.amount,
-          price: e.price,
-          factAmount: e.amount
-        );
-      }).toList();
+      .where((e) => e.orderId == order.orderId)
+      .map((e) => e.copyWith(factAmount: e.amount))
+      .toList();
     _total = _orderLinesTotal;
   }
 
@@ -55,12 +47,21 @@ class OrderViewModel extends BaseViewModel {
   bool get cardPayment => _cardPayment;
   double get total => payment?.summ ?? _total;
   bool get isInProgress => !order.isFinished && deliveryPoint.inProgress;
-  bool get totalEditable => isInProgress && payment == null;
-  bool get needPayment => payment == null && orderLines.any((el) => el.price != 0);
+  bool get totalEditable => isInProgress && payment == null && !order.isPickup;
+  bool get needPayment => totalEditable && orderLines.any((el) => el.price != 0);
   Payment get payment => appState.payments.firstWhere(
-    (e) => e.deliveryPointOrderId == order.deliveryPointOrderId,
+    (e) => e.deliveryPointOrderId == order.id,
     orElse: () => null
   );
+  String get orderStatus {
+    if (order.isCanceled)
+      return 'Отменен';
+
+    if (order.isPickup)
+      return order.isFinished ? 'Забран' : 'Ожидает забора';
+
+    return order.isFinished ? 'Доставлен' : 'Ожидает доставки';
+  }
   List<OrderLine> get sortedOrderLines => orderLines..sort((a, b) => a.name.compareTo(b.name));
 
   double get _orderLinesTotal {
@@ -84,14 +85,7 @@ class OrderViewModel extends BaseViewModel {
   }
 
   void _updateOrderLineAmount(OrderLine orderLine, int amount) {
-    OrderLine updatedOrderLine = OrderLine(
-      id: orderLine.id,
-      orderId: orderLine.orderId,
-      name: orderLine.name,
-      amount: orderLine.amount,
-      price: orderLine.price,
-      factAmount: amount
-    );
+    OrderLine updatedOrderLine = orderLine.copyWith(factAmount: amount);
 
     orderLines.removeWhere((e) => e.id == orderLine.id);
     orderLines.add(updatedOrderLine);
@@ -132,7 +126,9 @@ class OrderViewModel extends BaseViewModel {
       return;
     }
 
-    _message = needPayment ? 'Заказ не оплачен!' : 'Вы действительно хотите завершить заказ?';
+    _message = needPayment ?
+      'Заказ не оплачен!' :
+      'Вы действительно хотите завершить ${order.isPickup ? 'забор' : 'доставку' } заказа?';
     _confirmationCallback = confirmOrder;
     _setState(OrderState.NeedUserConfirmation);
   }
@@ -146,7 +142,7 @@ class OrderViewModel extends BaseViewModel {
       Location location = await GeoLoc.getCurrentLocation();
 
       order = await appState.confirmOrder(order, orderLines, location);
-      _setMessage('Заказ завершен');
+      _setMessage(order.isPickup ? 'Забор заказа завершен' : 'Доставка заказа завершена');
       _setState(OrderState.Confirmed);
     } on AppError catch(e) {
       _setMessage(e.message);

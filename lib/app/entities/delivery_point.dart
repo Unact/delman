@@ -14,11 +14,15 @@ class DeliveryPoint extends Equatable {
   final double latitude;
   final double longitude;
 
+  final String sellerName;
+  final String buyerName;
   final String phone;
   final String paymentTypeName;
-  final String buyerName;
-  final String sellerName;
   final String deliveryTypeName;
+
+  final String pickupSellerName;
+  final String senderName;
+  final String senderPhone;
 
   const DeliveryPoint({
     this.id,
@@ -35,7 +39,10 @@ class DeliveryPoint extends Equatable {
     this.paymentTypeName,
     this.buyerName,
     this.sellerName,
-    this.deliveryTypeName
+    this.deliveryTypeName,
+    this.pickupSellerName,
+    this.senderName,
+    this.senderPhone,
   });
 
   bool get inProgress => factArrival != null;
@@ -58,6 +65,9 @@ class DeliveryPoint extends Equatable {
     buyerName,
     sellerName,
     deliveryTypeName,
+    pickupSellerName,
+    senderName,
+    senderPhone,
   ];
 
   static DeliveryPoint fromJson(dynamic map) {
@@ -76,7 +86,10 @@ class DeliveryPoint extends Equatable {
       paymentTypeName: map['paymentTypeName'],
       buyerName: map['buyerName'],
       sellerName: map['sellerName'],
-      deliveryTypeName: map['deliveryTypeName']
+      deliveryTypeName: map['deliveryTypeName'],
+      pickupSellerName: map['pickupSellerName'],
+      senderName: map['senderName'],
+      senderPhone: map['senderPhone'],
     );
   }
 
@@ -97,7 +110,52 @@ class DeliveryPoint extends Equatable {
       'buyerName' : buyerName,
       'sellerName' : sellerName,
       'deliveryTypeName' : deliveryTypeName,
+      'pickupSellerName': pickupSellerName,
+      'senderName': senderName,
+      'senderPhone': senderPhone,
     };
+  }
+
+  DeliveryPoint copyWith({
+    int id,
+    int deliveryId,
+    int seq,
+    DateTime planArrival,
+    DateTime planDeparture,
+    DateTime factArrival,
+    DateTime factDeparture,
+    String addressName,
+    double latitude,
+    double longitude,
+    String phone,
+    String paymentTypeName,
+    String buyerName,
+    String sellerName,
+    String deliveryTypeName,
+    String pickupSellerName,
+    String senderName,
+    String senderPhone,
+  }) {
+    return DeliveryPoint(
+      id: id ?? this.id,
+      deliveryId: deliveryId ?? this.deliveryId,
+      seq: seq ?? this.seq,
+      planArrival: planArrival ?? this.planArrival,
+      planDeparture: planDeparture ?? this.planDeparture,
+      factArrival: factArrival ?? this.factArrival,
+      factDeparture: factDeparture ?? this.factDeparture,
+      addressName: addressName ?? this.addressName,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      phone: phone ?? this.phone,
+      paymentTypeName: paymentTypeName ?? this.paymentTypeName,
+      buyerName: buyerName ?? this.buyerName,
+      sellerName: sellerName ?? this.sellerName,
+      deliveryTypeName: deliveryTypeName ?? this.deliveryTypeName,
+      pickupSellerName: pickupSellerName ?? this.pickupSellerName,
+      senderName: senderName ?? this.senderName,
+      senderPhone: senderPhone ?? this.senderPhone,
+    );
   }
 
   @override

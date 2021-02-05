@@ -1,7 +1,5 @@
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 import 'package:delman/app/app_state.dart';
 import 'package:delman/app/constants/strings.dart';
@@ -22,38 +20,25 @@ class DeliveryPointViewModel extends BaseViewModel {
   DeliveryPointState _state = DeliveryPointState.Initial;
 
   String _message;
-  Placemark _placemark;
 
-  DeliveryPointViewModel({@required BuildContext context, @required this.deliveryPoint}) : super(context: context) {
-    _placemark = Placemark(
-      point: Point(longitude: deliveryPoint.longitude, latitude: deliveryPoint.latitude),
-      iconName: 'lib/app/assets/images/placeicon.png',
-      onTap: (double lat, double lon) async {
-        Location location = await GeoLoc.getCurrentLocation();
-        String params = 'rtext=' +
-          '${location.latitude},${location.longitude}' +
-          '~' +
-          '${deliveryPoint.latitude},${deliveryPoint.longitude}';
-        String url = 'yandexmaps://maps.yandex.ru?$params';
-
-        if (await canLaunch(url)) {
-          await launch(url);
-        } else {
-          _setMessage(Strings.genericErrorMsg);
-          _setState(DeliveryPointState.Failure);
-        }
-      }
-    );
-  }
+  DeliveryPointViewModel({@required BuildContext context, @required this.deliveryPoint}) : super(context: context);
 
   DeliveryPointState get state => _state;
   String get message => _message;
 
-  Placemark get placemark => _placemark;
+  bool get hasDeliveryOrders => getDeliveryOrders().isNotEmpty;
+  bool get hasPickupOrders => getPickupOrders().isNotEmpty;
 
-  List<Order> getOrders() {
+  List<Order> getDeliveryOrders() {
     return appState.orders
-      .where((e) => e.deliveryPointId == deliveryPoint.id)
+      .where((e) => e.deliveryPointId == deliveryPoint.id && !e.isPickup)
+      .toList()
+      ..sort((a, b) => a.trackingNumber.compareTo(b.trackingNumber));
+  }
+
+  List<Order> getPickupOrders() {
+    return appState.orders
+      .where((e) => e.deliveryPointId == deliveryPoint.id && e.isPickup)
       .toList()
       ..sort((a, b) => a.trackingNumber.compareTo(b.trackingNumber));
   }

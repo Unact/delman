@@ -46,6 +46,24 @@ class OrderLine extends Equatable {
     };
   }
 
+  OrderLine copyWith({
+    int id,
+    int orderId,
+    String name,
+    int amount,
+    double price,
+    int factAmount,
+  }) {
+    return OrderLine(
+      id: id ?? this.id,
+      orderId: orderId ?? this.orderId,
+      name: name ?? this.name,
+      amount: amount ?? this.amount,
+      price: price ?? this.price,
+      factAmount: factAmount ?? this.factAmount,
+    );
+  }
+
   @override
   String toString() => 'OrderLine { id: $id }';
 }

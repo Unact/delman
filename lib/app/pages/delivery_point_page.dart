@@ -1,6 +1,7 @@
+import 'package:delman/app/pages/point_address_page.dart';
+import 'package:delman/app/view_models/point_address_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 import 'package:delman/app/constants/strings.dart';
 import 'package:delman/app/entities/entities.dart';
@@ -48,8 +49,6 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = MediaQuery.of(context).size.height;
-
     return Consumer<DeliveryPointViewModel>(
       builder: (context, vm, _) {
         return Scaffold(
@@ -63,11 +62,27 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
               Flexible(
                 child: ListView(
                   physics: AlwaysScrollableScrollPhysics(),
-                  padding: EdgeInsets.only(top: 24, bottom: 0),
+                  padding: EdgeInsets.only(top: 24, bottom: 24),
                   children: [
                     InfoRow(
                       title: Text(Strings.address),
-                      trailing: ExpandingText(vm.deliveryPoint.addressName, style: TextStyle(color: Colors.black)),
+                      trailing: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (BuildContext context) => ChangeNotifierProvider<PointAddressViewModel>(
+                                create: (context) => PointAddressViewModel(
+                                  context: context,
+                                  deliveryPoint: vm.deliveryPoint
+                                ),
+                                child: PointAddressPage(),
+                              )
+                            )
+                          );
+                        },
+                        child: ExpandingText(vm.deliveryPoint.addressName, style: TextStyle(color: Colors.blue)),
+                      )
                     ),
                     ListTile(
                       leading: Text(Strings.planArrival),
@@ -96,31 +111,17 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
                       dense: true,
                       contentPadding: EdgeInsets.symmetric(horizontal: 8)
                     ),
-                    InfoRow(title: Text('ИМ'), trailing: Text(vm.deliveryPoint.sellerName ?? '')),
-                    InfoRow(title: Text('Покупатель'), trailing: Text(vm.deliveryPoint.buyerName ?? '')),
-                    InfoRow(
-                      title: Text('Телефон'),
-                      trailing: GestureDetector(
-                        onTap: vm.callPhone,
-                        child: Text(vm.deliveryPoint.phone ?? '', style: TextStyle(color: Colors.blue))
-                      )
-                    ),
-                    InfoRow(title: Text('Доставка'), trailing: Text(vm.deliveryPoint.deliveryTypeName ?? '')),
-                    InfoRow(title: Text('Оплата'), trailing: Text(vm.deliveryPoint.paymentTypeName ?? '')),
-                    ExpansionTile(
-                      title: Text('Заказы'),
+                    !vm.hasDeliveryOrders ? Container() : ExpansionTile(
+                      title: Text('Доставка'),
                       initiallyExpanded: true,
                       tilePadding: EdgeInsets.symmetric(horizontal: 8),
-                      children: vm.getOrders().map<Widget>((e) => _buildOrderTile(context, e)).toList()
+                      children: _buildDeliveryTiles(context)
                     ),
-                    Container(
-                      height: screenHeight/3,
-                      child: YandexMap(
-                        onMapCreated: (YandexMapController controller) async {
-                          await controller.addPlacemark(vm.placemark);
-                          await controller.move(point: vm.placemark.point, zoom: 17.0);
-                        }
-                      )
+                    !vm.hasPickupOrders ? Container() : ExpansionTile(
+                      title: Text('Забор'),
+                      initiallyExpanded: true,
+                      tilePadding: EdgeInsets.symmetric(horizontal: 8),
+                      children: _buildPickupTiles(context)
                     )
                   ]
                 )
@@ -132,9 +133,45 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
     );
   }
 
+  List<Widget> _buildDeliveryTiles(BuildContext context) {
+    DeliveryPointViewModel vm = Provider.of<DeliveryPointViewModel>(context);
+
+    return [
+      InfoRow(title: Text('ИМ'), trailing: Text(vm.deliveryPoint.sellerName ?? '')),
+      InfoRow(title: Text('Покупатель'), trailing: Text(vm.deliveryPoint.buyerName ?? '')),
+      InfoRow(
+        title: Text('Телефон'),
+        trailing: GestureDetector(
+          onTap: vm.callPhone,
+          child: Text(vm.deliveryPoint.phone ?? '', style: TextStyle(color: Colors.blue))
+        )
+      ),
+      InfoRow(title: Text('Доставка'), trailing: Text(vm.deliveryPoint.deliveryTypeName ?? '')),
+      InfoRow(title: Text('Оплата'), trailing: Text(vm.deliveryPoint.paymentTypeName ?? '')),
+      InfoRow(title: Text('Заказы')),
+    ]..addAll(vm.getDeliveryOrders().map<Widget>((e) => _buildOrderTile(context, e)).toList());
+  }
+
+  List<Widget> _buildPickupTiles(BuildContext context) {
+    DeliveryPointViewModel vm = Provider.of<DeliveryPointViewModel>(context);
+
+    return [
+      InfoRow(title: Text('ИМ'), trailing: Text(vm.deliveryPoint.pickupSellerName ?? '')),
+      InfoRow(title: Text('Отправитель'), trailing: Text(vm.deliveryPoint.senderName ?? '')),
+      InfoRow(
+        title: Text('Телефон'),
+        trailing: GestureDetector(
+          onTap: vm.callPhone,
+          child: Text(vm.deliveryPoint.senderPhone ?? '', style: TextStyle(color: Colors.blue))
+        )
+      ),
+      InfoRow(title: Text('Заказы')),
+    ]..addAll(vm.getPickupOrders().map<Widget>((e) => _buildOrderTile(context, e)).toList());
+  }
+
   Widget _buildOrderTile(BuildContext context, Order order) {
     return ListTile(
-      title: Text('Заказ ${order.trackingNumber}'),
+      title: Text('Заказ ${order.trackingNumber}', style: TextStyle(fontSize: 14)),
       contentPadding: EdgeInsets.symmetric(horizontal: 20),
       onTap: () {
         Navigator.push(
