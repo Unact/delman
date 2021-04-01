@@ -7,6 +7,7 @@ import 'package:delman/app/app.dart';
 import 'package:delman/app/constants/strings.dart';
 import 'package:delman/app/entities/entities.dart';
 import 'package:delman/app/services/api.dart';
+import 'package:delman/app/utils/geo_loc.dart';
 
 class AppError implements Exception {
   final String message;
@@ -60,6 +61,12 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> getData() async {
+    Location location = await GeoLoc.getCurrentLocation();
+
+    if (location == null) {
+      throw AppError('Для работы с приложением необходимо разрешить определение местоположения');
+    }
+
     await loadUserData();
 
     try {
@@ -123,6 +130,18 @@ class AppState extends ChangeNotifier {
     await app.paymentRepo.reloadPayments(payments);
   }
 
+  Future<DeliveryPoint> _departFromDeliveryPoint(DeliveryPoint deliveryPoint, Location location) async {
+    DeliveryPoint updatedDeliveryPoint = deliveryPoint.copyWith(factDeparture: DateTime.now());
+
+    _deliveryPoints.removeWhere((e) => e.id == updatedDeliveryPoint.id);
+    _deliveryPoints.add(updatedDeliveryPoint);
+    await app.deliveryPointRepo.updateDeliveryPoint(updatedDeliveryPoint);
+
+    notifyListeners();
+
+    return updatedDeliveryPoint;
+  }
+
   Future<void> loadUserData() async {
     try {
       User user = await app.api.getUserData();
@@ -143,8 +162,13 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<DeliveryPoint> arriveAtDeliveryPoint(DeliveryPoint deliveryPoint, Location location) async {
+  Future<DeliveryPoint> arriveAtDeliveryPoint(DeliveryPoint deliveryPoint) async {
+    Location location = await GeoLoc.getCurrentLocation();
     DeliveryPoint updatedDeliveryPoint = deliveryPoint.copyWith(factArrival: DateTime.now());
+
+    if (!deliveryPoints.any((e) => e.id == deliveryPoint.id)) {
+      throw AppError('Не найдена точка доставки');
+    }
 
     try {
       await app.api.arriveAtDeliveryPoint(updatedDeliveryPoint, location);
@@ -164,19 +188,12 @@ class AppState extends ChangeNotifier {
     return updatedDeliveryPoint;
   }
 
-  Future<DeliveryPoint> departFromDeliveryPoint(DeliveryPoint deliveryPoint, Location location) async {
-    DeliveryPoint updatedDeliveryPoint = deliveryPoint.copyWith(factDeparture: DateTime.now());
+  Future<Order> cancelOrder(Order order) async {
+    if (!_orders.any((e) => e.id == order.id)) {
+      throw AppError('Не найден заказ');
+    }
 
-    _deliveryPoints.removeWhere((e) => e.id == updatedDeliveryPoint.id);
-    _deliveryPoints.add(updatedDeliveryPoint);
-    await app.deliveryPointRepo.updateDeliveryPoint(updatedDeliveryPoint);
-
-    notifyListeners();
-
-    return updatedDeliveryPoint;
-  }
-
-  Future<Order> cancelOrder(Order order, Location location) async {
+    Location location = await GeoLoc.getCurrentLocation();
     Order updatedOrder = order.copyWith(canceled: 1, finished: 1);
 
     try {
@@ -193,7 +210,7 @@ class AppState extends ChangeNotifier {
     await app.orderRepo.updateOrder(updatedOrder);
 
     if (!_orders.any((e) => e.deliveryPointId == updatedOrder.deliveryPointId && !e.isFinished)) {
-      await departFromDeliveryPoint(_deliveryPoints.firstWhere((e) => e.id == updatedOrder.deliveryPointId), location);
+      await _departFromDeliveryPoint(_deliveryPoints.firstWhere((e) => e.id == updatedOrder.deliveryPointId), location);
     }
 
     notifyListeners();
@@ -201,7 +218,12 @@ class AppState extends ChangeNotifier {
     return updatedOrder;
   }
 
-  Future<Order> confirmOrder(Order order, List<OrderLine> orderLines, Location location) async {
+  Future<Order> confirmOrder(Order order, List<OrderLine> orderLines) async {
+    if (!_orders.any((e) => e.id == order.id)) {
+      throw AppError('Не найден заказ');
+    }
+
+    Location location = await GeoLoc.getCurrentLocation();
     Order updatedOrder = order.copyWith(finished: 1);
     List<OrderLine> updatedOrderLines = orderLines;
 
@@ -223,7 +245,7 @@ class AppState extends ChangeNotifier {
     await app.orderLineRepo.updateOrderLines(updatedOrderLines);
 
     if (!_orders.any((e) => e.deliveryPointId == updatedOrder.deliveryPointId && !e.isFinished)) {
-      await departFromDeliveryPoint(_deliveryPoints.firstWhere((e) => e.id == updatedOrder.deliveryPointId), location);
+      await _departFromDeliveryPoint(_deliveryPoints.firstWhere((e) => e.id == updatedOrder.deliveryPointId), location);
     }
 
     notifyListeners();
@@ -231,7 +253,9 @@ class AppState extends ChangeNotifier {
     return updatedOrder;
   }
 
-  Future<void> acceptPayment(Payment payment, Map<dynamic, dynamic> transaction, Location location) async {
+  Future<void> acceptPayment(Payment payment, Map<dynamic, dynamic> transaction) async {
+    Location location = await GeoLoc.getCurrentLocation();
+
     try {
       await app.api.acceptPayment(payment, transaction, location);
     } on ApiException catch(e) {

@@ -24,6 +24,7 @@ class PaymentsPage extends StatelessWidget {
             padding: EdgeInsets.only(top: 24, left: 8, right: 8, bottom: 24),
             children: vm.payments.map((payment) {
               Order order = vm.getOrderForPayment(payment);
+              DeliveryPoint deliveryPoint = vm.getDeliveryPointForPayment(payment);
 
               return ListTile(
                 isThreeLine: true,
@@ -52,7 +53,8 @@ class PaymentsPage extends StatelessWidget {
                       builder: (BuildContext context) => ChangeNotifierProvider<OrderViewModel>(
                         create: (context) => OrderViewModel(
                           context: context,
-                          order: order
+                          order: order,
+                          deliveryPoint: deliveryPoint
                         ),
                         child: OrderPage(),
                       )

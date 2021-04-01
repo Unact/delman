@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:delman/app/app_state.dart';
 import 'package:delman/app/entities/entities.dart';
 import 'package:delman/app/services/iboxpro.dart';
-import 'package:delman/app/utils/geo_loc.dart';
 import 'package:delman/app/utils/misc.dart';
 import 'package:delman/app/view_models/base_view_model.dart';
 
@@ -163,14 +162,13 @@ class AcceptPaymentViewModel extends BaseViewModel {
     _setMessage('Сохранение информации об оплате');
     _setState(AcceptPaymentState.SavingPayment);
 
-    Location location = await GeoLoc.getCurrentLocation();
     Payment payment = Payment(
       deliveryPointOrderId: order.id,
       summ: total,
       transactionId: transaction != null ? transaction['id'] : null
     );
     try {
-      await appState.acceptPayment(payment, transaction, location);
+      await appState.acceptPayment(payment, transaction);
 
       _setMessage('Оплата успешно сохранена');
       _setState(AcceptPaymentState.Finished);

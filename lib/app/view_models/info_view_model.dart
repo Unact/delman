@@ -1,10 +1,10 @@
+import 'dart:async';
+
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:delman/app/app_state.dart';
-import 'package:delman/app/entities/entities.dart';
-import 'package:delman/app/utils/geo_loc.dart';
 import 'package:delman/app/utils/misc.dart';
 import 'package:delman/app/view_models/base_view_model.dart';
 import 'package:delman/app/view_models/home_view_model.dart';
@@ -13,20 +13,27 @@ enum InfoState {
   Initial,
   InProgress,
   DataLoaded,
-  Failure
+  Failure,
+  TimerInProgress,
+  TimerDataLoaded,
+  TimerFailure
 }
 
 class InfoViewModel extends BaseViewModel {
   HomeViewModel _homeViewModel;
   InfoState _state = InfoState.Initial;
   String _message;
+  Timer fetchDataTimer;
 
   InfoViewModel({@required BuildContext context}) : super(context: context) {
     _homeViewModel = Provider.of<HomeViewModel>(context, listen: false);
+    _startRefreshTimer();
   }
 
+  bool get isRefreshing => _state == InfoState.InProgress || _state == InfoState.TimerInProgress;
+
   bool get needRefresh {
-    if (_state == InfoState.InProgress)
+    if (isRefreshing)
       return false;
 
     if (appState.appData.lastSyncTime == null)
@@ -41,6 +48,7 @@ class InfoViewModel extends BaseViewModel {
   InfoState get state => _state;
   String get message => _message;
 
+  String get timerFailureMessage => _state == InfoState.TimerFailure ? _message : null;
   bool get newVersionAvailable => appState.newVersionAvailable;
   int get deliveryPointsCnt => appState.deliveryPoints.length;
   int get deliveryPointsLeftCnt => appState.deliveryPoints.where((e) => !e.isFinished).length;
@@ -54,31 +62,36 @@ class InfoViewModel extends BaseViewModel {
   double get cardPaymentsSum =>
     appState.payments.where((e) => e.isCard).toList().fold(0, (prev, el) => prev + el.summ);
 
-  Future<void> getData() async {
-    _setState(InfoState.InProgress);
-
-    Location location = await GeoLoc.getCurrentLocation();
-
-    if (location == null) {
-      _setMessage('Для работы с приложением необходимо разрешить определение местоположения');
-      _setState(InfoState.Failure);
-
+  Future<void> refresh([bool timerCallback = false]) async {
+    if (isRefreshing)
       return;
-    }
 
     try {
+      _setState(timerCallback ? InfoState.TimerInProgress : InfoState.InProgress);
       await appState.getData();
 
       _setMessage('Данные успешно обновлены');
-      _setState(InfoState.DataLoaded);
+      _setState(timerCallback ? InfoState.TimerDataLoaded : InfoState.DataLoaded);
     } on AppError catch(e) {
       _setMessage(e.message);
-      _setState(InfoState.Failure);
+      _setState(timerCallback ? InfoState.TimerFailure : InfoState.Failure);
     }
   }
 
   void changePage(int index) {
     _homeViewModel.setCurrentIndex(index);
+  }
+
+  void _startRefreshTimer() {
+    if (fetchDataTimer == null || !fetchDataTimer.isActive) {
+      fetchDataTimer = Timer.periodic(Duration(minutes: 10), (_) => refresh(true));
+    }
+  }
+
+  void _stopRefreshTimer() {
+    if (fetchDataTimer != null && fetchDataTimer.isActive) {
+      fetchDataTimer.cancel();
+    }
   }
 
   void _setState(InfoState state) {
@@ -90,5 +103,11 @@ class InfoViewModel extends BaseViewModel {
 
   void _setMessage(String message) {
     _message = message;
+  }
+
+  @override
+  void dispose() {
+    _stopRefreshTimer();
+    super.dispose();
   }
 }

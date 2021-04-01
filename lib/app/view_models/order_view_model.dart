@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:delman/app/app_state.dart';
 import 'package:delman/app/constants/strings.dart';
 import 'package:delman/app/entities/entities.dart';
-import 'package:delman/app/utils/geo_loc.dart';
 import 'package:delman/app/utils/misc.dart';
 import 'package:delman/app/view_models/base_view_model.dart';
 
@@ -22,6 +21,7 @@ enum OrderState {
 
 class OrderViewModel extends BaseViewModel {
   Order order;
+  DeliveryPoint deliveryPoint;
   List<OrderLine> orderLines = [];
   String _message;
   Function _confirmationCallback;
@@ -31,7 +31,8 @@ class OrderViewModel extends BaseViewModel {
 
   OrderViewModel({
     @required BuildContext context,
-    @required this.order
+    @required this.order,
+    @required this.deliveryPoint
   }) : super(context: context) {
     orderLines = appState.orderLines
       .where((e) => e.orderId == order.orderId)
@@ -42,7 +43,6 @@ class OrderViewModel extends BaseViewModel {
 
   OrderState get state => _state;
   String get message => _message;
-  DeliveryPoint get deliveryPoint => appState.deliveryPoints.firstWhere((e) => e.id == order.deliveryPointId);
   Function get confirmationCallback => _confirmationCallback;
   bool get cardPayment => _cardPayment;
   double get total => payment?.summ ?? _total;
@@ -139,9 +139,7 @@ class OrderViewModel extends BaseViewModel {
     _setState(OrderState.InProgress);
 
     try {
-      Location location = await GeoLoc.getCurrentLocation();
-
-      order = await appState.confirmOrder(order, orderLines, location);
+      order = await appState.confirmOrder(order, orderLines);
       _setMessage(order.isPickup ? 'Забор заказа завершен' : 'Доставка заказа завершена');
       _setState(OrderState.Confirmed);
     } on AppError catch(e) {
@@ -162,9 +160,7 @@ class OrderViewModel extends BaseViewModel {
     _setState(OrderState.InProgress);
 
     try {
-      Location location = await GeoLoc.getCurrentLocation();
-
-      order = await appState.cancelOrder(order, location);
+      order = await appState.cancelOrder(order);
       _setMessage('Заказ отменен');
       _setState(OrderState.Canceled);
     } on AppError catch(e) {

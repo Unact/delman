@@ -111,13 +111,13 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
                       dense: true,
                       contentPadding: EdgeInsets.symmetric(horizontal: 8)
                     ),
-                    !vm.hasDeliveryOrders ? Container() : ExpansionTile(
+                    vm.deliveryOrders.isEmpty ? Container() : ExpansionTile(
                       title: Text('Доставка'),
                       initiallyExpanded: true,
                       tilePadding: EdgeInsets.symmetric(horizontal: 8),
                       children: _buildDeliveryTiles(context)
                     ),
-                    !vm.hasPickupOrders ? Container() : ExpansionTile(
+                    vm.pickupOrders.isEmpty ? Container() : ExpansionTile(
                       title: Text('Забор'),
                       initiallyExpanded: true,
                       tilePadding: EdgeInsets.symmetric(horizontal: 8),
@@ -149,7 +149,7 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
       InfoRow(title: Text('Доставка'), trailing: Text(vm.deliveryPoint.deliveryTypeName ?? '')),
       InfoRow(title: Text('Оплата'), trailing: Text(vm.deliveryPoint.paymentTypeName ?? '')),
       InfoRow(title: Text('Заказы')),
-    ]..addAll(vm.getDeliveryOrders().map<Widget>((e) => _buildOrderTile(context, e)).toList());
+    ]..addAll(vm.deliveryOrders.map<Widget>((e) => _buildOrderTile(context, e, vm.deliveryPoint)).toList());
   }
 
   List<Widget> _buildPickupTiles(BuildContext context) {
@@ -166,10 +166,10 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
         )
       ),
       InfoRow(title: Text('Заказы')),
-    ]..addAll(vm.getPickupOrders().map<Widget>((e) => _buildOrderTile(context, e)).toList());
+    ]..addAll(vm.pickupOrders.map<Widget>((e) => _buildOrderTile(context, e, vm.deliveryPoint)).toList());
   }
 
-  Widget _buildOrderTile(BuildContext context, Order order) {
+  Widget _buildOrderTile(BuildContext context, Order order, DeliveryPoint deliveryPoint) {
     return ListTile(
       title: Text('Заказ ${order.trackingNumber}', style: TextStyle(fontSize: 14)),
       contentPadding: EdgeInsets.symmetric(horizontal: 20),
@@ -180,7 +180,8 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
             builder: (BuildContext context) => ChangeNotifierProvider<OrderViewModel>(
               create: (context) => OrderViewModel(
                 context: context,
-                order: order
+                order: order,
+                deliveryPoint: deliveryPoint
               ),
               child: OrderPage(),
             )

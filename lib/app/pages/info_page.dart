@@ -90,7 +90,7 @@ class _InfoPageState extends State<InfoPage> {
         return RefreshIndicator(
           key: _refreshIndicatorKey,
           onRefresh: () async {
-            vm.getData();
+            vm.refresh();
             return _refresherCompleter.future;
           },
           child: ListView(
@@ -129,6 +129,7 @@ class _InfoPageState extends State<InfoPage> {
           subtitle: _buildPaymentsCard(context),
         ),
       ),
+      _buildFailureCard(context),
       _buildInfoCard(context),
     ];
   }
@@ -169,6 +170,22 @@ class _InfoPageState extends State<InfoPage> {
         ]
       )
     );
+  }
+
+  Widget _buildFailureCard(BuildContext context) {
+    InfoViewModel vm = Provider.of<InfoViewModel>(context);
+
+    if (vm.timerFailureMessage != null) {
+      return Card(
+        child: ListTile(
+          isThreeLine: true,
+          title: Text('Ошибки'),
+          subtitle: Text(vm.timerFailureMessage, style: TextStyle(color: Colors.red[300])),
+        )
+      );
+    } else {
+      return Container();
+    }
   }
 
   Widget _buildInfoCard(BuildContext context) {

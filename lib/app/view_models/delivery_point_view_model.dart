@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:delman/app/app_state.dart';
 import 'package:delman/app/constants/strings.dart';
 import 'package:delman/app/entities/entities.dart';
-import 'package:delman/app/utils/geo_loc.dart';
 import 'package:delman/app/utils/misc.dart';
 import 'package:delman/app/view_models/base_view_model.dart';
 
@@ -18,30 +17,25 @@ enum DeliveryPointState {
 class DeliveryPointViewModel extends BaseViewModel {
   DeliveryPoint deliveryPoint;
   DeliveryPointState _state = DeliveryPointState.Initial;
+  List<Order> deliveryOrders;
+  List<Order> pickupOrders;
 
   String _message;
 
-  DeliveryPointViewModel({@required BuildContext context, @required this.deliveryPoint}) : super(context: context);
-
-  DeliveryPointState get state => _state;
-  String get message => _message;
-
-  bool get hasDeliveryOrders => getDeliveryOrders().isNotEmpty;
-  bool get hasPickupOrders => getPickupOrders().isNotEmpty;
-
-  List<Order> getDeliveryOrders() {
-    return appState.orders
+  DeliveryPointViewModel({@required BuildContext context, @required this.deliveryPoint}) : super(context: context) {
+    deliveryOrders = appState.orders
       .where((e) => e.deliveryPointId == deliveryPoint.id && !e.isPickup)
       .toList()
       ..sort((a, b) => a.trackingNumber.compareTo(b.trackingNumber));
-  }
 
-  List<Order> getPickupOrders() {
-    return appState.orders
+    pickupOrders = appState.orders
       .where((e) => e.deliveryPointId == deliveryPoint.id && e.isPickup)
       .toList()
       ..sort((a, b) => a.trackingNumber.compareTo(b.trackingNumber));
   }
+
+  DeliveryPointState get state => _state;
+  String get message => _message;
 
   Future<void> callPhone() async {
     await Misc.callPhone(deliveryPoint.phone, onFailure: () {
@@ -54,8 +48,7 @@ class DeliveryPointViewModel extends BaseViewModel {
     _setState(DeliveryPointState.InProgress);
 
     try {
-      Location location = await GeoLoc.getCurrentLocation();
-      deliveryPoint = await appState.arriveAtDeliveryPoint(deliveryPoint, location);
+      deliveryPoint = await appState.arriveAtDeliveryPoint(deliveryPoint);
 
       _setMessage('Прибытие успешно отмечено');
       _setState(DeliveryPointState.ArrivalSaved);
