@@ -22,6 +22,7 @@ class Order extends Equatable {
   final String sellerName;
   final int canceled;
   final int finished;
+  final int cardPaymentAllowed;
 
   const Order({
     this.id,
@@ -43,12 +44,14 @@ class Order extends Equatable {
     this.sellerName,
     this.canceled,
     this.finished,
+    this.cardPaymentAllowed,
   });
 
   bool get hasElevator => elevator == 1;
   bool get isFinished => finished == 1;
   bool get isCanceled => canceled == 1;
   bool get isPickup => pickup == 1;
+  bool get isCardPaymentAllowed => cardPaymentAllowed == 1;
 
   @override
   List<Object> get props => [
@@ -71,6 +74,7 @@ class Order extends Equatable {
     sellerName,
     canceled,
     finished,
+    cardPaymentAllowed,
   ];
 
   static Order fromJson(dynamic json) {
@@ -94,6 +98,7 @@ class Order extends Equatable {
       sellerName: json['sellerName'],
       canceled: json['canceled'],
       finished: json['finished'],
+      cardPaymentAllowed: json['cardPaymentAllowed'],
     );
   }
 
@@ -118,6 +123,7 @@ class Order extends Equatable {
       'sellerName': sellerName,
       'canceled': canceled,
       'finished': finished,
+      'cardPaymentAllowed': cardPaymentAllowed,
     };
   }
 
@@ -141,6 +147,7 @@ class Order extends Equatable {
     String sellerName,
     int canceled,
     int finished,
+    int cardPaymentAllowed,
   }) {
     return Order(
       id: id ?? this.id,
@@ -162,6 +169,7 @@ class Order extends Equatable {
       sellerName: sellerName ?? this.sellerName,
       canceled: canceled ?? this.canceled,
       finished: finished ?? this.finished,
+      cardPaymentAllowed: cardPaymentAllowed ?? this.cardPaymentAllowed,
     );
   }
 

@@ -141,7 +141,7 @@ class _OrderPageState extends State<OrderPage> {
               child: Icon(Icons.account_balance_wallet),
               textColor: Colors.redAccent,
             ),
-            !vm.totalEditable ? null : FlatButton(
+            !vm.totalEditable || !vm.order.isCardPaymentAllowed ? null : FlatButton(
               onPressed: () {
                 unfocus();
                 vm.tryStartPayment(true);

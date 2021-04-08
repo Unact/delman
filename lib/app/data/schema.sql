@@ -51,6 +51,7 @@ CREATE TABLE orders(
     sellerName TEXT,
     canceled INTEGER,
     finished INTEGER,
+    cardPaymentAllowed INTEGER,
 
     localTs DATETIME DEFAULT CURRENT_TIMESTAMP,
     localId INTEGER PRIMARY KEY
