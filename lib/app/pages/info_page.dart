@@ -17,7 +17,6 @@ class InfoPage extends StatefulWidget {
 }
 
 class _InfoPageState extends State<InfoPage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   InfoViewModel _infoViewModel;
   Completer<void> _refresherCompleter = Completer();
@@ -53,7 +52,7 @@ class _InfoPageState extends State<InfoPage> {
     switch (_infoViewModel.state) {
       case InfoState.Failure:
       case InfoState.DataLoaded:
-        _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(_infoViewModel.message)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_infoViewModel.message)));
         closeRefresher();
 
         break;
@@ -64,7 +63,6 @@ class _InfoPageState extends State<InfoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         title: Text(Strings.ruAppName),
         actions: <Widget>[

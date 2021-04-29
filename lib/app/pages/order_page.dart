@@ -20,7 +20,6 @@ class OrderPage extends StatefulWidget {
 
 class _OrderPageState extends State<OrderPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   OrderViewModel _orderViewModel;
   Completer<void> _dialogCompleter = Completer();
 
@@ -54,7 +53,7 @@ class _OrderPageState extends State<OrderPage> {
   }
 
   void showMessage(String message) {
-    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<String> showAcceptPaymentDialog() async {
@@ -82,8 +81,8 @@ class _OrderPageState extends State<OrderPage> {
           title: Text('Предупреждение'),
           content: SingleChildScrollView(child: ListBody(children: <Widget>[Text(message)])),
           actions: <Widget>[
-            FlatButton(child: Text(Strings.ok), onPressed: () => Navigator.of(context).pop(true)),
-            FlatButton(child: Text(Strings.cancel), onPressed: () => Navigator.of(context).pop(false))
+            TextButton(child: Text(Strings.ok), onPressed: () => Navigator.of(context).pop(true)),
+            TextButton(child: Text(Strings.cancel), onPressed: () => Navigator.of(context).pop(false))
           ],
         );
       }
@@ -127,38 +126,37 @@ class _OrderPageState extends State<OrderPage> {
     return Consumer<OrderViewModel>(
       builder: (context, vm, _) {
         return Scaffold(
-          key: _scaffoldKey,
           appBar: AppBar(
             title: Text('Заказ ${vm.order.trackingNumber}'),
             centerTitle: true
           ),
           persistentFooterButtons: vm.order.isFinished ? null : <Widget>[
-            !vm.totalEditable ? null : FlatButton(
+            !vm.totalEditable ? null : TextButton(
               onPressed: () {
                 unfocus();
                 vm.tryStartPayment(false);
               },
               child: Icon(Icons.account_balance_wallet),
-              textColor: Colors.redAccent,
+              style: TextButton.styleFrom(primary: Colors.redAccent),
             ),
-            !vm.totalEditable || !vm.order.isCardPaymentAllowed ? null : FlatButton(
+            !vm.totalEditable || !vm.order.isCardPaymentAllowed ? null : TextButton(
               onPressed: () {
                 unfocus();
                 vm.tryStartPayment(true);
               },
               child: Icon(Icons.credit_card),
-              textColor: Colors.redAccent,
+              style: TextButton.styleFrom(primary: Colors.redAccent),
             ),
-            FlatButton(
-              textColor: Colors.red,
+            TextButton(
+              style: TextButton.styleFrom(primary: Colors.redAccent),
               child: Text('Отменить'),
               onPressed: () {
                 unfocus();
                 vm.tryCancelOrder();
               }
             ),
-            !vm.isInProgress ? null : FlatButton(
-              textColor: Colors.red,
+            !vm.isInProgress ? null : TextButton(
+              style: TextButton.styleFrom(primary: Colors.redAccent),
               child: Text('Завершить'),
               onPressed: () {
                 unfocus();

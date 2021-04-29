@@ -13,7 +13,6 @@ class PersonPage extends StatefulWidget {
 }
 
 class _PersonPageState extends State<PersonPage> {
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
   PersonViewModel _personViewModel;
   Completer<void> _dialogCompleter = Completer();
 
@@ -53,7 +52,7 @@ class _PersonPageState extends State<PersonPage> {
         break;
       case PersonState.LogsSent:
       case PersonState.Failure:
-        _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(_personViewModel.message)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_personViewModel.message)));
         closeDialog();
         break;
       case PersonState.LoggedOut:
@@ -71,7 +70,6 @@ class _PersonPageState extends State<PersonPage> {
     return Consumer<PersonViewModel>(
       builder: (context, vm, _) {
         return Scaffold(
-          key: _scaffoldKey,
           appBar: AppBar(
             title: Text('Пользователь'),
             actions: [
@@ -104,12 +102,13 @@ class _PersonPageState extends State<PersonPage> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              RaisedButton(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+                  primary: Colors.blueAccent,
+                ),
                 child: Text('Обновить приложение'),
-                onPressed: vm.launchAppUpdate,
-                color: Colors.blueAccent,
-                textColor: Colors.white,
+                onPressed: vm.launchAppUpdate
               )
             ],
           )
@@ -120,11 +119,13 @@ class _PersonPageState extends State<PersonPage> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              RaisedButton(
-                color: Colors.red,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+                  primary: Colors.blueAccent,
+                ),
                 onPressed: vm.apiLogout,
-                child: Text('Выйти', style: TextStyle(color: Colors.white)),
+                child: Text('Выйти'),
               ),
             ]
           )

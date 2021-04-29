@@ -71,9 +71,12 @@ class _AcceptPaymentPageState extends State<AcceptPaymentPage> {
       Container(height: 40),
       Container(
         height: 32,
-        child: vm.isCancelable ? RaisedButton(
-          child: Text('Отмена'),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+        child: vm.isCancelable ? ElevatedButton(
+          child: Text('Отмена', style: TextStyle(color: Colors.black)),
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+            primary: Colors.white
+          ),
           onPressed: vm.cancelPayment
         ) : Container()
       ),
@@ -104,15 +107,21 @@ class _AcceptPaymentPageState extends State<AcceptPaymentPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            RaisedButton(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
-              child: Text('Очистить'),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+                primary: Colors.white
+              ),
+              child: Text('Очистить', style: TextStyle(color: Colors.black)),
               onPressed: () => _padController.clear()
             ),
             Container(width: 40),
-            RaisedButton(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
-              child: Text('Подтвердить'),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+                primary: Colors.white
+              ),
+              child: Text('Подтвердить', style: TextStyle(color: Colors.black)),
               onPressed: () async => vm.adjustPayment(await _padController.toPng())
             )
           ]

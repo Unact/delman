@@ -12,7 +12,6 @@ class PointAddressPage extends StatefulWidget {
 }
 
 class _PointAddressPageState extends State<PointAddressPage> {
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
   PointAddressViewModel _pointAddressViewModel;
 
   @override
@@ -32,7 +31,7 @@ class _PointAddressPageState extends State<PointAddressPage> {
   void vmListener() {
     switch (_pointAddressViewModel.state) {
       case PointAddressState.Failure:
-        _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(_pointAddressViewModel.message)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_pointAddressViewModel.message)));
 
         break;
       default:
@@ -44,7 +43,6 @@ class _PointAddressPageState extends State<PointAddressPage> {
     return Consumer<PointAddressViewModel>(
       builder: (context, vm, _) {
         return Scaffold(
-          key: _scaffoldKey,
           appBar: AppBar(
             title: Text(vm.deliveryPoint.addressName)
           ),

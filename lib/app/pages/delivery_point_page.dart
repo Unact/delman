@@ -19,7 +19,6 @@ class DeliveryPointPage extends StatefulWidget {
 }
 
 class _DeliveryPointPageState extends State<DeliveryPointPage> {
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
   DeliveryPointViewModel _deliveryPointViewModel;
 
   @override
@@ -40,7 +39,7 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
     switch (_deliveryPointViewModel.state) {
       case DeliveryPointState.Failure:
       case DeliveryPointState.ArrivalSaved:
-        _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(_deliveryPointViewModel.message)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_deliveryPointViewModel.message)));
 
         break;
       default:
@@ -52,7 +51,6 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
     return Consumer<DeliveryPointViewModel>(
       builder: (context, vm, _) {
         return Scaffold(
-          key: _scaffoldKey,
           appBar: AppBar(
             title: Text('Точка ${vm.deliveryPoint.seq}')
           ),
@@ -96,9 +94,11 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
                         Text(Format.timeStr(vm.deliveryPoint.factArrival)) :
                         vm.state == DeliveryPointState.InProgress ?
                           SizedBox(child: CircularProgressIndicator()) :
-                          RaisedButton(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-                            color: Colors.blue,
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+                              primary: Colors.blue
+                            ),
                             child: Text('Отметить', style: TextStyle(color: Colors.white)),
                             onPressed: () => vm.arrive(),
                           ),
