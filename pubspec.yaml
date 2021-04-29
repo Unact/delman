@@ -1,7 +1,7 @@
 name: delman
 description: An application for couriers
 publish_to: 'none'
-version: 1.1.4+20
+version: 1.1.4+21
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
