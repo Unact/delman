@@ -17,25 +17,26 @@ enum DeliveryPointState {
 class DeliveryPointViewModel extends BaseViewModel {
   DeliveryPoint deliveryPoint;
   DeliveryPointState _state = DeliveryPointState.Initial;
-  List<Order> deliveryOrders;
-  List<Order> pickupOrders;
 
   String _message;
 
-  DeliveryPointViewModel({@required BuildContext context, @required this.deliveryPoint}) : super(context: context) {
-    deliveryOrders = appState.orders
+  DeliveryPointViewModel({@required BuildContext context, @required this.deliveryPoint}) : super(context: context);
+
+  DeliveryPointState get state => _state;
+  String get message => _message;
+
+  List<Order> get deliveryOrders {
+    return appState.orders
       .where((e) => e.deliveryPointId == deliveryPoint.id && !e.isPickup)
       .toList()
       ..sort((a, b) => a.trackingNumber.compareTo(b.trackingNumber));
-
-    pickupOrders = appState.orders
+  }
+  List<Order> get pickupOrders {
+    return appState.orders
       .where((e) => e.deliveryPointId == deliveryPoint.id && e.isPickup)
       .toList()
       ..sort((a, b) => a.trackingNumber.compareTo(b.trackingNumber));
   }
-
-  DeliveryPointState get state => _state;
-  String get message => _message;
 
   Future<void> callPhone() async {
     await Misc.callPhone(deliveryPoint.phone, onFailure: () {

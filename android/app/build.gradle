@@ -52,6 +52,7 @@ android {
         targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        multiDexEnabled true
 
         buildConfigField("String", "YANDEX_API_KEY", envProperties['YANDEX_API_KEY'])
     }
@@ -73,4 +74,5 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.yandex.android:mapkit:3.5.0'
     implementation 'com.yandex.android:search:3.5.0'
+    implementation 'androidx.multidex:multidex:2.0.1'
 }

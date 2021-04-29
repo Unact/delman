@@ -136,7 +136,7 @@ class Api {
     DateTime date = DateTime.now();
     File file = File('${dir.path}/${date.toIso8601String()}-log.json');
 
-    await file.writeAsString(jsonEncode(logs.map((e) => e.toMap()).toList()));
+    await file.writeAsString(jsonEncode(logs.map((e) => e.toJson()).toList()));
 
     await _post('v1/delman/save_log',
       data: <String, dynamic>{

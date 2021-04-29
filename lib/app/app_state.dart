@@ -240,7 +240,7 @@ class AppState extends ChangeNotifier {
     _orders.add(updatedOrder);
     await app.orderRepo.updateOrder(updatedOrder);
 
-    _orderLines.removeWhere((e) => e.orderId == updatedOrder.id);
+    _orderLines.removeWhere((e) => e.orderId == updatedOrder.orderId);
     _orderLines.addAll(updatedOrderLines);
     await app.orderLineRepo.updateOrderLines(updatedOrderLines);
 
