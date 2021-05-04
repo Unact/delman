@@ -22,6 +22,7 @@ class AppState extends ChangeNotifier {
   List<Delivery> _deliveries = [];
   List<OrderLine> _orderLines = [];
   List<Order> _orders = [];
+  List<OrderStorage> _orderStorages = [];
   List<Payment> _payments = [];
 
   User _user;
@@ -48,6 +49,7 @@ class AppState extends ChangeNotifier {
   List<OrderLine> get orderLines => _orderLines;
   List<Order> get orders => _orders;
   List<Payment> get payments => _payments;
+  List<OrderStorage> get orderStorages => _orderStorages;
   User get user => _user;
 
   Future<void> loadData() async {
@@ -55,6 +57,7 @@ class AppState extends ChangeNotifier {
     _deliveries = await app.deliveryRepo.getDeliveries();
     _orderLines = await app.orderLineRepo.getOrderLines();
     _orders = await app.orderRepo.getOrders();
+    _orderStorages = await app.orderStorageRepo.getOrderStorages();
     _payments = await app.paymentRepo.getPayments();
 
     notifyListeners();
@@ -76,6 +79,7 @@ class AppState extends ChangeNotifier {
       await _setDeliveries(data['deliveries']);
       await _setOrderLines(data['orderLines']);
       await _setOrders(data['orders']);
+      await _setOrderStorages(data['orderStorages']);
       await _setPayments(data['payments']);
       await _setAppData(AppData(lastSyncTime: DateTime.now()));
     } on ApiException catch(e) {
@@ -94,6 +98,7 @@ class AppState extends ChangeNotifier {
     await _setDeliveries([]);
     await _setOrderLines([]);
     await _setOrders([]);
+    await _setOrderStorages([]);
     await _setPayments([]);
     await _setAppData(AppData());
 
@@ -123,6 +128,11 @@ class AppState extends ChangeNotifier {
   Future<void> _setOrders(List<Order> orders) async {
     _orders = orders;
     await app.orderRepo.reloadOrders(orders);
+  }
+
+  Future<void> _setOrderStorages(List<OrderStorage> orderStorages) async {
+    _orderStorages = orderStorages;
+    await app.orderStorageRepo.reloadOrderStorages(orderStorages);
   }
 
   Future<void> _setPayments(List<Payment> payments) async {
@@ -224,7 +234,10 @@ class AppState extends ChangeNotifier {
     }
 
     Location location = await GeoLoc.getCurrentLocation();
-    Order updatedOrder = order.copyWith(finished: 1);
+    Order updatedOrder = order.copyWith(
+      finished: 1,
+      orderStorageId: order.isPickup ? user.courierStorageId : null
+    );
     List<OrderLine> updatedOrderLines = orderLines;
 
     try {
@@ -267,6 +280,44 @@ class AppState extends ChangeNotifier {
 
     _payments.add(payment);
     await app.paymentRepo.addPayments([payment]);
+
+    notifyListeners();
+  }
+
+  Future<void> acceptOrder(Order order) async {
+    Order updatedOrder = order.copyWith(orderStorageId: user.courierStorageId);
+
+    try {
+      await app.api.acceptOrder(order);
+    } on ApiException catch(e) {
+      throw AppError(e.errorMsg);
+    } catch(e, trace) {
+      _reportError(e, trace);
+      throw AppError(Strings.genericErrorMsg);
+    }
+
+    _orders.removeWhere((e) => e.id == updatedOrder.id);
+    _orders.add(updatedOrder);
+    await app.orderRepo.updateOrder(updatedOrder);
+
+    notifyListeners();
+  }
+
+  Future<void> transferOrder(Order order, OrderStorage orderStorage) async {
+    Order updatedOrder = order.copyWith(orderStorageId: orderStorage.id);
+
+    try {
+      await app.api.transferOrder(order, orderStorage);
+    } on ApiException catch(e) {
+      throw AppError(e.errorMsg);
+    } catch(e, trace) {
+      _reportError(e, trace);
+      throw AppError(Strings.genericErrorMsg);
+    }
+
+    _orders.removeWhere((e) => e.id == updatedOrder.id);
+    _orders.add(updatedOrder);
+    await app.orderRepo.updateOrder(updatedOrder);
 
     notifyListeners();
   }

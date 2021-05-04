@@ -105,7 +105,7 @@ class _PersonPageState extends State<PersonPage> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-                  primary: Colors.blueAccent,
+                  primary: Colors.blue,
                 ),
                 child: Text('Обновить приложение'),
                 onPressed: vm.launchAppUpdate
@@ -122,7 +122,7 @@ class _PersonPageState extends State<PersonPage> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-                  primary: Colors.blueAccent,
+                  primary: Colors.blue,
                 ),
                 onPressed: vm.apiLogout,
                 child: Text('Выйти'),

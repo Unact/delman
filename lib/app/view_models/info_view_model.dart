@@ -52,6 +52,12 @@ class InfoViewModel extends BaseViewModel {
   bool get newVersionAvailable => appState.newVersionAvailable;
   int get deliveryPointsCnt => appState.deliveryPoints.length;
   int get deliveryPointsLeftCnt => appState.deliveryPoints.where((e) => !e.isFinished).length;
+  int get ordersInOwnStorageCnt =>
+    appState.orders.where((e) => e.orderStorageId == appState.user.courierStorageId).length;
+  int get ordersNotInOwnStorageCnt =>
+    appState.orders.where((e) => e.orderStorageId != appState.user.courierStorageId && e.orderStorageId != null).length;
+  int get ordersWithoutStorageCnt =>
+    appState.orders.where((e) => e.orderStorageId == null).length;
   int get paymentsCnt => appState.payments.length;
   int get cashPaymentsCnt => appState.payments.where((e) => !e.isCard).toList().length;
   int get cardPaymentsCnt => appState.payments.where((e) => e.isCard).toList().length;

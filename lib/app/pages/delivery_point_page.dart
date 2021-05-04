@@ -99,7 +99,7 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
                               primary: Colors.blue
                             ),
-                            child: Text('Отметить', style: TextStyle(color: Colors.white)),
+                            child: Text('Отметить'),
                             onPressed: () => vm.arrive(),
                           ),
                       dense: true,

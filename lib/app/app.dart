@@ -28,6 +28,7 @@ class App {
   final DeliveryRepository deliveryRepo;
   final OrderLineRepository orderLineRepo;
   final OrderRepository orderRepo;
+  final OrderStorageRepository orderStorageRepo;
   final PaymentRepository paymentRepo;
   final UserRepository userRepo;
 
@@ -43,6 +44,7 @@ class App {
     @required this.deliveryRepo,
     @required this.orderLineRepo,
     @required this.orderRepo,
+    @required this.orderStorageRepo,
     @required this.paymentRepo,
     @required this.userRepo,
   }) {
@@ -85,8 +87,9 @@ class App {
     AppDataRepository appDataRepo = AppDataRepository(storage: storage);
     DeliveryPointRepository deliveryPointRepo = DeliveryPointRepository(storage: storage);
     DeliveryRepository deliveryRepo = DeliveryRepository(storage: storage);
-    OrderRepository orderRepo = OrderRepository(storage: storage);
     OrderLineRepository orderLineRepo = OrderLineRepository(storage: storage);
+    OrderRepository orderRepo = OrderRepository(storage: storage);
+    OrderStorageRepository orderStorageRepo = OrderStorageRepository(storage: storage);
     PaymentRepository paymentRepo = PaymentRepository(storage: storage);
     UserRepository userRepo = UserRepository(storage: storage);
     Api api = Api.init(repo: ApiDataRepository(storage: storage), version: version);
@@ -108,6 +111,7 @@ class App {
       deliveryRepo: deliveryRepo,
       orderLineRepo: orderLineRepo,
       orderRepo: orderRepo,
+      orderStorageRepo: orderStorageRepo,
       paymentRepo: paymentRepo,
       userRepo: userRepo,
     );

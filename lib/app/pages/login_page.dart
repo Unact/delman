@@ -140,8 +140,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-                      //color: Colors.blueAccent,
-                      primary: Colors.white,
+                      primary: Colors.blue,
                     ),
                     onPressed: () {
                       unfocus();
@@ -158,8 +157,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-                      //color: Colors.blueAccent,
-                      primary: Colors.white,
+                      primary: Colors.blue,
                     ),
                     onPressed: () {
                       unfocus();

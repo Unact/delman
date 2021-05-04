@@ -8,6 +8,7 @@ class Strings {
   static const infoPageName = 'Главная';
   static const deliveryPageName = 'Маршрут';
   static const paymentsPageName = 'Оплаты';
+  static const orderStoragesPageName = 'РЦ';
 
   static const address = 'Адрес';
   static const planArrival = 'Ож. время прибытия';

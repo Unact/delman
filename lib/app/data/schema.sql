@@ -52,6 +52,7 @@ CREATE TABLE orders(
     canceled INTEGER,
     finished INTEGER,
     cardPaymentAllowed INTEGER,
+    orderStorageId INTEGER,
 
     localTs DATETIME DEFAULT CURRENT_TIMESTAMP,
     localId INTEGER PRIMARY KEY
@@ -74,6 +75,13 @@ CREATE TABLE payments(
 
     summ NUMERIC,
     transactionId TEXT,
+
+    localTs DATETIME DEFAULT CURRENT_TIMESTAMP,
+    localId INTEGER PRIMARY KEY
+);
+CREATE TABLE orderStorages(
+    id INTEGER UNIQUE,
+    name TEXT,
 
     localTs DATETIME DEFAULT CURRENT_TIMESTAMP,
     localId INTEGER PRIMARY KEY

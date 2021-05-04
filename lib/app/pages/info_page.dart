@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:delman/app/constants/strings.dart';
+import 'package:delman/app/pages/order_storages_page.dart';
 import 'package:delman/app/pages/person_page.dart';
 import 'package:delman/app/utils/format.dart';
 import 'package:delman/app/view_models/info_view_model.dart';
+import 'package:delman/app/view_models/order_storages_view_model.dart';
 import 'package:delman/app/view_models/person_view_model.dart';
 
 class InfoPage extends StatefulWidget {
@@ -108,65 +110,96 @@ class _InfoPageState extends State<InfoPage> {
   }
 
   List<Widget> _buildInfoCards(BuildContext context) {
-    InfoViewModel vm = Provider.of<InfoViewModel>(context);
-
     return <Widget>[
-      Card(
-        child: ListTile(
-          onTap: () => vm.changePage(1),
-          isThreeLine: true,
-          title: Text(Strings.deliveryPageName),
-          subtitle: _buildDeliveriesCard(context),
-        ),
-      ),
-      Card(
-        child: ListTile(
-          onTap: () => vm.changePage(2),
-          isThreeLine: true,
-          title: Text(Strings.paymentsPageName),
-          subtitle: _buildPaymentsCard(context),
-        ),
-      ),
+      _buildDeliveriesCard(context),
+      _buildPaymentsCard(context),
+      _buildOrderStoragesCard(context),
       _buildFailureCard(context),
       _buildInfoCard(context),
     ];
   }
 
+  Widget _buildOrderStoragesCard(BuildContext context) {
+    InfoViewModel vm = Provider.of<InfoViewModel>(context);
+
+    return Card(
+      child: ListTile(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (BuildContext context) => ChangeNotifierProvider<OrderStoragesViewModel>(
+                create: (context) => OrderStoragesViewModel(context: context),
+                child: OrderStoragesPage(),
+              )
+            )
+          );
+        },
+        isThreeLine: true,
+        title: Text(Strings.orderStoragesPageName),
+        subtitle: RichText(
+          text: TextSpan(
+            style: TextStyle(color: Colors.grey),
+            children: <TextSpan>[
+              TextSpan(text: 'В РЦ: ${vm.ordersNotInOwnStorageCnt}\n', style: TextStyle(fontSize: 12.0)),
+              TextSpan(text: 'Ожидаются в РЦ: ${vm.ordersWithoutStorageCnt}\n', style: TextStyle(fontSize: 12.0)),
+              TextSpan(text: 'Принято: ${vm.ordersInOwnStorageCnt}\n', style: TextStyle(fontSize: 12.0))
+            ]
+          )
+        )
+      ),
+    );
+  }
+
   Widget _buildDeliveriesCard(BuildContext context) {
     InfoViewModel vm = Provider.of<InfoViewModel>(context);
 
-    return RichText(
-      text: TextSpan(
-        style: TextStyle(color: Colors.grey),
-        children: <TextSpan>[
-          TextSpan(text: 'Точек: ${vm.deliveryPointsCnt}\n', style: TextStyle(fontSize: 12.0)),
-          TextSpan(text: 'Осталось: ${vm.deliveryPointsLeftCnt}\n', style: TextStyle(fontSize: 12.0))
-        ]
-      )
+    return Card(
+      child: ListTile(
+        onTap: () => vm.changePage(1),
+        isThreeLine: true,
+        title: Text(Strings.deliveryPageName),
+        subtitle: RichText(
+          text: TextSpan(
+            style: TextStyle(color: Colors.grey),
+            children: <TextSpan>[
+              TextSpan(text: 'Точек: ${vm.deliveryPointsCnt}\n', style: TextStyle(fontSize: 12.0)),
+              TextSpan(text: 'Осталось: ${vm.deliveryPointsLeftCnt}\n', style: TextStyle(fontSize: 12.0))
+            ]
+          )
+        )
+      ),
     );
   }
 
   Widget _buildPaymentsCard(BuildContext context) {
     InfoViewModel vm = Provider.of<InfoViewModel>(context);
 
-    return RichText(
-      text: TextSpan(
-        style: TextStyle(color: Colors.grey),
-        children: <TextSpan>[
-          TextSpan(
-            text: 'Всего: ${vm.paymentsCnt} на сумму ${Format.numberStr(vm.paymentsSum)}\n',
-            style: TextStyle(fontSize: 12.0)
-          ),
-          TextSpan(
-            text: 'Наличными: ${vm.cashPaymentsCnt} на сумму ${Format.numberStr(vm.cashPaymentsSum)}\n',
-            style: TextStyle(fontSize: 12.0)
-          ),
-          TextSpan(
-            text: 'Картой: ${vm.cardPaymentsCnt} на сумму ${Format.numberStr(vm.cardPaymentsSum)}\n',
-            style: TextStyle(fontSize: 12.0)
+    return Card(
+      child: ListTile(
+        onTap: () => vm.changePage(2),
+        isThreeLine: true,
+        title: Text(Strings.paymentsPageName),
+        subtitle: RichText(
+          text: TextSpan(
+            style: TextStyle(color: Colors.grey),
+            children: <TextSpan>[
+              TextSpan(
+                text: 'Всего: ${vm.paymentsCnt} на сумму ${Format.numberStr(vm.paymentsSum)}\n',
+                style: TextStyle(fontSize: 12.0)
+              ),
+              TextSpan(
+                text: 'Наличными: ${vm.cashPaymentsCnt} на сумму ${Format.numberStr(vm.cashPaymentsSum)}\n',
+                style: TextStyle(fontSize: 12.0)
+              ),
+              TextSpan(
+                text: 'Картой: ${vm.cardPaymentsCnt} на сумму ${Format.numberStr(vm.cardPaymentsSum)}\n',
+                style: TextStyle(fontSize: 12.0)
+              )
+            ]
           )
-        ]
-      )
+        )
+      ),
     );
   }
 

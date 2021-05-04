@@ -174,6 +174,10 @@ class _OrderPageState extends State<OrderPage> {
                   title: Text('Статус'),
                   trailing: Text(vm.orderStatus)
                 ),
+                InfoRow(
+                  title: Text('Посылка'),
+                  trailing: Text(vm.withCourier ? 'На борту' : 'Не на борту')
+                ),
                 InfoRow(title: Text('ИМ'), trailing: Text(vm.order.sellerName)),
                 InfoRow(title: Text('Номер в ИМ'), trailing: Text(vm.order.number)),
                 InfoRow(
