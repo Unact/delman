@@ -302,7 +302,7 @@ class Api {
         throw ApiException(body['error'], statusCode);
       }
     } else {
-      if (e.error is SocketException || e.type == DioErrorType.CONNECT_TIMEOUT) {
+      if (e.error is SocketException || e.error is HandshakeException || e.type == DioErrorType.CONNECT_TIMEOUT) {
         throw ApiConnException();
       }
 

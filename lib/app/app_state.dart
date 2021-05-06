@@ -384,9 +384,11 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> _reportError(dynamic error, dynamic stackTrace) async {
+    Frame methodFrame = Trace.current().frames.length > 1 ? Trace.current().frames[1] : Trace.current().frames[0];
+
     await app.reportError(error, stackTrace);
     FLog.error(
-      methodName: Trace.current().frames[1].member.split('.')[1],
+      methodName: methodFrame.member.split('.')[1],
       text: error.toString(),
       exception: error,
       stacktrace: stackTrace
