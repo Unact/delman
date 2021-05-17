@@ -56,8 +56,6 @@ class InfoViewModel extends BaseViewModel {
     appState.orders.where((e) => e.orderStorageId == appState.user.courierStorageId).length;
   int get ordersNotInOwnStorageCnt =>
     appState.orders.where((e) => e.orderStorageId != appState.user.courierStorageId && e.orderStorageId != null).length;
-  int get ordersWithoutStorageCnt =>
-    appState.orders.where((e) => e.orderStorageId == null).length;
   int get paymentsCnt => appState.payments.length;
   int get cashPaymentsCnt => appState.payments.where((e) => !e.isCard).toList().length;
   int get cardPaymentsCnt => appState.payments.where((e) => e.isCard).toList().length;

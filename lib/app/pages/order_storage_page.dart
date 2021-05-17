@@ -73,7 +73,7 @@ class _OrderStoragePageState extends State<OrderStoragePage> {
       builder: (context, vm, _) {
         return Scaffold(
           appBar: AppBar(
-            title: Text('Заказы в РЦ')
+            title: Text('Заказы на складе')
           ),
           body: ListView(
             physics: AlwaysScrollableScrollPhysics(),

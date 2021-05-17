@@ -141,9 +141,8 @@ class _InfoPageState extends State<InfoPage> {
           text: TextSpan(
             style: TextStyle(color: Colors.grey),
             children: <TextSpan>[
-              TextSpan(text: 'В РЦ: ${vm.ordersNotInOwnStorageCnt}\n', style: TextStyle(fontSize: 12.0)),
-              TextSpan(text: 'Ожидаются в РЦ: ${vm.ordersWithoutStorageCnt}\n', style: TextStyle(fontSize: 12.0)),
-              TextSpan(text: 'Принято: ${vm.ordersInOwnStorageCnt}\n', style: TextStyle(fontSize: 12.0))
+              TextSpan(text: 'Забрать со склада: ${vm.ordersNotInOwnStorageCnt}\n', style: TextStyle(fontSize: 12.0)),
+              TextSpan(text: 'У меня: ${vm.ordersInOwnStorageCnt}\n', style: TextStyle(fontSize: 12.0))
             ]
           )
         )
