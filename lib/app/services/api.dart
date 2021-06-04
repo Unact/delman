@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:delman/app/services/storage.dart';
 import 'package:dio/dio.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter_user_agent/flutter_user_agent.dart';
 import 'package:meta/meta.dart';
+import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:delman/app/constants/strings.dart';
@@ -24,11 +26,13 @@ class Api {
   static Api _instance;
   static Api get instance => _instance;
 
-  static Api init({@required ApiDataRepository repo, @required String version}) {
+  static Future<Api> init() async {
     if (_instance != null)
       return _instance;
 
-    return Api._(repo: repo, version: version);
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+
+    return Api._(repo: ApiDataRepository(storage: Storage.instance), version: packageInfo.version);
   }
 
   Future<void> resetPassword(String url, String login) async {

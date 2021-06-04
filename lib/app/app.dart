@@ -17,36 +17,18 @@ import 'package:delman/app/services/api.dart';
 import 'package:delman/app/services/storage.dart';
 
 class App {
-  final Api api;
   final bool isDebug;
   final String version;
   final String buildNumber;
   final String osVersion;
   final String deviceModel;
-  final AppDataRepository appDataRepo;
-  final DeliveryPointRepository deliveryPointRepo;
-  final DeliveryRepository deliveryRepo;
-  final OrderLineRepository orderLineRepo;
-  final OrderRepository orderRepo;
-  final OrderStorageRepository orderStorageRepo;
-  final PaymentRepository paymentRepo;
-  final UserRepository userRepo;
 
   App._({
-    @required this.api,
     @required this.isDebug,
     @required this.version,
     @required this.buildNumber,
     @required this.osVersion,
     @required this.deviceModel,
-    @required this.appDataRepo,
-    @required this.deliveryPointRepo,
-    @required this.deliveryRepo,
-    @required this.orderLineRepo,
-    @required this.orderRepo,
-    @required this.orderStorageRepo,
-    @required this.paymentRepo,
-    @required this.userRepo,
   }) {
     _instance = this;
   }
@@ -81,39 +63,19 @@ class App {
       deviceModel = androidDeviceInfo.brand + ' - ' + androidDeviceInfo.model;
     }
 
-    String version = packageInfo.version;
-    String buildNumber = packageInfo.buildNumber;
-    Storage storage = await Storage.init();
-    AppDataRepository appDataRepo = AppDataRepository(storage: storage);
-    DeliveryPointRepository deliveryPointRepo = DeliveryPointRepository(storage: storage);
-    DeliveryRepository deliveryRepo = DeliveryRepository(storage: storage);
-    OrderLineRepository orderLineRepo = OrderLineRepository(storage: storage);
-    OrderRepository orderRepo = OrderRepository(storage: storage);
-    OrderStorageRepository orderStorageRepo = OrderStorageRepository(storage: storage);
-    PaymentRepository paymentRepo = PaymentRepository(storage: storage);
-    UserRepository userRepo = UserRepository(storage: storage);
-    Api api = Api.init(repo: ApiDataRepository(storage: storage), version: version);
-
-    await _initSentry(dsn: DotEnv().env['SENTRY_DSN'], userRepo: userRepo, capture: !isDebug);
+    await Storage.init();
+    await Api.init();
+    await _initSentry(dsn: DotEnv().env['SENTRY_DSN'], capture: !isDebug);
     _intFlogs(isDebug: isDebug);
 
     FLog.info(text: 'App Initialized');
 
     return App._(
-      api: api,
       isDebug: isDebug,
-      version: version,
-      buildNumber: buildNumber,
+      version: packageInfo.version,
+      buildNumber: packageInfo.buildNumber,
       osVersion: osVersion,
       deviceModel: deviceModel,
-      appDataRepo: appDataRepo,
-      deliveryPointRepo: deliveryPointRepo,
-      deliveryRepo: deliveryRepo,
-      orderLineRepo: orderLineRepo,
-      orderRepo: orderRepo,
-      orderStorageRepo: orderStorageRepo,
-      paymentRepo: paymentRepo,
-      userRepo: userRepo,
     );
   }
 
@@ -137,7 +99,6 @@ class App {
   }
 
   static Future<void> _initSentry({
-    @required UserRepository userRepo,
     @required String dsn,
     @required bool capture
   }) async {
@@ -148,7 +109,7 @@ class App {
       (options) {
         options.dsn = dsn;
         options.beforeSend = (sentryLib.SentryEvent event, {dynamic hint}) {
-          User user = userRepo.getUser();
+          User user = UserRepository(storage: Storage.instance).getUser();
 
           return event.copyWith(user: sentryLib.User(
             id: user.id.toString(),
