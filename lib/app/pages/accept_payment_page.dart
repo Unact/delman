@@ -1,45 +1,53 @@
+import 'dart:typed_data';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:signature_pad/signature_pad.dart';
-import 'package:signature_pad_flutter/signature_pad_flutter.dart';
+import 'package:flutter_signature_pad/flutter_signature_pad.dart';
 
 import 'package:delman/app/view_models/accept_payment_view_model.dart';
 
 class AcceptPaymentPage extends StatefulWidget {
-  AcceptPaymentPage({Key key}) : super(key: key);
+  AcceptPaymentPage({Key? key}) : super(key: key);
 
   @override
   _AcceptPaymentPageState createState() => _AcceptPaymentPageState();
 }
 
 class _AcceptPaymentPageState extends State<AcceptPaymentPage> {
-  SignaturePadController _padController = SignaturePadController();
-  AcceptPaymentViewModel _acceptPaymentViewModel;
+  final GlobalKey<SignatureState> _sign = GlobalKey<SignatureState>();
+  AcceptPaymentViewModel? _acceptPaymentViewModel;
 
   @override
   void initState() {
     super.initState();
 
     _acceptPaymentViewModel = context.read<AcceptPaymentViewModel>();
-    _acceptPaymentViewModel.addListener(this.vmListener);
+    _acceptPaymentViewModel!.addListener(this.vmListener);
   }
 
   @override
   void dispose() {
-    _acceptPaymentViewModel.removeListener(this.vmListener);
+    _acceptPaymentViewModel!.removeListener(this.vmListener);
     super.dispose();
   }
 
   Future<void> vmListener() async {
-    switch (_acceptPaymentViewModel.state) {
+    switch (_acceptPaymentViewModel!.state) {
       case AcceptPaymentState.Finished:
       case AcceptPaymentState.Failure:
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.pop(context, _acceptPaymentViewModel.message);
+        WidgetsBinding.instance!.addPostFrameCallback((_) {
+          Navigator.pop(context, _acceptPaymentViewModel!.message);
         });
         break;
       default:
     }
+  }
+  Future<Uint8List> getSignatureData() async {
+    SignatureState? sign = _sign.currentState;
+    ByteData? data = (await (await sign!.getData()).toByteData(format: ImageByteFormat.png));
+
+    return data!.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
   }
 
   @override
@@ -99,7 +107,7 @@ class _AcceptPaymentPageState extends State<AcceptPaymentPage> {
           border: Border.all(color: Colors.grey),
           color: Colors.white
         ),
-        child: SignaturePadWidget(_padController, SignaturePadOptions(penColor: '#000000'))
+        child: Signature(key: _sign, strokeWidth: 5)
       ),
       Container(height: 40),
       Container(
@@ -113,7 +121,7 @@ class _AcceptPaymentPageState extends State<AcceptPaymentPage> {
                 primary: Colors.white
               ),
               child: Text('Очистить', style: TextStyle(color: Colors.black)),
-              onPressed: () => _padController.clear()
+              onPressed: () => _sign.currentState!.clear()
             ),
             Container(width: 40),
             ElevatedButton(
@@ -122,7 +130,7 @@ class _AcceptPaymentPageState extends State<AcceptPaymentPage> {
                 primary: Colors.white
               ),
               child: Text('Подтвердить', style: TextStyle(color: Colors.black)),
-              onPressed: () async => vm.adjustPayment(await _padController.toPng())
+              onPressed: () async => vm.adjustPayment(await getSignatureData())
             )
           ]
         )

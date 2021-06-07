@@ -8,7 +8,7 @@ import 'package:delman/app/view_models/order_storage_view_model.dart';
 import 'package:delman/app/view_models/order_storages_view_model.dart';
 
 class OrderStoragesPage extends StatelessWidget {
-  const OrderStoragesPage({Key key}) : super(key: key);
+  const OrderStoragesPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

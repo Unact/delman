@@ -8,21 +8,21 @@ class OrderLine extends Equatable {
   final String name;
   final int amount;
   final double price;
-  final int factAmount;
+  final int? factAmount;
 
   const OrderLine({
-    this.id,
-    this.orderId,
-    this.name,
-    this.amount,
-    this.price,
+    required this.id,
+    required this.orderId,
+    required this.name,
+    required this.amount,
+    required this.price,
     this.factAmount
   });
 
   int get currentAmount => factAmount ?? amount;
 
   @override
-  List<Object> get props => [id, orderId, name, amount, price, factAmount];
+  List<Object> get props => [id, orderId, name, amount, price];
 
   static OrderLine fromJson(dynamic json) {
     return OrderLine(
@@ -30,7 +30,7 @@ class OrderLine extends Equatable {
       orderId: json['orderId'],
       name: json['name'],
       amount: json['amount'],
-      price: Nullify.parseDouble(json['price']),
+      price: Nullify.parseDouble(json['price'])!,
       factAmount: json['factAmount'],
     );
   }
@@ -47,12 +47,12 @@ class OrderLine extends Equatable {
   }
 
   OrderLine copyWith({
-    int id,
-    int orderId,
-    String name,
-    int amount,
-    double price,
-    int factAmount,
+    int? id,
+    int? orderId,
+    String? name,
+    int? amount,
+    double? price,
+    int? factAmount,
   }) {
     return OrderLine(
       id: id ?? this.id,

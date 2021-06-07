@@ -37,10 +37,10 @@ class AcceptPaymentViewModel extends BaseViewModel {
   Iboxpro iboxpro = Iboxpro();
 
   AcceptPaymentViewModel({
-    @required BuildContext context,
-    @required this.total,
-    @required this.cardPayment,
-    @required this.order
+    required BuildContext context,
+    required this.total,
+    required this.cardPayment,
+    required this.order
   }) : super(context: context) {
     if (!cardPayment) {
       _savePayment();
@@ -158,7 +158,7 @@ class AcceptPaymentViewModel extends BaseViewModel {
     );
   }
 
-  Future<void> _savePayment([Map<dynamic, dynamic> transaction]) async {
+  Future<void> _savePayment([Map<dynamic, dynamic>? transaction]) async {
     _setMessage('Сохранение информации об оплате');
     _setState(AcceptPaymentState.SavingPayment);
 

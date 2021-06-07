@@ -18,12 +18,12 @@ class DeliveryPointViewModel extends BaseViewModel {
   DeliveryPoint deliveryPoint;
   DeliveryPointState _state = DeliveryPointState.Initial;
 
-  String _message;
+  String? _message;
 
-  DeliveryPointViewModel({@required BuildContext context, @required this.deliveryPoint}) : super(context: context);
+  DeliveryPointViewModel({required BuildContext context, required this.deliveryPoint}) : super(context: context);
 
   DeliveryPointState get state => _state;
-  String get message => _message;
+  String? get message => _message;
 
   List<Order> get deliveryOrders {
     return appState.orders

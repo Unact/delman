@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:meta/meta.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 import 'package:delman/app/entities/entities.dart';
@@ -10,7 +9,7 @@ class DeliveryRepository {
   final Storage storage;
   final String _tableName = 'deliveries';
 
-  DeliveryRepository({@required this.storage});
+  DeliveryRepository({required this.storage});
 
   Future<List<Delivery>> getDeliveries() async {
     return (await storage.db.query(_tableName, orderBy: 'id')).map((e) => Delivery.fromJson(e)).toList();

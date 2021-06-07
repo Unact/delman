@@ -11,10 +11,9 @@ class BaseViewModel extends ChangeNotifier {
   AppState appState;
   bool disposed = false;
 
-  BaseViewModel({@required this.context}) {
-    app = Provider.of<App>(context, listen: false);
+  BaseViewModel({required this.context}) :
+    app = Provider.of<App>(context, listen: false),
     appState = Provider.of<AppState>(context, listen: false);
-  }
 
   @override
   void dispose() {

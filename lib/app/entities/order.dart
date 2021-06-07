@@ -7,45 +7,45 @@ class Order extends Equatable {
   final int orderId;
   final int deliveryPointId;
   final int pickup;
-  final DateTime timeFrom;
-  final DateTime timeTo;
+  final DateTime? timeFrom;
+  final DateTime? timeTo;
   final String number;
   final String trackingNumber;
-  final String personName;
-  final String phone;
-  final String comment;
+  final String? personName;
+  final String? phone;
+  final String? comment;
   final String deliveryTypeName;
-  final int floor;
-  final String flat;
-  final int elevator;
+  final int? floor;
+  final String? flat;
+  final int? elevator;
   final String paymentTypeName;
   final String sellerName;
   final int canceled;
   final int finished;
   final int cardPaymentAllowed;
-  final int orderStorageId;
+  final int? orderStorageId;
 
   const Order({
-    this.id,
-    this.orderId,
-    this.deliveryPointId,
-    this.pickup,
+    required this.id,
+    required this.orderId,
+    required this.deliveryPointId,
+    required this.pickup,
     this.timeFrom,
     this.timeTo,
-    this.number,
-    this.trackingNumber,
+    required this.number,
+    required this.trackingNumber,
     this.personName,
     this.phone,
     this.comment,
-    this.deliveryTypeName,
+    required this.deliveryTypeName,
     this.floor,
     this.flat,
     this.elevator,
-    this.paymentTypeName,
-    this.sellerName,
-    this.canceled,
-    this.finished,
-    this.cardPaymentAllowed,
+    required this.paymentTypeName,
+    required this.sellerName,
+    required this.canceled,
+    required this.finished,
+    required this.cardPaymentAllowed,
     this.orderStorageId
   });
 
@@ -61,23 +61,14 @@ class Order extends Equatable {
     orderId,
     deliveryPointId,
     pickup,
-    timeFrom,
-    timeTo,
     number,
     trackingNumber,
-    personName,
-    phone,
-    comment,
     deliveryTypeName,
-    floor,
-    flat,
-    elevator,
     paymentTypeName,
     sellerName,
     canceled,
     finished,
     cardPaymentAllowed,
-    orderStorageId,
   ];
 
   static Order fromJson(dynamic json) {
@@ -133,27 +124,27 @@ class Order extends Equatable {
   }
 
   Order copyWith({
-    int id,
-    int orderId,
-    int deliveryPointId,
-    int pickup,
-    DateTime timeFrom,
-    DateTime timeTo,
-    String number,
-    String trackingNumber,
-    String personName,
-    String phone,
-    String comment,
-    String deliveryTypeName,
-    int floor,
-    String flat,
-    int elevator,
-    String paymentTypeName,
-    String sellerName,
-    int canceled,
-    int finished,
-    int cardPaymentAllowed,
-    int orderStorageId
+    int? id,
+    int? orderId,
+    int? deliveryPointId,
+    int? pickup,
+    DateTime? timeFrom,
+    DateTime? timeTo,
+    String? number,
+    String? trackingNumber,
+    String? personName,
+    String? phone,
+    String? comment,
+    String? deliveryTypeName,
+    int? floor,
+    String? flat,
+    int? elevator,
+    String? paymentTypeName,
+    String? sellerName,
+    int? canceled,
+    int? finished,
+    int? cardPaymentAllowed,
+    int? orderStorageId
   }) {
     return Order(
       id: id ?? this.id,

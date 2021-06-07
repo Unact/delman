@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter_blue/flutter_blue.dart' as blue;
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart' as blueSerial;
 import 'package:iboxpro_flutter/iboxpro_flutter.dart';
@@ -10,17 +10,17 @@ import 'package:iboxpro_flutter/iboxpro_flutter.dart';
 class Iboxpro {
   static const String _terminalNamePrefix = 'MPOS';
   Duration _searchTimeout = Duration(seconds: 5);
-  String _deviceName;
-  Map<dynamic, dynamic> _transaction;
-  String _transactionId;
+  String? _deviceName;
+  Map<dynamic, dynamic>? _transaction;
+  String? _transactionId;
 
   Iboxpro();
 
   Future<void> apiLogin({
-    @required String login,
-    @required String password,
-    @required Function onError,
-    @required Function onLogin
+    required String login,
+    required String password,
+    required Function onError,
+    required Function onLogin
   }) async {
     await PaymentController.login(
       email: login,
@@ -38,8 +38,8 @@ class Iboxpro {
   }
 
   Future<void> connectToDevice({
-    @required Function onError,
-    @required Function onConnected
+    required Function(String) onError,
+    required Function() onConnected
   }) async {
     if (!(await blue.FlutterBlue.instance.isOn)) {
       onError.call('Не включен Bluetooth');
@@ -62,7 +62,7 @@ class Iboxpro {
     }
 
     await PaymentController.startSearchBTDevice(
-      deviceName: _deviceName,
+      deviceName: _deviceName!,
       onReaderSetBTDevice: onConnected
     );
   }
@@ -72,11 +72,11 @@ class Iboxpro {
   }
 
   Future<void> startPayment({
-    @required double amount,
-    @required String description,
-    @required Function onError,
-    @required Function onPaymentStart,
-    @required Function onPaymentComplete,
+    required double amount,
+    required String description,
+    required Function onError,
+    required Function onPaymentStart,
+    required Function onPaymentComplete,
   }) async {
 
     await PaymentController.startPayment(
@@ -101,19 +101,19 @@ class Iboxpro {
       },
       onPaymentComplete: (Transaction transaction, bool requiredSignature) async {
         _transaction = transaction.toMap();
-        _transaction['deviceName'] = _deviceName;
+        _transaction!['deviceName'] = _deviceName;
         onPaymentComplete.call(_transaction, requiredSignature);
       }
     );
   }
 
   Future<void> adjustPayment({
-    @required Uint8List signature,
-    @required onError,
-    @required onPaymentAdjust
+    required Uint8List signature,
+    required onError,
+    required onPaymentAdjust
   }) async {
     await PaymentController.adjustPayment(
-      id: _transactionId,
+      id: _transactionId!,
       signature: signature,
       onPaymentAdjust: (Result res) async {
         int errorCode = res.errorCode;
@@ -127,12 +127,11 @@ class Iboxpro {
     );
   }
 
-  Future<String> _findBTDeviceNameIos() async {
+  Future<String?> _findBTDeviceNameIos() async {
     blue.FlutterBlue flutterBlue = blue.FlutterBlue.instance;
     List<blue.ScanResult> results = await flutterBlue.startScan(timeout: _searchTimeout);
-    blue.BluetoothDevice device = results.firstWhere(
-      (blue.ScanResult result) => result?.device?.name?.contains(_terminalNamePrefix),
-      orElse: () => null
+    blue.BluetoothDevice? device = results.firstWhereOrNull(
+      (blue.ScanResult result) => result.device.name.contains(_terminalNamePrefix)
     )?.device;
 
     if (device == null) {
@@ -142,33 +141,33 @@ class Iboxpro {
     return device.name;
   }
 
-  Future<String> _findBTDeviceNameAndroid() async {
+  Future<String?> _findBTDeviceNameAndroid() async {
     blueSerial.FlutterBluetoothSerial bluetooth = blueSerial.FlutterBluetoothSerial.instance;
     List<blueSerial.BluetoothDevice> devices = await bluetooth.getBondedDevices();
 
-    if (!devices.any((device) => device.name.contains(_terminalNamePrefix))) {
+    if (!devices.any((device) => device.name != null && device.name!.contains(_terminalNamePrefix))) {
       List<blueSerial.BluetoothDiscoveryResult> results = [];
-      StreamSubscription<blueSerial.BluetoothDiscoveryResult> subscription= bluetooth.startDiscovery().
+      StreamSubscription<blueSerial.BluetoothDiscoveryResult> subscription = bluetooth.startDiscovery().
         listen((r) => results.add(r));
       await Future.delayed(_searchTimeout);
-      subscription.cancel();
+      await subscription.cancel();
 
       devices.addAll(
         results
           .where((blueSerial.BluetoothDiscoveryResult result) => result.device != null)
-          .map((result) => result.device)
+          .map((result) => result.device!)
       );
     }
 
-    blueSerial.BluetoothDevice device = devices
+    blueSerial.BluetoothDevice? device = devices
       .where((device) => device.name != null)
-      .firstWhere((device) => device.name.contains(_terminalNamePrefix), orElse: () => null);
+      .firstWhereOrNull((device) => device.name!.contains(_terminalNamePrefix));
 
     if (device == null) {
       return null;
     }
 
-    if (!device.isBonded) await bluetooth.bondDeviceAtAddress(device.address);
+    if (!device.isBonded) await bluetooth.bondDeviceAtAddress(device.address!);
 
     return device.name;
   }

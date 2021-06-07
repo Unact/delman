@@ -8,7 +8,7 @@ import com.yandex.mapkit.MapKitFactory
 
 class MainActivity: FlutterActivity() {
   override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
-    MapKitFactory.setApiKey(BuildConfig.YANDEX_API_KEY)
+    MapKitFactory.setApiKey(BuildConfig.DELMAN_YANDEX_API_KEY)
     GeneratedPluginRegistrant.registerWith(flutterEngine)
   }
 }

@@ -18,17 +18,17 @@ class PointAddressViewModel extends BaseViewModel {
   DeliveryPoint deliveryPoint;
   PointAddressState _state = PointAddressState.Initial;
 
-  String _message;
-  Placemark _placemark;
+  String? _message;
+  late Placemark _placemark;
 
-  PointAddressViewModel({@required BuildContext context, @required this.deliveryPoint}) : super(context: context) {
+  PointAddressViewModel({required BuildContext context, required this.deliveryPoint}) : super(context: context) {
     _placemark = Placemark(
       point: Point(longitude: deliveryPoint.longitude, latitude: deliveryPoint.latitude),
-      iconName: 'lib/app/assets/images/placeicon.png',
-      onTap: (double lat, double lon) async {
-        Location location = await GeoLoc.getCurrentLocation();
+      style: PlacemarkStyle(iconName: 'lib/app/assets/images/placeicon.png'),
+      onTap: (Placemark placemark, Point point) async {
+        Location? location = await GeoLoc.getCurrentLocation();
         String params = 'rtext=' +
-          '${location.latitude},${location.longitude}' +
+          '${location?.latitude},${location?.longitude}' +
           '~' +
           '${deliveryPoint.latitude},${deliveryPoint.longitude}';
         String url = 'yandexmaps://maps.yandex.ru?$params';
@@ -44,7 +44,7 @@ class PointAddressViewModel extends BaseViewModel {
   }
 
   PointAddressState get state => _state;
-  String get message => _message;
+  String? get message => _message;
 
   Placemark get placemark => _placemark;
 

@@ -3,7 +3,7 @@ import 'package:location/location.dart' as geoLoc;
 import 'package:delman/app/entities/entities.dart';
 
 class GeoLoc {
-  static Future<Location> getCurrentLocation() async {
+  static Future<Location?> getCurrentLocation() async {
     geoLoc.Location loc = new geoLoc.Location();
 
     if (!(await loc.serviceEnabled()) && !(await loc.requestService())) {
@@ -26,7 +26,7 @@ class GeoLoc {
       altitude: data.altitude,
       heading: data.heading,
       speed: data.speed,
-      pointTs: DateTime.fromMillisecondsSinceEpoch(data.time.toInt())
+      pointTs: data.time != null ? DateTime.fromMillisecondsSinceEpoch(data.time!.toInt()) : null
     );
   }
 }

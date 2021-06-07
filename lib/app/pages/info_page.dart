@@ -12,7 +12,7 @@ import 'package:delman/app/view_models/order_storages_view_model.dart';
 import 'package:delman/app/view_models/person_view_model.dart';
 
 class InfoPage extends StatefulWidget {
-  InfoPage({Key key}) : super(key: key);
+  InfoPage({Key? key}) : super(key: key);
 
   @override
   _InfoPageState createState() => _InfoPageState();
@@ -20,7 +20,7 @@ class InfoPage extends StatefulWidget {
 
 class _InfoPageState extends State<InfoPage> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
-  InfoViewModel _infoViewModel;
+  InfoViewModel? _infoViewModel;
   Completer<void> _refresherCompleter = Completer();
 
   @override
@@ -28,20 +28,20 @@ class _InfoPageState extends State<InfoPage> {
     super.initState();
 
     _infoViewModel = context.read<InfoViewModel>();
-    _infoViewModel.addListener(this.vmListener);
+    _infoViewModel!.addListener(this.vmListener);
 
-    if (_infoViewModel.needRefresh) openRefresher();
+    if (_infoViewModel!.needRefresh) openRefresher();
   }
 
   @override
   void dispose() {
-    _infoViewModel.removeListener(this.vmListener);
+    _infoViewModel!.removeListener(this.vmListener);
     super.dispose();
   }
 
   Future<void> openRefresher() async {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _refreshIndicatorKey.currentState.show();
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      _refreshIndicatorKey.currentState!.show();
     });
   }
 
@@ -51,10 +51,10 @@ class _InfoPageState extends State<InfoPage> {
   }
 
   Future<void> vmListener() async {
-    switch (_infoViewModel.state) {
+    switch (_infoViewModel!.state) {
       case InfoState.Failure:
       case InfoState.DataLoaded:
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_infoViewModel.message)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_infoViewModel!.message!)));
         closeRefresher();
 
         break;
@@ -210,7 +210,7 @@ class _InfoPageState extends State<InfoPage> {
         child: ListTile(
           isThreeLine: true,
           title: Text('Ошибки'),
-          subtitle: Text(vm.timerFailureMessage, style: TextStyle(color: Colors.red[300])),
+          subtitle: Text(vm.timerFailureMessage!, style: TextStyle(color: Colors.red[300])),
         )
       );
     } else {

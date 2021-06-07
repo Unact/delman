@@ -3,12 +3,14 @@ import 'package:equatable/equatable.dart';
 import 'package:delman/app/utils/nullify.dart';
 
 class AppData extends Equatable {
-  final DateTime lastSyncTime;
+  final DateTime? lastSyncTime;
 
-  const AppData({this.lastSyncTime});
+  const AppData({
+    this.lastSyncTime
+  });
 
   @override
-  List<Object> get props => [lastSyncTime];
+  List<Object> get props => [];
 
   static AppData fromJson(dynamic json) {
     return AppData(

@@ -7,13 +7,13 @@ import 'package:delman/app/view_models/person_view_model.dart';
 import 'package:delman/app/widgets/widgets.dart';
 
 class PersonPage extends StatefulWidget {
-  const PersonPage({Key key}) : super(key: key);
+  const PersonPage({Key? key}) : super(key: key);
 
   _PersonPageState createState() => _PersonPageState();
 }
 
 class _PersonPageState extends State<PersonPage> {
-  PersonViewModel _personViewModel;
+  PersonViewModel? _personViewModel;
   Completer<void> _dialogCompleter = Completer();
 
   @override
@@ -21,12 +21,12 @@ class _PersonPageState extends State<PersonPage> {
     super.initState();
 
     _personViewModel = context.read<PersonViewModel>();
-    _personViewModel.addListener(this.vmListener);
+    _personViewModel!.addListener(this.vmListener);
   }
 
   @override
   void dispose() {
-    _personViewModel.removeListener(this.vmListener);
+    _personViewModel!.removeListener(this.vmListener);
     super.dispose();
   }
 
@@ -46,18 +46,18 @@ class _PersonPageState extends State<PersonPage> {
   }
 
   Future<void> vmListener() async {
-    switch (_personViewModel.state) {
+    switch (_personViewModel!.state) {
       case PersonState.InProgress:
         openDialog();
         break;
       case PersonState.LogsSent:
       case PersonState.Failure:
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_personViewModel.message)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_personViewModel!.message!)));
         closeDialog();
         break;
       case PersonState.LoggedOut:
         closeDialog();
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+        WidgetsBinding.instance!.addPostFrameCallback((_) {
           Navigator.of(context).pop();
         });
         break;

@@ -17,16 +17,16 @@ enum OrderStorageState {
 class OrderStorageViewModel extends BaseViewModel {
   OrderStorage orderStorage;
 
-  String _message;
+  String? _message;
   OrderStorageState _state = OrderStorageState.Initial;
 
   OrderStorageViewModel({
-    @required BuildContext context,
-    @required this.orderStorage,
+    required BuildContext context,
+    required this.orderStorage,
   }) : super(context: context);
 
   OrderStorageState get state => _state;
-  String get message => _message;
+  String? get message => _message;
 
   List<Order> get ordersInOwnStorage {
     return appState.orders

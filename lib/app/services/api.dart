@@ -5,8 +5,7 @@ import 'dart:io';
 import 'package:delman/app/services/storage.dart';
 import 'package:dio/dio.dart';
 import 'package:f_logs/f_logs.dart';
-import 'package:flutter_user_agent/flutter_user_agent.dart';
-import 'package:meta/meta.dart';
+import 'package:fk_user_agent/fk_user_agent.dart';
 import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -19,20 +18,20 @@ class Api {
   final String version;
   static const String authSchema = 'Renew';
 
-  Api._({@required this.repo, @required this.version}) {
+  Api._({required this.repo, required this.version}) {
     _instance = this;
   }
 
-  static Api _instance;
-  static Api get instance => _instance;
+  static Api? _instance;
+  static Api? get instance => _instance;
 
   static Future<Api> init() async {
     if (_instance != null)
-      return _instance;
+      return _instance!;
 
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
-    return Api._(repo: ApiDataRepository(storage: Storage.instance), version: packageInfo.version);
+    return Api._(repo: ApiDataRepository(storage: Storage.instance!), version: packageInfo.version);
   }
 
   Future<void> resetPassword(String url, String login) async {
@@ -62,7 +61,7 @@ class Api {
 
   Future<ApiData> relogin() async {
     ApiData currentAuthData = repo.getApiData();
-    return await login(currentAuthData.url, currentAuthData.login, currentAuthData.password);
+    return await login(currentAuthData.url!, currentAuthData.login!, currentAuthData.password!);
   }
 
   Future<User> getUserData() async {
@@ -106,7 +105,7 @@ class Api {
   Future<void> arriveAtDeliveryPoint(DeliveryPoint deliveryPoint, Location location) async {
     await _post('v1/delman/arrive', data: {
       'deliveryPointId': deliveryPoint.id,
-      'factArrival': deliveryPoint.factArrival.toIso8601String(),
+      'factArrival': deliveryPoint.factArrival!.toIso8601String(),
       'location': location
     });
   }
@@ -130,7 +129,7 @@ class Api {
     return await _get('v1/delman/credentials');
   }
 
-  Future<void> acceptPayment(Payment payment, Map<dynamic, dynamic> transaction, Location location) async {
+  Future<void> acceptPayment(Payment payment, Map<dynamic, dynamic>? transaction, Location location) async {
     await _post('v1/delman/accept_payment', data: {
       'deliveryPointOrderId': payment.deliveryPointOrderId,
       'summ': payment.summ,
@@ -171,8 +170,8 @@ class Api {
   Future<dynamic> _get(
     String method,
     {
-      Map<String, String> headers,
-      Map<String, dynamic> queryParameters,
+      Map<String, String>? headers,
+      Map<String, dynamic>? queryParameters,
     }
   ) async {
     return await _request(
@@ -187,10 +186,10 @@ class Api {
   Future<dynamic> _post(
     String method,
     {
-      Map<String, String> headers,
-      Map<String, dynamic> queryParameters,
+      Map<String, String>? headers,
+      Map<String, dynamic>? queryParameters,
       dynamic data,
-      File file,
+      File? file,
       String fileKey = 'file'
     }
   ) async {
@@ -211,10 +210,10 @@ class Api {
     String method,
     String apiMethod,
     {
-      Map<String, String> headers,
-      Map<String, dynamic> queryParameters,
+      Map<String, String>? headers,
+      Map<String, dynamic>? queryParameters,
       dynamic data,
-      File file,
+      File? file,
       String fileKey = 'file'
     }
   ) async {
@@ -239,7 +238,7 @@ class Api {
       );
     } on AuthException {
       if (dataToSend is FormData) {
-        dataToSend = _createFileFormData(data, file, fileKey);
+        dataToSend = _createFileFormData(data, file!, fileKey);
       }
 
       return await _rawRequest(
@@ -253,7 +252,7 @@ class Api {
     }
   }
 
-  Dio _createDio(ApiData apiData, String method, [Map<String, String> headers = const {}]) {
+  Dio _createDio(ApiData apiData, String method, [Map<String, String>? headers = const {}]) {
     String appName = Strings.appName;
 
     if (headers == null) headers = {};
@@ -267,12 +266,12 @@ class Api {
     headers.addAll({
       'Accept': 'application/json',
       appName: '$version',
-      HttpHeaders.userAgentHeader: '$appName/$version ${FlutterUserAgent.userAgent}',
+      HttpHeaders.userAgentHeader: '$appName/$version ${FkUserAgent.userAgent}',
     });
 
     return Dio(BaseOptions(
       method: method,
-      baseUrl: apiData.url,
+      baseUrl: apiData.url!,
       connectTimeout: 100000,
       receiveTimeout: 100000,
       headers: headers,
@@ -283,8 +282,8 @@ class Api {
 
   static void _onDioError(DioError e) {
     if (e.response != null) {
-      final int statusCode = e.response.statusCode;
-      final dynamic body = e.response.data;
+      final int statusCode = e.response!.statusCode!;
+      final dynamic body = e.response!.data;
 
       if (statusCode < 200) {
         throw ApiException('Ошибка при получении данных', statusCode);
@@ -306,7 +305,7 @@ class Api {
         throw ApiException(body['error'], statusCode);
       }
     } else {
-      if (e.error is SocketException || e.error is HandshakeException || e.type == DioErrorType.CONNECT_TIMEOUT) {
+      if (e.error is SocketException || e.error is HandshakeException || e.type == DioErrorType.connectTimeout) {
         throw ApiConnException();
       }
 
@@ -326,8 +325,8 @@ class Api {
     String method,
     String apiMethod,
     {
-      Map<String, String> headers,
-      Map<String, dynamic> queryParameters,
+      Map<String, String>? headers,
+      Map<String, dynamic>? queryParameters,
       data
     }
   ) async {

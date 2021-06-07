@@ -9,7 +9,7 @@ import 'package:delman/app/view_models/order_view_model.dart';
 import 'package:delman/app/view_models/payments_view_model.dart';
 
 class PaymentsPage extends StatelessWidget {
-  const PaymentsPage({Key key}) : super(key: key);
+  const PaymentsPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

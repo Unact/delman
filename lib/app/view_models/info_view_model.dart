@@ -22,13 +22,14 @@ enum InfoState {
 class InfoViewModel extends BaseViewModel {
   HomeViewModel _homeViewModel;
   InfoState _state = InfoState.Initial;
-  String _message;
-  Timer fetchDataTimer;
+  String? _message;
+  Timer? fetchDataTimer;
 
-  InfoViewModel({@required BuildContext context}) : super(context: context) {
-    _homeViewModel = Provider.of<HomeViewModel>(context, listen: false);
-    _startRefreshTimer();
-  }
+  InfoViewModel({required BuildContext context}) :
+    _homeViewModel = Provider.of<HomeViewModel>(context, listen: false),
+    super(context: context) {
+      _startRefreshTimer();
+    }
 
   bool get isRefreshing => _state == InfoState.InProgress || _state == InfoState.TimerInProgress;
 
@@ -39,16 +40,16 @@ class InfoViewModel extends BaseViewModel {
     if (appState.appData.lastSyncTime == null)
       return true;
 
-    DateTime lastAttempt = appState.appData.lastSyncTime;
+    DateTime lastAttempt = appState.appData.lastSyncTime!;
     DateTime time = DateTime.now();
 
     return lastAttempt.year != time.year || lastAttempt.month != time.month || lastAttempt.day != time.day;
   }
 
   InfoState get state => _state;
-  String get message => _message;
+  String? get message => _message;
 
-  String get timerFailureMessage => _state == InfoState.TimerFailure ? _message : null;
+  String? get timerFailureMessage => _state == InfoState.TimerFailure ? _message : null;
   bool get newVersionAvailable => appState.newVersionAvailable;
   int get deliveryPointsCnt => appState.deliveryPoints.length;
   int get deliveryPointsLeftCnt => appState.deliveryPoints.where((e) => !e.isFinished).length;
@@ -87,14 +88,14 @@ class InfoViewModel extends BaseViewModel {
   }
 
   void _startRefreshTimer() {
-    if (fetchDataTimer == null || !fetchDataTimer.isActive) {
+    if (fetchDataTimer == null || !fetchDataTimer!.isActive) {
       fetchDataTimer = Timer.periodic(Duration(minutes: 10), (_) => refresh(true));
     }
   }
 
   void _stopRefreshTimer() {
-    if (fetchDataTimer != null && fetchDataTimer.isActive) {
-      fetchDataTimer.cancel();
+    if (fetchDataTimer != null && fetchDataTimer!.isActive) {
+      fetchDataTimer!.cancel();
     }
   }
 

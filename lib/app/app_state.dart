@@ -19,7 +19,8 @@ class AppError implements Exception {
 
 class AppState extends ChangeNotifier {
   final App app;
-  AppData _appData;
+  late AppData _appData;
+  late User _user;
   List<DeliveryPoint> _deliveryPoints = [];
   List<Delivery> _deliveries = [];
   List<OrderLine> _orderLines = [];
@@ -37,31 +38,26 @@ class AppState extends ChangeNotifier {
   final PaymentRepository paymentRepo;
   final UserRepository userRepo;
 
-  User _user;
-
   bool get newVersionAvailable {
     String currentVersion = app.version;
-    String remoteVersion = user.version;
+    String? remoteVersion = user.version;
 
     return remoteVersion != null && Version.parse(remoteVersion) > Version.parse(currentVersion);
   }
 
   String get fullVersion => app.version + '+' + app.buildNumber;
 
-  AppState({@required this.app}) :
-    api = Api.instance,
-    appDataRepo = AppDataRepository(storage: Storage.instance),
-    deliveryPointRepo = DeliveryPointRepository(storage: Storage.instance),
-    deliveryRepo = DeliveryRepository(storage: Storage.instance),
-    orderLineRepo = OrderLineRepository(storage: Storage.instance),
-    orderRepo = OrderRepository(storage: Storage.instance),
-    orderStorageRepo = OrderStorageRepository(storage: Storage.instance),
-    paymentRepo = PaymentRepository(storage: Storage.instance),
-    userRepo = UserRepository(storage: Storage.instance)
+  AppState({required this.app}) :
+    api = Api.instance!,
+    appDataRepo = AppDataRepository(storage: Storage.instance!),
+    deliveryPointRepo = DeliveryPointRepository(storage: Storage.instance!),
+    deliveryRepo = DeliveryRepository(storage: Storage.instance!),
+    orderLineRepo = OrderLineRepository(storage: Storage.instance!),
+    orderRepo = OrderRepository(storage: Storage.instance!),
+    orderStorageRepo = OrderStorageRepository(storage: Storage.instance!),
+    paymentRepo = PaymentRepository(storage: Storage.instance!),
+    userRepo = UserRepository(storage: Storage.instance!)
   {
-    _appData = appDataRepo.getAppData();
-    _user = userRepo.getUser();
-
     loadData();
   }
 
@@ -75,6 +71,8 @@ class AppState extends ChangeNotifier {
   User get user => _user;
 
   Future<void> loadData() async {
+    _appData = appDataRepo.getAppData();
+    _user = userRepo.getUser();
     _deliveryPoints = await deliveryPointRepo.getDeliveryPoints();
     _deliveries = await deliveryRepo.getDeliveries();
     _orderLines = await orderLineRepo.getOrderLines();
@@ -86,7 +84,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> getData() async {
-    Location location = await GeoLoc.getCurrentLocation();
+    Location? location = await GeoLoc.getCurrentLocation();
 
     if (location == null) {
       throw AppError('Для работы с приложением необходимо разрешить определение местоположения');
@@ -195,11 +193,15 @@ class AppState extends ChangeNotifier {
   }
 
   Future<DeliveryPoint> arriveAtDeliveryPoint(DeliveryPoint deliveryPoint) async {
-    Location location = await GeoLoc.getCurrentLocation();
+    Location? location = await GeoLoc.getCurrentLocation();
     DeliveryPoint updatedDeliveryPoint = deliveryPoint.copyWith(factArrival: DateTime.now());
 
     if (!deliveryPoints.any((e) => e.id == deliveryPoint.id)) {
       throw AppError('Не найдена точка доставки');
+    }
+
+    if (location == null) {
+      throw AppError('Для работы с приложением необходимо разрешить определение местоположения');
     }
 
     try {
@@ -225,8 +227,12 @@ class AppState extends ChangeNotifier {
       throw AppError('Не найден заказ');
     }
 
-    Location location = await GeoLoc.getCurrentLocation();
+    Location? location = await GeoLoc.getCurrentLocation();
     Order updatedOrder = order.copyWith(canceled: 1, finished: 1);
+
+    if (location == null) {
+      throw AppError('Для работы с приложением необходимо разрешить определение местоположения');
+    }
 
     try {
       await api.cancelOrder(order, location);
@@ -255,12 +261,16 @@ class AppState extends ChangeNotifier {
       throw AppError('Не найден заказ');
     }
 
-    Location location = await GeoLoc.getCurrentLocation();
+    Location? location = await GeoLoc.getCurrentLocation();
     Order updatedOrder = order.copyWith(
       finished: 1,
       orderStorageId: order.isPickup ? user.courierStorageId : null
     );
     List<OrderLine> updatedOrderLines = orderLines;
+
+    if (location == null) {
+      throw AppError('Для работы с приложением необходимо разрешить определение местоположения');
+    }
 
     try {
       await api.confirmOrder(order, orderLines, location);
@@ -288,8 +298,12 @@ class AppState extends ChangeNotifier {
     return updatedOrder;
   }
 
-  Future<void> acceptPayment(Payment payment, Map<dynamic, dynamic> transaction) async {
-    Location location = await GeoLoc.getCurrentLocation();
+  Future<void> acceptPayment(Payment payment, Map<dynamic, dynamic>? transaction) async {
+    Location? location = await GeoLoc.getCurrentLocation();
+
+    if (location == null) {
+      throw AppError('Для работы с приложением необходимо разрешить определение местоположения');
+    }
 
     try {
       await api.acceptPayment(payment, transaction, location);
@@ -410,7 +424,7 @@ class AppState extends ChangeNotifier {
 
     await app.reportError(error, stackTrace);
     FLog.error(
-      methodName: methodFrame.member.split('.')[1],
+      methodName: methodFrame.member!.split('.')[1],
       text: error.toString(),
       exception: error,
       stacktrace: stackTrace

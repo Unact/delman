@@ -1,30 +1,28 @@
 import 'package:equatable/equatable.dart';
 
-import 'package:delman/app/utils/nullify.dart';
-
 class Payment extends Equatable {
-  final int id;
+  final int? id;
   final int deliveryPointOrderId;
   final double summ;
-  final String transactionId;
+  final String? transactionId;
 
   const Payment({
     this.id,
-    this.deliveryPointOrderId,
-    this.summ,
+    required this.deliveryPointOrderId,
+    required this.summ,
     this.transactionId
   });
 
   bool get isCard => transactionId != null;
 
   @override
-  List<Object> get props => [id, deliveryPointOrderId, summ, transactionId];
+  List<Object> get props => [deliveryPointOrderId, summ];
 
   static Payment fromJson(dynamic json) {
     return Payment(
       id: json['id'],
       deliveryPointOrderId: json['deliveryPointOrderId'],
-      summ: Nullify.parseDouble(json['summ']),
+      summ: json['summ'],
       transactionId: json['transactionId']
     );
   }

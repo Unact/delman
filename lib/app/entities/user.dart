@@ -3,20 +3,27 @@ import 'package:equatable/equatable.dart';
 class User extends Equatable {
   final int id;
   final String username;
-  final String email;
-  final String courierName;
-  final int courierStorageId;
-  final String version;
+  final String? email;
+  final String? courierName;
+  final int? courierStorageId;
+  final String? version;
 
   static const int kGuestId = 1;
   static const String kGuestUsername = 'guest';
 
-  bool get isLogged => id != null && id != kGuestId;
+  bool get isLogged => id != kGuestId;
 
-  const User({this.id, this.username, this.email, this.courierName, this.courierStorageId, this.version});
+  const User({
+    required this.id,
+    required this.username,
+    this.email,
+    this.courierName,
+    this.courierStorageId,
+    this.version
+  });
 
   @override
-  List<Object> get props => [id, email, courierName, courierStorageId];
+  List<Object> get props => [id, username];
 
   static User fromJson(dynamic json) {
     return User(

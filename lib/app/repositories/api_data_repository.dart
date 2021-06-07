@@ -1,18 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:meta/meta.dart';
-
 import 'package:delman/app/entities/entities.dart';
 import 'package:delman/app/services/storage.dart';
 
 class ApiDataRepository {
   final Storage storage;
 
-  ApiDataRepository({@required this.storage});
+  ApiDataRepository({required this.storage});
 
   ApiData getApiData() {
-    String data = storage.prefs.getString('apiData');
+    String? data = storage.prefs.getString('apiData');
     return data == null ? ApiData() : ApiData.fromJson(json.decode(data));
   }
 

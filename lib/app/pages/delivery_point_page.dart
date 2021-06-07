@@ -12,34 +12,34 @@ import 'package:delman/app/view_models/order_view_model.dart';
 import 'package:delman/app/widgets/widgets.dart';
 
 class DeliveryPointPage extends StatefulWidget {
-  const DeliveryPointPage({Key key}) : super(key: key);
+  const DeliveryPointPage({Key? key}) : super(key: key);
 
   @override
   _DeliveryPointPageState createState() => _DeliveryPointPageState();
 }
 
 class _DeliveryPointPageState extends State<DeliveryPointPage> {
-  DeliveryPointViewModel _deliveryPointViewModel;
+  DeliveryPointViewModel? _deliveryPointViewModel;
 
   @override
   void initState() {
     super.initState();
 
     _deliveryPointViewModel = context.read<DeliveryPointViewModel>();
-    _deliveryPointViewModel.addListener(this.vmListener);
+    _deliveryPointViewModel!.addListener(this.vmListener);
   }
 
   @override
   void dispose() {
-    _deliveryPointViewModel.removeListener(this.vmListener);
+    _deliveryPointViewModel!.removeListener(this.vmListener);
     super.dispose();
   }
 
   void vmListener() {
-    switch (_deliveryPointViewModel.state) {
+    switch (_deliveryPointViewModel!.state) {
       case DeliveryPointState.Failure:
       case DeliveryPointState.ArrivalSaved:
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_deliveryPointViewModel.message)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_deliveryPointViewModel!.message!)));
 
         break;
       default:

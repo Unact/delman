@@ -4,10 +4,9 @@ import 'package:delman/app/view_models/base_view_model.dart';
 
 class HomeViewModel extends BaseViewModel {
   int _currentIndex = 0;
-  String message;
   bool _isLoading = false;
 
-  HomeViewModel({@required BuildContext context}) : super(context: context);
+  HomeViewModel({required BuildContext context}) : super(context: context);
 
   int get currentIndex => _currentIndex;
   bool get isLoading => _isLoading;

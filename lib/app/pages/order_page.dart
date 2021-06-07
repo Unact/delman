@@ -12,7 +12,7 @@ import 'package:delman/app/view_models/order_view_model.dart';
 import 'package:delman/app/widgets/widgets.dart';
 
 class OrderPage extends StatefulWidget {
-  const OrderPage({Key key}) : super(key: key);
+  const OrderPage({Key? key}) : super(key: key);
 
   @override
   _OrderPageState createState() => _OrderPageState();
@@ -20,7 +20,7 @@ class OrderPage extends StatefulWidget {
 
 class _OrderPageState extends State<OrderPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  OrderViewModel _orderViewModel;
+  OrderViewModel? _orderViewModel;
   Completer<void> _dialogCompleter = Completer();
 
   @override
@@ -28,12 +28,12 @@ class _OrderPageState extends State<OrderPage> {
     super.initState();
 
     _orderViewModel = context.read<OrderViewModel>();
-    _orderViewModel.addListener(this.vmListener);
+    _orderViewModel!.addListener(this.vmListener);
   }
 
   @override
   void dispose() {
-    _orderViewModel.removeListener(this.vmListener);
+    _orderViewModel!.removeListener(this.vmListener);
     super.dispose();
   }
 
@@ -62,9 +62,9 @@ class _OrderPageState extends State<OrderPage> {
       builder: (_) => ChangeNotifierProvider<AcceptPaymentViewModel>(
         create: (context) => AcceptPaymentViewModel(
           context: context,
-          order: _orderViewModel.order,
-          total: _orderViewModel.total,
-          cardPayment: _orderViewModel.cardPayment
+          order: _orderViewModel!.order,
+          total: _orderViewModel!.total,
+          cardPayment: _orderViewModel!.cardPayment
         ),
         child: AcceptPaymentPage(),
       ),
@@ -86,28 +86,28 @@ class _OrderPageState extends State<OrderPage> {
           ],
         );
       }
-    );
+    ) ?? false;
   }
 
   Future<void> vmListener() async {
-    switch (_orderViewModel.state) {
+    switch (_orderViewModel!.state) {
       case OrderState.InProgress:
         openDialog();
         break;
       case OrderState.PaymentStarted:
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          _orderViewModel.finishPayment(await showAcceptPaymentDialog());
+        WidgetsBinding.instance!.addPostFrameCallback((_) async {
+          _orderViewModel!.finishPayment(await showAcceptPaymentDialog());
         });
         break;
       case OrderState.Failure:
       case OrderState.Canceled:
       case OrderState.PaymentFinished:
       case OrderState.Confirmed:
-        showMessage(_orderViewModel.message);
+        showMessage(_orderViewModel!.message!);
         closeDialog();
         break;
       case OrderState.NeedUserConfirmation:
-        _orderViewModel.confirmationCallback(await showConfirmationDialog(_orderViewModel.message));
+        _orderViewModel!.confirmationCallback!(await showConfirmationDialog(_orderViewModel!.message!));
         break;
       default:
     }
@@ -130,7 +130,7 @@ class _OrderPageState extends State<OrderPage> {
             title: Text('Заказ ${vm.order.trackingNumber}'),
             centerTitle: true
           ),
-          persistentFooterButtons: vm.order.isFinished ? null : <Widget>[
+          persistentFooterButtons: vm.order.isFinished ? null : [
             !vm.totalEditable ? null : TextButton(
               onPressed: () {
                 unfocus();
@@ -163,7 +163,7 @@ class _OrderPageState extends State<OrderPage> {
                 vm.tryConfirmOrder();
               }
             ),
-          ],
+          ].whereType<Widget>().toList(),
           body: Form(
             key: _formKey,
             child: ListView(

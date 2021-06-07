@@ -6,35 +6,35 @@ class DeliveryPoint extends Equatable {
   final int id;
   final int deliveryId;
   final int seq;
-  final DateTime planArrival;
-  final DateTime planDeparture;
-  final DateTime factArrival;
-  final DateTime factDeparture;
+  final DateTime? planArrival;
+  final DateTime? planDeparture;
+  final DateTime? factArrival;
+  final DateTime? factDeparture;
   final String addressName;
   final double latitude;
   final double longitude;
 
-  final String sellerName;
-  final String buyerName;
-  final String phone;
-  final String paymentTypeName;
-  final String deliveryTypeName;
+  final String? sellerName;
+  final String? buyerName;
+  final String? phone;
+  final String? paymentTypeName;
+  final String? deliveryTypeName;
 
-  final String pickupSellerName;
-  final String senderName;
-  final String senderPhone;
+  final String? pickupSellerName;
+  final String? senderName;
+  final String? senderPhone;
 
   const DeliveryPoint({
-    this.id,
-    this.deliveryId,
-    this.seq,
+    required this.id,
+    required this.deliveryId,
+    required this.seq,
     this.planArrival,
     this.planDeparture,
     this.factArrival,
     this.factDeparture,
-    this.addressName,
-    this.latitude,
-    this.longitude,
+    required this.addressName,
+    required this.latitude,
+    required this.longitude,
     this.phone,
     this.paymentTypeName,
     this.buyerName,
@@ -49,26 +49,7 @@ class DeliveryPoint extends Equatable {
   bool get isFinished => factDeparture != null;
 
   @override
-  List<Object> get props => [
-    id,
-    deliveryId,
-    seq,
-    planArrival,
-    planDeparture,
-    factArrival,
-    factDeparture,
-    addressName,
-    latitude,
-    longitude,
-    phone,
-    paymentTypeName,
-    buyerName,
-    sellerName,
-    deliveryTypeName,
-    pickupSellerName,
-    senderName,
-    senderPhone,
-  ];
+  List<Object> get props => [id];
 
   static DeliveryPoint fromJson(dynamic map) {
     return DeliveryPoint(
@@ -80,8 +61,8 @@ class DeliveryPoint extends Equatable {
       factArrival: Nullify.parseDate(map['factArrival']),
       factDeparture: Nullify.parseDate(map['factDeparture']),
       addressName: map['addressName'],
-      latitude: Nullify.parseDouble(map['latitude']),
-      longitude: Nullify.parseDouble(map['longitude']),
+      latitude: Nullify.parseDouble(map['latitude'])!,
+      longitude: Nullify.parseDouble(map['longitude'])!,
       phone: map['phone'],
       paymentTypeName: map['paymentTypeName'],
       buyerName: map['buyerName'],
@@ -117,24 +98,24 @@ class DeliveryPoint extends Equatable {
   }
 
   DeliveryPoint copyWith({
-    int id,
-    int deliveryId,
-    int seq,
-    DateTime planArrival,
-    DateTime planDeparture,
-    DateTime factArrival,
-    DateTime factDeparture,
-    String addressName,
-    double latitude,
-    double longitude,
-    String phone,
-    String paymentTypeName,
-    String buyerName,
-    String sellerName,
-    String deliveryTypeName,
-    String pickupSellerName,
-    String senderName,
-    String senderPhone,
+    int? id,
+    int? deliveryId,
+    int? seq,
+    DateTime? planArrival,
+    DateTime? planDeparture,
+    DateTime? factArrival,
+    DateTime? factDeparture,
+    String? addressName,
+    double? latitude,
+    double? longitude,
+    String? phone,
+    String? paymentTypeName,
+    String? buyerName,
+    String? sellerName,
+    String? deliveryTypeName,
+    String? pickupSellerName,
+    String? senderName,
+    String? senderPhone,
   }) {
     return DeliveryPoint(
       id: id ?? this.id,

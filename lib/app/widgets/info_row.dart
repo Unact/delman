@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class InfoRow extends StatelessWidget {
-  final Widget title;
-  final Widget trailing;
+  final Widget? title;
+  final Widget? trailing;
 
   InfoRow({
-    Key key,
+    Key? key,
     this.title,
     this.trailing
   }) : super(key: key);

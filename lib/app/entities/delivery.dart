@@ -4,7 +4,10 @@ class Delivery extends Equatable {
   final int id;
   final int active;
 
-  const Delivery({this.id, this.active});
+  const Delivery({
+    required this.id,
+    required this.active
+  });
 
   bool get isActive => active == 1;
 

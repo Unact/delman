@@ -9,7 +9,7 @@ import 'package:delman/app/view_models/delivery_point_view_model.dart';
 import 'package:delman/app/view_models/delivery_view_model.dart';
 
 class DeliveryPage extends StatelessWidget {
-  const DeliveryPage({Key key}) : super(key: key);
+  const DeliveryPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +31,8 @@ class DeliveryPage extends StatelessWidget {
 
   Widget _deliveryPointTile(BuildContext context, DeliveryPoint deliveryPoint) {
     Color color = deliveryPoint.isFinished ?
-      Colors.green[400] :
-      (deliveryPoint.inProgress ? Colors.yellow[400] : Colors.blue[400]);
+      Colors.green[400]! :
+      (deliveryPoint.inProgress ? Colors.yellow[400]! : Colors.blue[400]!);
 
     return ListTile(
       leading: CircleAvatar(

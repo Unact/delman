@@ -9,14 +9,14 @@ import 'package:delman/app/view_models/order_view_model.dart';
 import 'package:delman/app/view_models/order_storage_view_model.dart';
 
 class OrderStoragePage extends StatefulWidget {
-  const OrderStoragePage({Key key}) : super(key: key);
+  const OrderStoragePage({Key? key}) : super(key: key);
 
   @override
   _OrderStoragePageState createState() => _OrderStoragePageState();
 }
 
 class _OrderStoragePageState extends State<OrderStoragePage> {
-  OrderStorageViewModel _orderStorageViewModel;
+  OrderStorageViewModel? _orderStorageViewModel;
   Completer<void> _dialogCompleter = Completer();
 
   @override
@@ -24,12 +24,12 @@ class _OrderStoragePageState extends State<OrderStoragePage> {
     super.initState();
 
     _orderStorageViewModel = context.read<OrderStorageViewModel>();
-    _orderStorageViewModel.addListener(this.vmListener);
+    _orderStorageViewModel!.addListener(this.vmListener);
   }
 
   @override
   void dispose() {
-    _orderStorageViewModel.removeListener(this.vmListener);
+    _orderStorageViewModel!.removeListener(this.vmListener);
     super.dispose();
   }
 
@@ -53,14 +53,14 @@ class _OrderStoragePageState extends State<OrderStoragePage> {
   }
 
   Future<void> vmListener() async {
-    switch (_orderStorageViewModel.state) {
+    switch (_orderStorageViewModel!.state) {
       case OrderStorageState.InProgress:
         openDialog();
         break;
       case OrderStorageState.Failure:
       case OrderStorageState.Accepted:
       case OrderStorageState.Transferred:
-        showMessage(_orderStorageViewModel.message);
+        showMessage(_orderStorageViewModel!.message!);
         closeDialog();
         break;
       default:

@@ -1,18 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:meta/meta.dart';
-
 import 'package:delman/app/entities/entities.dart';
 import 'package:delman/app/services/storage.dart';
 
 class AppDataRepository {
   final Storage storage;
 
-  AppDataRepository({@required this.storage});
+  AppDataRepository({required this.storage});
 
   AppData getAppData() {
-    String data = storage.prefs.getString('appData');
+    String? data = storage.prefs.getString('appData');
     return data == null ? AppData() : AppData.fromJson(json.decode(data));
   }
 

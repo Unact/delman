@@ -5,8 +5,8 @@ class OrderStorage extends Equatable {
   final String name;
 
   const OrderStorage({
-    this.id,
-    this.name,
+    required this.id,
+    required this.name,
   });
 
   @override

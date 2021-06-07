@@ -3,13 +3,13 @@ import 'package:equatable/equatable.dart';
 import 'package:delman/app/utils/nullify.dart';
 
 class Location extends Equatable {
-  final double latitude;
-  final double longitude;
-  final double accuracy;
-  final double altitude;
-  final double heading;
-  final double speed;
-  final DateTime pointTs;
+  final double? latitude;
+  final double? longitude;
+  final double? accuracy;
+  final double? altitude;
+  final double? heading;
+  final double? speed;
+  final DateTime? pointTs;
 
   const Location({
     this.latitude,
@@ -22,15 +22,7 @@ class Location extends Equatable {
   });
 
   @override
-  List<Object> get props => [
-    latitude,
-    longitude,
-    accuracy,
-    altitude,
-    heading,
-    speed,
-    pointTs,
-  ];
+  List<Object> get props => [];
 
   static Location fromJson(dynamic json) {
     return Location(

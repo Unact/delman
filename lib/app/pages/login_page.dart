@@ -6,14 +6,14 @@ import 'package:provider/provider.dart';
 import 'package:delman/app/view_models/login_view_model.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key key}) : super(key: key);
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  LoginViewModel _loginViewModel;
+  LoginViewModel? _loginViewModel;
   Completer<void> _dialogCompleter = Completer();
 
   @override
@@ -21,12 +21,12 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
 
     _loginViewModel = context.read<LoginViewModel>();
-    _loginViewModel.addListener(this.vmListener);
+    _loginViewModel!.addListener(this.vmListener);
   }
 
   @override
   void dispose() {
-    _loginViewModel.removeListener(this.vmListener);
+    _loginViewModel!.removeListener(this.vmListener);
     super.dispose();
   }
 
@@ -46,13 +46,13 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> vmListener() async {
-    switch (_loginViewModel.state) {
+    switch (_loginViewModel!.state) {
       case LoginState.InProgress:
         openDialog();
         break;
       case LoginState.Failure:
       case LoginState.PasswordSent:
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_loginViewModel.message)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_loginViewModel!.message!)));
         closeDialog();
         break;
       case LoginState.LoggedIn:

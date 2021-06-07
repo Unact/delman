@@ -1,5 +1,7 @@
 PODS:
-  - device_info (0.0.1):
+  - device_info_plus (0.0.1):
+    - Flutter
+  - fk_user_agent (2.0.0):
     - Flutter
   - Flutter (1.0.0)
   - flutter_blue (0.0.1):
@@ -10,8 +12,6 @@ PODS:
     - Protobuf (~> 3.11.4)
   - flutter_bluetooth_serial (0.0.1):
     - Flutter
-  - flutter_user_agent (1.2.2):
-    - Flutter
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
@@ -21,43 +21,39 @@ PODS:
     - Flutter
   - package_info (0.0.1):
     - Flutter
+  - package_info_plus (0.4.5):
+    - Flutter
   - path_provider (0.0.1):
     - Flutter
   - Protobuf (3.11.4)
-  - Sentry (6.0.12):
-    - Sentry/Core (= 6.0.12)
-  - Sentry/Core (6.0.12)
+  - Sentry (6.2.1):
+    - Sentry/Core (= 6.2.1)
+  - Sentry/Core (6.2.1)
   - sentry_flutter (0.0.1):
     - Flutter
-    - Sentry (~> 6.0.10)
+    - Sentry (~> 6.2.1)
   - shared_preferences (0.0.1):
     - Flutter
-  - sqflite (0.0.1):
+  - sqflite (0.0.2):
     - Flutter
-    - FMDB (~> 2.7.2)
+    - FMDB (>= 2.7.5)
   - url_launcher (0.0.1):
     - Flutter
   - yandex_mapkit (0.0.1):
     - Flutter
-    - YandexMapKit (= 3.5.0)
-    - YandexMapKitSearch (= 3.5.0)
-    - YandexRuntime (= 3.5.0)
-  - YandexMapKit (3.5.0):
-    - YandexRuntime (= 3.5.0)
-  - YandexMapKitSearch (3.5.0):
-    - YandexMapKit (= 3.5.0)
-    - YandexRuntime (= 3.5.0)
-  - YandexRuntime (3.5.0)
+    - YandexMapsMobile (= 4.0.0-full)
+  - YandexMapsMobile (4.0.0-full)
 
 DEPENDENCIES:
-  - device_info (from `.symlinks/plugins/device_info/ios`)
+  - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
+  - fk_user_agent (from `.symlinks/plugins/fk_user_agent/ios`)
   - Flutter (from `Flutter`)
   - flutter_blue (from `.symlinks/plugins/flutter_blue/ios`)
   - flutter_bluetooth_serial (from `.symlinks/plugins/flutter_bluetooth_serial/ios`)
-  - flutter_user_agent (from `.symlinks/plugins/flutter_user_agent/ios`)
   - iboxpro_flutter (from `.symlinks/plugins/iboxpro_flutter/ios`)
   - location (from `.symlinks/plugins/location/ios`)
   - package_info (from `.symlinks/plugins/package_info/ios`)
+  - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
@@ -70,27 +66,27 @@ SPEC REPOS:
     - FMDB
     - Protobuf
     - Sentry
-    - YandexMapKit
-    - YandexMapKitSearch
-    - YandexRuntime
+    - YandexMapsMobile
 
 EXTERNAL SOURCES:
-  device_info:
-    :path: ".symlinks/plugins/device_info/ios"
+  device_info_plus:
+    :path: ".symlinks/plugins/device_info_plus/ios"
+  fk_user_agent:
+    :path: ".symlinks/plugins/fk_user_agent/ios"
   Flutter:
     :path: Flutter
   flutter_blue:
     :path: ".symlinks/plugins/flutter_blue/ios"
   flutter_bluetooth_serial:
     :path: ".symlinks/plugins/flutter_bluetooth_serial/ios"
-  flutter_user_agent:
-    :path: ".symlinks/plugins/flutter_user_agent/ios"
   iboxpro_flutter:
     :path: ".symlinks/plugins/iboxpro_flutter/ios"
   location:
     :path: ".symlinks/plugins/location/ios"
   package_info:
     :path: ".symlinks/plugins/package_info/ios"
+  package_info_plus:
+    :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
   sentry_flutter:
@@ -105,26 +101,25 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/yandex_mapkit/ios"
 
 SPEC CHECKSUMS:
-  device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
+  device_info_plus: e5c5da33f982a436e103237c0c85f9031142abed
+  fk_user_agent: 1f47ec39291e8372b1d692b50084b0d54103c545
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   flutter_blue: eeb381dc4727a0954dede73515f683865494b370
   flutter_bluetooth_serial: a42f785e4f7d2a6390d415cc39da5474ec2fef4f
-  flutter_user_agent: 27c45d034dc31b80948d29998cea52cd3a7bf936
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   iboxpro_flutter: fe944bd0a3f50fa4f18a7c633ead63603611016d
   location: 3a2eed4dd2fab25e7b7baf2a9efefe82b512d740
   package_info: 873975fc26034f0b863a300ad47e7f1ac6c7ec62
+  package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   Protobuf: 176220c526ad8bd09ab1fb40a978eac3fef665f7
-  Sentry: 8ffcfe3416e0a58b90bb1ae319e8e8a13022a03e
-  sentry_flutter: e57e33f56d5791e4effa48e85e44505367686b27
+  Sentry: 9b922b396b0e0bca8516a10e36b0ea3ebea5faf7
+  sentry_flutter: 5b3c6d717db5b7482504a313c831b318297d4d37
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
-  sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
+  sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
-  yandex_mapkit: 808e1857438445c61e2789a9e4374b230a0a97ca
-  YandexMapKit: ecd4b78de34a35df63d066ac299e6fd0fe46d1ba
-  YandexMapKitSearch: b46ddd1c80e2e35d006cdfc4ab88070a50cebeda
-  YandexRuntime: 2d55244d06267106cf9b00c25a1e63f72a73b6fd
+  yandex_mapkit: 0454ffe6e303a299e9a4414b53a006ab4e15bce7
+  YandexMapsMobile: 0f3d8c92fad685dc33d07f83eed4eb0166089743
 
 PODFILE CHECKSUM: a75497545d4391e2d394c3668e20cfb1c2bbd4aa
 

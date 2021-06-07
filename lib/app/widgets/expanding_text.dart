@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 class ExpandingText extends StatefulWidget {
   final String content;
-  final TextStyle style;
-  final TextAlign textAlign;
+  final TextStyle? style;
+  final TextAlign? textAlign;
 
   ExpandingText(this.content, {
-    Key key,
+    Key? key,
     this.style,
     this.textAlign
   }) : super(key: key);

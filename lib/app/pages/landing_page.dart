@@ -8,7 +8,7 @@ import 'package:delman/app/view_models/landing_view_model.dart';
 import 'package:delman/app/view_models/login_view_model.dart';
 
 class LandingPage extends StatelessWidget {
-  const LandingPage({Key key}) : super(key: key);
+  const LandingPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

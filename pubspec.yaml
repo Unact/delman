@@ -4,43 +4,35 @@ publish_to: 'none'
 version: 1.2.2+24
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  equatable: any
-  dio: any
-  device_info: any
-  stack_trace: any
-  f_logs: any
-  flutter_user_agent: any
-  pub_semver: any
-  shared_preferences: any
-  sqflite: any
-  path_provider: any
-  package_info: any
-  sentry_flutter: any
-  flutter_dotenv: any
-  provider: any
-  url_launcher: any
-  location: any
-  yandex_mapkit:
+  equatable: ^2.0.2
+  dio: ^4.0.0
+  device_info_plus: ^1.0.1
+  stack_trace: ^1.10.0
+  f_logs: ^2.0.0
+  fk_user_agent: ^2.0.1
+  pub_semver: ^2.0.0
+  shared_preferences: ^2.0.6
+  sqflite: ^2.0.0
+  path_provider: ^2.0.2
+  package_info: ^2.0.2
+  sentry_flutter: ^5.0.0
+  provider: ^5.0.0
+  url_launcher: ^6.0.6
+  location: ^4.1.1
+  yandex_mapkit: ^1.0.0
+  flutter_blue: ^0.8.0
+  flutter_signature_pad: ^3.0.0
+  iboxpro_flutter: ^1.0.0
+  flutter_bluetooth_serial:
     git:
-      url: ssh://git@github.com/Unact/yandex_mapkit.git
-  flutter_bluetooth_serial: any
-  flutter_blue: any
-  # https://github.com/johnpryan/signature-pad-dart/pull/2
-  signature_pad_flutter:
-    git:
-      url: git://github.com/remicode/signature-pad-dart
-      ref: fix-picture-to-image-now-returns-future-not-image
-      path: signature_pad_flutter
-  iboxpro_flutter:
-    git:
-      url: ssh://git@github.com/Unact/iboxpro_flutter.git
+      url: git://github.com/Syutkin/flutter_bluetooth_serial
 
 dev_dependencies:
   flutter_test:

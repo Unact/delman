@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 
@@ -22,17 +23,17 @@ enum OrderState {
 class OrderViewModel extends BaseViewModel {
   Order order;
   DeliveryPoint deliveryPoint;
-  List<OrderLine> orderLines = [];
-  String _message;
-  Function _confirmationCallback;
+  late List<OrderLine> orderLines = [];
+  String? _message;
+  Function? _confirmationCallback;
   OrderState _state = OrderState.Initial;
-  double _total;
+  late double _total;
   bool _cardPayment = false;
 
   OrderViewModel({
-    @required BuildContext context,
-    @required this.order,
-    @required this.deliveryPoint
+    required BuildContext context,
+    required this.order,
+    required this.deliveryPoint
   }) : super(context: context) {
     orderLines = appState.orderLines
       .where((e) => e.orderId == order.orderId)
@@ -42,18 +43,15 @@ class OrderViewModel extends BaseViewModel {
   }
 
   OrderState get state => _state;
-  String get message => _message;
-  Function get confirmationCallback => _confirmationCallback;
+  String? get message => _message;
+  Function? get confirmationCallback => _confirmationCallback;
   bool get cardPayment => _cardPayment;
   double get total => payment?.summ ?? _total;
   bool get withCourier => order.orderStorageId == appState.user.courierStorageId;
   bool get isInProgress => !order.isFinished && deliveryPoint.inProgress;
   bool get totalEditable => isInProgress && payment == null && !order.isPickup;
   bool get needPayment => totalEditable && orderLines.any((el) => el.price != 0);
-  Payment get payment => appState.payments.firstWhere(
-    (e) => e.deliveryPointOrderId == order.id,
-    orElse: () => null
-  );
+  Payment? get payment => appState.payments.firstWhereOrNull((e) => e.deliveryPointOrderId == order.id);
   String get orderStatus {
     if (order.isCanceled)
       return 'Отменен';
@@ -77,7 +75,7 @@ class OrderViewModel extends BaseViewModel {
   }
 
   void updateOrderLineAmount(OrderLine orderLine, String amount) {
-    int intAmount = int.tryParse(amount);
+    int? intAmount = int.tryParse(amount);
     _updateOrderLineAmount(orderLine, intAmount);
     _setState(OrderState.OrderLineChanged);
     String text = '$intAmount';
@@ -85,7 +83,7 @@ class OrderViewModel extends BaseViewModel {
     FLog.debug(text: text);
   }
 
-  void _updateOrderLineAmount(OrderLine orderLine, int amount) {
+  void _updateOrderLineAmount(OrderLine orderLine, int? amount) {
     OrderLine updatedOrderLine = orderLine.copyWith(factAmount: amount);
 
     orderLines.removeWhere((e) => e.id == orderLine.id);
@@ -95,7 +93,7 @@ class OrderViewModel extends BaseViewModel {
   }
 
   void tryStartPayment(bool cardPayment) {
-    if (_total == null || _total == 0 || _total < 0) {
+    if (_total == 0 || _total < 0) {
       _setMessage('Указана некорректная сумма');
       _setState(OrderState.Failure);
 
@@ -120,7 +118,7 @@ class OrderViewModel extends BaseViewModel {
   }
 
   void tryConfirmOrder() {
-    if (orderLines.any((e) => e.factAmount == null || e.factAmount < 0)) {
+    if (orderLines.any((e) => e.factAmount == null || e.factAmount! < 0)) {
       _setMessage('Не для всех позиций указан факт');
       _setState(OrderState.Failure);
 
