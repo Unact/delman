@@ -1,3 +1,4 @@
+import 'package:delman/app/repositories/order_info_repository.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:pub_semver/pub_semver.dart';
@@ -27,11 +28,13 @@ class AppState extends ChangeNotifier {
   List<Order> _orders = [];
   List<OrderStorage> _orderStorages = [];
   List<Payment> _payments = [];
+  List<OrderInfo> _orderInfoList = [];
 
   final Api api;
   final AppDataRepository appDataRepo;
   final DeliveryPointRepository deliveryPointRepo;
   final DeliveryRepository deliveryRepo;
+  final OrderInfoRepository orderInfoRepo;
   final OrderLineRepository orderLineRepo;
   final OrderRepository orderRepo;
   final OrderStorageRepository orderStorageRepo;
@@ -52,6 +55,7 @@ class AppState extends ChangeNotifier {
     appDataRepo = AppDataRepository(storage: Storage.instance!),
     deliveryPointRepo = DeliveryPointRepository(storage: Storage.instance!),
     deliveryRepo = DeliveryRepository(storage: Storage.instance!),
+    orderInfoRepo = OrderInfoRepository(storage: Storage.instance!),
     orderLineRepo = OrderLineRepository(storage: Storage.instance!),
     orderRepo = OrderRepository(storage: Storage.instance!),
     orderStorageRepo = OrderStorageRepository(storage: Storage.instance!),
@@ -68,6 +72,7 @@ class AppState extends ChangeNotifier {
   List<Order> get orders => _orders;
   List<Payment> get payments => _payments;
   List<OrderStorage> get orderStorages => _orderStorages;
+  List<OrderInfo> get orderInfoList => _orderInfoList;
   User get user => _user;
 
   Future<void> loadData() async {
@@ -79,6 +84,7 @@ class AppState extends ChangeNotifier {
     _orders = await orderRepo.getOrders();
     _orderStorages = await orderStorageRepo.getOrderStorages();
     _payments = await paymentRepo.getPayments();
+    _orderInfoList = await orderInfoRepo.getOrderInfo();
 
     notifyListeners();
   }
@@ -97,6 +103,7 @@ class AppState extends ChangeNotifier {
 
       await _setDeliveryPoints(data['deliveryPoints']);
       await _setDeliveries(data['deliveries']);
+      await _setOrderInfoList(data['orderInfoList']);
       await _setOrderLines(data['orderLines']);
       await _setOrders(data['orders']);
       await _setOrderStorages(data['orderStorages']);
@@ -120,6 +127,7 @@ class AppState extends ChangeNotifier {
     await _setOrders([]);
     await _setOrderStorages([]);
     await _setPayments([]);
+    await _setOrderInfoList([]);
     await _setAppData(AppData());
 
     notifyListeners();
@@ -158,6 +166,11 @@ class AppState extends ChangeNotifier {
   Future<void> _setPayments(List<Payment> payments) async {
     _payments = payments;
     await paymentRepo.reloadPayments(payments);
+  }
+
+  Future<void> _setOrderInfoList(List<OrderInfo> orderInfoList) async {
+    _orderInfoList = orderInfoList;
+    await orderInfoRepo.reloadOrderInfo(orderInfoList);
   }
 
   Future<DeliveryPoint> _departFromDeliveryPoint(DeliveryPoint deliveryPoint, Location location) async {
@@ -356,6 +369,26 @@ class AppState extends ChangeNotifier {
     await orderRepo.updateOrder(updatedOrder);
 
     notifyListeners();
+  }
+
+  Future<OrderInfo> addOrderInfo(Order order, String comment) async {
+    OrderInfo newOrderInfo = OrderInfo(orderId: order.orderId, comment: comment, ts: DateTime.now());
+
+    try {
+      await api.addOrderInfo(newOrderInfo);
+    } on ApiException catch(e) {
+      throw AppError(e.errorMsg);
+    } catch(e, trace) {
+      _reportError(e, trace);
+      throw AppError(Strings.genericErrorMsg);
+    }
+
+    _orderInfoList.add(newOrderInfo);
+    await orderInfoRepo.addOrderInfo([newOrderInfo]);
+
+    notifyListeners();
+
+    return newOrderInfo;
   }
 
   Future<void> login(String url, String login, String password) async {

@@ -56,6 +56,42 @@ class _OrderPageState extends State<OrderPage> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  Future<void> showAddOrderInfoDialog(BuildContext context) async {
+    TextEditingController controller = TextEditingController();
+    Size size = MediaQuery.of(context).size;
+
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Комментарий'),
+          content: Container(
+            child: TextField(
+              textCapitalization: TextCapitalization.words,
+              controller: controller,
+            ),
+            width: size.width
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _orderViewModel!.addComment(controller.text);
+              },
+              child: Text('Сохранить')
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Отменить')
+            )
+          ]
+        );
+      }
+    );
+  }
+
   Future<String> showAcceptPaymentDialog() async {
     return await showDialog(
       context: context,
@@ -103,6 +139,7 @@ class _OrderPageState extends State<OrderPage> {
       case OrderState.Canceled:
       case OrderState.PaymentFinished:
       case OrderState.Confirmed:
+      case OrderState.OrderInfoCommentAdded:
         showMessage(_orderViewModel!.message!);
         closeDialog();
         break;
@@ -219,11 +256,52 @@ class _OrderPageState extends State<OrderPage> {
                   tilePadding: EdgeInsets.symmetric(horizontal: 8),
                   children: vm.sortedOrderLines.map<Widget>((e) => _buildOrderLineTile(context, e)).toList()
                 ),
+                ExpansionTile(
+                  title: Text('Служебная информация'),
+                  initiallyExpanded: false,
+                  tilePadding: EdgeInsets.symmetric(horizontal: 8),
+                  children: vm.sortedOrderInfoList.
+                    map<Widget>((e) => _buildOrderInfoTile(context, e)).toList()..
+                    add(
+                      Padding(
+                        padding: EdgeInsets.only(right: 8),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          heightFactor: 0.75,
+                          child: TextButton(
+                            style: TextButton.styleFrom(primary: Colors.green),
+                            onPressed: () => showAddOrderInfoDialog(context),
+                            child: Text('Добавить')
+                          )
+                        )
+                      )
+                    )
+                ),
               ],
             )
           )
         );
       }
+    );
+  }
+
+  Widget _buildOrderInfoTile(BuildContext context, OrderInfo orderInfo) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            child: Container(
+              height: 20,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: ExpandingText(orderInfo.comment, textAlign: TextAlign.left, style: TextStyle(fontSize: 12)),
+              )
+            )
+          ),
+        ]
+      ),
     );
   }
 

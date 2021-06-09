@@ -86,3 +86,13 @@ CREATE TABLE orderStorages(
     localTs DATETIME DEFAULT CURRENT_TIMESTAMP,
     localId INTEGER PRIMARY KEY
 );
+CREATE TABLE orderInfo(
+    id INTEGER UNIQUE,
+    orderId INTEGER,
+
+    comment TEXT,
+    ts DATETIME,
+
+    localTs DATETIME DEFAULT CURRENT_TIMESTAMP,
+    localId INTEGER PRIMARY KEY
+);

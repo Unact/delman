@@ -83,6 +83,8 @@ class Api {
       .map<DeliveryPoint>((e) => DeliveryPoint.fromJson(e)).toList();
     List<Delivery> deliveries = data['deliveries']
       .map<Delivery>((e) => Delivery.fromJson(e)).toList();
+    List<OrderInfo> orderInfoList = data['orderInfoList']
+      .map<OrderInfo>((e) => OrderInfo.fromJson(e)).toList();
     List<OrderLine> orderLines = data['orderLines']
       .map<OrderLine>((e) => OrderLine.fromJson(e)).toList();
     List<Order> orders = data['orders']
@@ -95,6 +97,7 @@ class Api {
     return {
       'deliveryPoints': deliveryPoints,
       'deliveries': deliveries,
+      'orderInfoList': orderInfoList,
       'orderLines': orderLines,
       'orders': orders,
       'orderStorages': orderStorages,
@@ -164,6 +167,13 @@ class Api {
     await _post('v1/delman/transfer_order', data: {
       'deliveryPointOrderId': order.id,
       'storageId': orderStorage.id
+    });
+  }
+
+  Future<void> addOrderInfo(OrderInfo orderInfo) async {
+    await _post('v1/delman/add_order_system_info', data: {
+      'orderId': orderInfo.orderId,
+      'comment': orderInfo.comment
     });
   }
 

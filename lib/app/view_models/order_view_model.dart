@@ -17,12 +17,14 @@ enum OrderState {
   PaymentFinished,
   Confirmed,
   Canceled,
+  OrderInfoCommentAdded,
   Failure
 }
 
 class OrderViewModel extends BaseViewModel {
   Order order;
   DeliveryPoint deliveryPoint;
+  late List<OrderInfo> orderInfoList = [];
   late List<OrderLine> orderLines = [];
   String? _message;
   Function? _confirmationCallback;
@@ -35,6 +37,7 @@ class OrderViewModel extends BaseViewModel {
     required this.order,
     required this.deliveryPoint
   }) : super(context: context) {
+    orderInfoList = appState.orderInfoList.where((e) => e.orderId == order.orderId).toList();
     orderLines = appState.orderLines
       .where((e) => e.orderId == order.orderId)
       .map((e) => e.copyWith(factAmount: e.amount))
@@ -61,6 +64,7 @@ class OrderViewModel extends BaseViewModel {
 
     return order.isFinished ? 'Доставлен' : 'Ожидает доставки';
   }
+  List<OrderInfo> get sortedOrderInfoList => orderInfoList..sort((a, b) => b.ts.compareTo(a.ts));
   List<OrderLine> get sortedOrderLines => orderLines..sort((a, b) => a.name.compareTo(b.name));
 
   double get _orderLinesTotal {
@@ -162,6 +166,19 @@ class OrderViewModel extends BaseViewModel {
       order = await appState.cancelOrder(order);
       _setMessage('Заказ отменен');
       _setState(OrderState.Canceled);
+    } on AppError catch(e) {
+      _setMessage(e.message);
+      _setState(OrderState.Failure);
+    }
+  }
+
+  Future<void> addComment(String newOrderInfoComment) async {
+    _setState(OrderState.InProgress);
+
+    try {
+      orderInfoList.add(await appState.addOrderInfo(order, newOrderInfoComment));
+      _setMessage('Комментарий добавлен');
+      _setState(OrderState.OrderInfoCommentAdded);
     } on AppError catch(e) {
       _setMessage(e.message);
       _setState(OrderState.Failure);
