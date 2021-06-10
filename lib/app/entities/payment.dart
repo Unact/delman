@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'package:delman/app/utils/nullify.dart';
+
 class Payment extends Equatable {
   final int? id;
   final int deliveryPointOrderId;
@@ -22,7 +24,7 @@ class Payment extends Equatable {
     return Payment(
       id: json['id'],
       deliveryPointOrderId: json['deliveryPointOrderId'],
-      summ: json['summ'],
+      summ: Nullify.parseDouble(json['summ'])!,
       transactionId: json['transactionId']
     );
   }
