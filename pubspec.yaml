@@ -15,7 +15,10 @@ dependencies:
   dio: ^4.0.0
   device_info_plus: ^1.0.1
   stack_trace: ^1.10.0
-  f_logs: ^2.0.0
+  # https://github.com/zubairehman/Flogs/issues/51
+  f_logs:
+    git:
+      url: git://github.com/draganjovanovic1/Flogs
   fk_user_agent: ^2.0.1
   pub_semver: ^2.0.0
   shared_preferences: ^2.0.6
@@ -30,9 +33,10 @@ dependencies:
   flutter_blue: ^0.8.0
   flutter_signature_pad: ^3.0.0
   iboxpro_flutter: ^1.0.0
+  # https://github.com/edufolly/flutter_bluetooth_serial/pull/122
   flutter_bluetooth_serial:
     git:
-      url: git://github.com/Syutkin/flutter_bluetooth_serial
+      url: git://github.com/fabiomarini/flutter_bluetooth_serial
 
 dev_dependencies:
   flutter_test:

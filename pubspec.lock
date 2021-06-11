@@ -116,10 +116,12 @@ packages:
   f_logs:
     dependency: "direct main"
     description:
-      name: f_logs
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.0"
+      path: "."
+      ref: HEAD
+      resolved-ref: d795d739b4074f108032c51ba364ae0c5c291da8
+      url: "git://github.com/draganjovanovic1/Flogs"
+    source: git
+    version: "2.0.0-alpha-01"
   fake_async:
     dependency: transitive
     description:
@@ -172,10 +174,10 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "44fced35aa3c60ddd6bf9586d45d7d36585a6035"
-      url: "git://github.com/Syutkin/flutter_bluetooth_serial"
+      resolved-ref: "987763e7d8b57a41dc008f107bd229480c3d910f"
+      url: "git://github.com/fabiomarini/flutter_bluetooth_serial"
     source: git
-    version: "1.0.1"
+    version: "1.0.0"
   flutter_localizations:
     dependency: "direct main"
     description: flutter
