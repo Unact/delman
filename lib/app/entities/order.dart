@@ -20,6 +20,7 @@ class Order extends Equatable {
   final int? elevator;
   final String paymentTypeName;
   final String sellerName;
+  final int documentsReturn;
   final int canceled;
   final int finished;
   final int cardPaymentAllowed;
@@ -43,6 +44,7 @@ class Order extends Equatable {
     this.elevator,
     required this.paymentTypeName,
     required this.sellerName,
+    required this.documentsReturn,
     required this.canceled,
     required this.finished,
     required this.cardPaymentAllowed,
@@ -54,6 +56,7 @@ class Order extends Equatable {
   bool get isCanceled => canceled == 1;
   bool get isPickup => pickup == 1;
   bool get isCardPaymentAllowed => cardPaymentAllowed == 1;
+  bool get needDocumentsReturn => documentsReturn == 1;
 
   @override
   List<Object> get props => [
@@ -66,6 +69,7 @@ class Order extends Equatable {
     deliveryTypeName,
     paymentTypeName,
     sellerName,
+    documentsReturn,
     canceled,
     finished,
     cardPaymentAllowed,
@@ -90,6 +94,7 @@ class Order extends Equatable {
       elevator: json['elevator'],
       paymentTypeName: json['paymentTypeName'],
       sellerName: json['sellerName'],
+      documentsReturn: json['documentsReturn'],
       canceled: json['canceled'],
       finished: json['finished'],
       cardPaymentAllowed: json['cardPaymentAllowed'],
@@ -116,6 +121,7 @@ class Order extends Equatable {
       'elevator': elevator,
       'paymentTypeName': paymentTypeName,
       'sellerName': sellerName,
+      'documentsReturn': documentsReturn,
       'canceled': canceled,
       'finished': finished,
       'cardPaymentAllowed': cardPaymentAllowed,
@@ -141,6 +147,7 @@ class Order extends Equatable {
     int? elevator,
     String? paymentTypeName,
     String? sellerName,
+    int? documentsReturn,
     int? canceled,
     int? finished,
     int? cardPaymentAllowed,
@@ -164,6 +171,7 @@ class Order extends Equatable {
       elevator: elevator ?? this.elevator,
       paymentTypeName: paymentTypeName ?? this.paymentTypeName,
       sellerName: sellerName ?? this.sellerName,
+      documentsReturn: documentsReturn ?? this.documentsReturn,
       canceled: canceled ?? this.canceled,
       finished: finished ?? this.finished,
       cardPaymentAllowed: cardPaymentAllowed ?? this.cardPaymentAllowed,

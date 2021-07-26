@@ -49,6 +49,7 @@ CREATE TABLE orders(
     elevator INTEGER,
     paymentTypeName TEXT,
     sellerName TEXT,
+    documentsReturn INTEGER,
     canceled INTEGER,
     finished INTEGER,
     cardPaymentAllowed INTEGER,

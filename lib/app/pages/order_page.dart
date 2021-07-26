@@ -53,6 +53,8 @@ class _OrderPageState extends State<OrderPage> {
   }
 
   void showMessage(String message) {
+    if (message == '') return;
+
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
@@ -214,6 +216,10 @@ class _OrderPageState extends State<OrderPage> {
                 InfoRow(
                   title: Text('Посылка'),
                   trailing: Text(vm.withCourier ? 'На борту' : 'Не на борту')
+                ),
+                InfoRow(
+                  title: Text('Возврат документов'),
+                  trailing: Text(vm.order.needDocumentsReturn ? 'Да' : 'Нет')
                 ),
                 InfoRow(title: Text('ИМ'), trailing: Text(vm.order.sellerName)),
                 InfoRow(title: Text('Номер в ИМ'), trailing: Text(vm.order.number)),

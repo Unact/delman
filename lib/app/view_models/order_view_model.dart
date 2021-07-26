@@ -105,8 +105,8 @@ class OrderViewModel extends BaseViewModel {
     }
 
     _cardPayment = cardPayment;
-    _message = 'Вы действительно хотите оплатить заказ ${cardPayment ? 'картой' : 'наличными'}?';
     _confirmationCallback = startPayment;
+    _setMessage('Вы действительно хотите оплатить заказ ${cardPayment ? 'картой' : 'наличными'}?');
     _setState(OrderState.NeedUserConfirmation);
   }
 
@@ -122,6 +122,9 @@ class OrderViewModel extends BaseViewModel {
   }
 
   void tryConfirmOrder() {
+    List<String> messages = [];
+    String typeMsgPart = order.isPickup ? 'забор' : 'доставку';
+
     if (orderLines.any((e) => e.factAmount == null || e.factAmount! < 0)) {
       _setMessage('Не для всех позиций указан факт');
       _setState(OrderState.Failure);
@@ -129,15 +132,27 @@ class OrderViewModel extends BaseViewModel {
       return;
     }
 
-    _message = needPayment ?
-      'Заказ не оплачен!' :
-      'Вы действительно хотите завершить ${order.isPickup ? 'забор' : 'доставку' } заказа?';
+    if (needPayment) messages.add('Заказ не оплачен!');
+    if (order.needDocumentsReturn) messages.add('Вы забрали документы?');
+    if (messages.isEmpty) messages.add('Вы действительно хотите завершить $typeMsgPart заказа?');
+
     _confirmationCallback = confirmOrder;
+    _setMessage(messages.join('\n'));
     _setState(OrderState.NeedUserConfirmation);
   }
 
   Future<void> confirmOrder(bool confirmed) async {
-    if (!confirmed) return;
+    if (!confirmed) {
+      _setMessage('');
+
+      if (order.needDocumentsReturn) {
+        _setMessage('Нельзя завершить заказ, без возврата документов');
+      }
+
+      _setState(OrderState.Failure);
+
+      return;
+    }
 
     _setState(OrderState.InProgress);
 
@@ -152,8 +167,8 @@ class OrderViewModel extends BaseViewModel {
   }
 
   void tryCancelOrder() {
-    _message = 'Вы действительно хотите отменить заказ?';
     _confirmationCallback = cancelOrder;
+    _setMessage('Вы действительно хотите отменить заказ?');
     _setState(OrderState.NeedUserConfirmation);
   }
 
