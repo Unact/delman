@@ -54,6 +54,7 @@ class OrderViewModel extends BaseViewModel {
   bool get isInProgress => !order.isFinished && deliveryPoint.inProgress;
   bool get totalEditable => isInProgress && payment == null && !order.isPickup;
   bool get needPayment => totalEditable && orderLines.any((el) => el.price != 0);
+  bool get needDocumentsReturn => order.needDocumentsReturn && !order.isPickup;
   Payment? get payment => appState.payments.firstWhereOrNull((e) => e.deliveryPointOrderId == order.id);
   String get orderStatus {
     if (order.isCanceled)
@@ -133,7 +134,7 @@ class OrderViewModel extends BaseViewModel {
     }
 
     if (needPayment) messages.add('Заказ не оплачен!');
-    if (order.needDocumentsReturn) messages.add('Вы забрали документы?');
+    if (needDocumentsReturn) messages.add('Вы забрали документы?');
     if (messages.isEmpty) messages.add('Вы действительно хотите завершить $typeMsgPart заказа?');
 
     _confirmationCallback = confirmOrder;
@@ -145,7 +146,7 @@ class OrderViewModel extends BaseViewModel {
     if (!confirmed) {
       _setMessage('');
 
-      if (order.needDocumentsReturn) {
+      if (needDocumentsReturn) {
         _setMessage('Нельзя завершить заказ, без возврата документов');
       }
 
