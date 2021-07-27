@@ -4,6 +4,7 @@ import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:delman/app/entities/entities.dart';
 import 'package:delman/app/app_state.dart';
 import 'package:delman/app/utils/misc.dart';
 import 'package:delman/app/view_models/base_view_model.dart';
@@ -11,12 +12,15 @@ import 'package:delman/app/view_models/home_view_model.dart';
 
 enum InfoState {
   Initial,
-  InProgress,
-  DataLoaded,
-  Failure,
-  TimerInProgress,
-  TimerDataLoaded,
-  TimerFailure
+  InCloseProgress,
+  InLoadProgress,
+  CloseSuccess,
+  LoadSuccess,
+  LoadFailure,
+  CloseFailure,
+  TimerInLoadProgress,
+  TimerLoadSuccess,
+  TimerLoadFailure
 }
 
 class InfoViewModel extends BaseViewModel {
@@ -31,10 +35,14 @@ class InfoViewModel extends BaseViewModel {
       _startRefreshTimer();
     }
 
-  bool get isRefreshing => _state == InfoState.InProgress || _state == InfoState.TimerInProgress;
+  bool get isBusy => [
+    InfoState.InLoadProgress,
+    InfoState.TimerInLoadProgress,
+    InfoState.InCloseProgress
+  ].indexOf(_state) != -1;
 
   bool get needRefresh {
-    if (isRefreshing)
+    if (isBusy)
       return false;
 
     if (appState.appData.lastSyncTime == null)
@@ -49,14 +57,15 @@ class InfoViewModel extends BaseViewModel {
   InfoState get state => _state;
   String? get message => _message;
 
-  String? get timerFailureMessage => _state == InfoState.TimerFailure ? _message : null;
+  String? get timerFailureMessage => _state == InfoState.TimerLoadFailure ? _message : null;
   bool get newVersionAvailable => appState.newVersionAvailable;
+  List<Delivery> get deliveries => appState.deliveries..sort((a, b) => b.deliveryDate.compareTo(a.deliveryDate));
   int get deliveryPointsCnt => appState.deliveryPoints.length;
   int get deliveryPointsLeftCnt => appState.deliveryPoints.where((e) => !e.isFinished).length;
-  int get ordersInOwnStorageCnt =>
-    appState.orders.where((e) => e.orderStorageId == appState.user.courierStorageId).length;
-  int get ordersNotInOwnStorageCnt =>
-    appState.orders.where((e) => e.orderStorageId != appState.user.courierStorageId && e.orderStorageId != null).length;
+  int get ordersInOwnStorageCnt => appState.userStorageOrders.length;
+  int get ordersNotInOwnStorageCnt => appState.orders
+    .where((e) => !appState.userStorageOrders.any((o) => e.orderId == o.orderId) && !e.isFinished && !e.isPickup)
+    .length;
   int get paymentsCnt => appState.payments.length;
   int get cashPaymentsCnt => appState.payments.where((e) => !e.isCard).toList().length;
   int get cardPaymentsCnt => appState.payments.where((e) => e.isCard).toList().length;
@@ -68,18 +77,18 @@ class InfoViewModel extends BaseViewModel {
     appState.payments.where((e) => e.isCard).toList().fold(0, (prev, el) => prev + el.summ);
 
   Future<void> refresh([bool timerCallback = false]) async {
-    if (isRefreshing)
+    if (isBusy)
       return;
 
     try {
-      _setState(timerCallback ? InfoState.TimerInProgress : InfoState.InProgress);
+      _setState(timerCallback ? InfoState.TimerInLoadProgress : InfoState.InLoadProgress);
       await appState.getData();
 
       _setMessage('Данные успешно обновлены');
-      _setState(timerCallback ? InfoState.TimerDataLoaded : InfoState.DataLoaded);
+      _setState(timerCallback ? InfoState.TimerLoadSuccess : InfoState.LoadSuccess);
     } on AppError catch(e) {
       _setMessage(e.message);
-      _setState(timerCallback ? InfoState.TimerFailure : InfoState.Failure);
+      _setState(timerCallback ? InfoState.TimerLoadFailure : InfoState.LoadFailure);
     }
   }
 
@@ -108,6 +117,19 @@ class InfoViewModel extends BaseViewModel {
 
   void _setMessage(String message) {
     _message = message;
+  }
+
+  Future<void> closeDelivery() async {
+    try {
+      _setState(InfoState.InCloseProgress);
+      await appState.closeDelivery();
+
+      _setMessage('День успешно завершен');
+      _setState(InfoState.CloseSuccess);
+    } on AppError catch(e) {
+      _setMessage(e.message);
+      _setState(InfoState.CloseFailure);
+    }
   }
 
   @override

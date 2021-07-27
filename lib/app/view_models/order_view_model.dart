@@ -50,7 +50,7 @@ class OrderViewModel extends BaseViewModel {
   Function? get confirmationCallback => _confirmationCallback;
   bool get cardPayment => _cardPayment;
   double get total => payment?.summ ?? _total;
-  bool get withCourier => order.orderStorageId == appState.user.courierStorageId;
+  bool get withCourier => appState.userStorageOrders.any((e) => e.orderId == order.orderId);
   bool get isInProgress => !order.isFinished && deliveryPoint.inProgress;
   bool get totalEditable => isInProgress && payment == null && !order.isPickup;
   bool get needPayment => totalEditable && orderLines.any((el) => el.price != 0);

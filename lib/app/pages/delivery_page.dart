@@ -21,12 +21,23 @@ class DeliveryPage extends StatelessWidget {
         builder: (context, vm, _) {
           return ListView(
             physics: AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.only(top: 24, left: 8, right: 8, bottom: 24),
-            children: vm.deliveryPoints.map((e) => _deliveryPointTile(context, e)).toList()
+            padding: EdgeInsets.only(top: 8, left: 8, right: 8, bottom: 24),
+            children: vm.deliveries.map((e) => _deliveryTile(context, e)).expand((i) => i).toList()
           );
         }
       )
     );
+  }
+
+  List<Widget> _deliveryTile(BuildContext context, Delivery delivery) {
+    DeliveryViewModel vm = Provider.of<DeliveryViewModel>(context);
+
+    return [
+        ListTile(
+          dense: true,
+          leading: Text('Маршрут от ${Format.dateStr(delivery.deliveryDate)}'),
+        )
+    ]..addAll(vm.getDeliveryPointsForDelivery(delivery).map((e) => _deliveryPointTile(context, e)).toList());
   }
 
   Widget _deliveryPointTile(BuildContext context, DeliveryPoint deliveryPoint) {

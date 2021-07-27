@@ -28,11 +28,8 @@ class OrderStorageViewModel extends BaseViewModel {
   OrderStorageState get state => _state;
   String? get message => _message;
 
-  List<Order> get ordersInOwnStorage {
-    return appState.orders
-      .where((e) => e.orderStorageId == appState.user.courierStorageId)
-      .toList()
-      ..sort((a, b) => a.trackingNumber.compareTo(b.trackingNumber));
+  List<UserStorageOrder> get ordersInOwnStorage {
+    return appState.userStorageOrders..sort((a, b) => a.trackingNumber.compareTo(b.trackingNumber));
   }
 
   List<Order> get ordersInOrderStorage {
@@ -59,11 +56,11 @@ class OrderStorageViewModel extends BaseViewModel {
     }
   }
 
-  Future<void> transferOrder(Order order) async {
+  Future<void> transferUserStorageOrder(UserStorageOrder userStorageOrder) async {
     _setState(OrderStorageState.InProgress);
 
     try {
-      await appState.transferOrder(order, orderStorage);
+      await appState.transferUserStorageOrder(userStorageOrder, orderStorage);
       _setMessage('Заказ успешно передан в ${orderStorage.name}');
       _setState(OrderStorageState.Transferred);
     } on AppError catch(e) {

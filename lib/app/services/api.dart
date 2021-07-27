@@ -89,6 +89,8 @@ class Api {
       .map<OrderLine>((e) => OrderLine.fromJson(e)).toList();
     List<Order> orders = data['orders']
       .map<Order>((e) => Order.fromJson(e)).toList();
+    List<UserStorageOrder> userStorageOrders = data['userStorageOrders']
+      .map<UserStorageOrder>((e) => UserStorageOrder.fromJson(e)).toList();
     List<OrderStorage> orderStorages = data['orderStorages']
       .map<OrderStorage>((e) => OrderStorage.fromJson(e)).toList();
     List<Payment> payments = data['payments']
@@ -100,6 +102,7 @@ class Api {
       'orderInfoList': orderInfoList,
       'orderLines': orderLines,
       'orders': orders,
+      'userStorageOrders': userStorageOrders,
       'orderStorages': orderStorages,
       'payments': payments
     };
@@ -163,9 +166,9 @@ class Api {
     });
   }
 
-  Future<void> transferOrder(Order order, OrderStorage orderStorage) async {
+  Future<void> transferUserStorageOrder(UserStorageOrder storageOrder, OrderStorage orderStorage) async {
     await _post('v1/delman/transfer_order', data: {
-      'deliveryPointOrderId': order.id,
+      'orderId': storageOrder.orderId,
       'storageId': orderStorage.id
     });
   }
@@ -175,6 +178,10 @@ class Api {
       'orderId': orderInfo.orderId,
       'comment': orderInfo.comment
     });
+  }
+
+  Future<void> closeDelivery() async {
+    await _post('v1/delman/close_delivery');
   }
 
   Future<dynamic> _get(

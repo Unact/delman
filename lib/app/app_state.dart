@@ -1,4 +1,3 @@
-import 'package:delman/app/repositories/order_info_repository.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:pub_semver/pub_semver.dart';
@@ -26,6 +25,7 @@ class AppState extends ChangeNotifier {
   List<Delivery> _deliveries = [];
   List<OrderLine> _orderLines = [];
   List<Order> _orders = [];
+  List<UserStorageOrder> _userStorageOrders = [];
   List<OrderStorage> _orderStorages = [];
   List<Payment> _payments = [];
   List<OrderInfo> _orderInfoList = [];
@@ -37,6 +37,7 @@ class AppState extends ChangeNotifier {
   final OrderInfoRepository orderInfoRepo;
   final OrderLineRepository orderLineRepo;
   final OrderRepository orderRepo;
+  final UserStorageOrderRepository userStorageOrderRepo;
   final OrderStorageRepository orderStorageRepo;
   final PaymentRepository paymentRepo;
   final UserRepository userRepo;
@@ -58,6 +59,7 @@ class AppState extends ChangeNotifier {
     orderInfoRepo = OrderInfoRepository(storage: Storage.instance!),
     orderLineRepo = OrderLineRepository(storage: Storage.instance!),
     orderRepo = OrderRepository(storage: Storage.instance!),
+    userStorageOrderRepo = UserStorageOrderRepository(storage: Storage.instance!),
     orderStorageRepo = OrderStorageRepository(storage: Storage.instance!),
     paymentRepo = PaymentRepository(storage: Storage.instance!),
     userRepo = UserRepository(storage: Storage.instance!)
@@ -71,6 +73,7 @@ class AppState extends ChangeNotifier {
   List<OrderLine> get orderLines => _orderLines;
   List<Order> get orders => _orders;
   List<Payment> get payments => _payments;
+  List<UserStorageOrder> get userStorageOrders => _userStorageOrders;
   List<OrderStorage> get orderStorages => _orderStorages;
   List<OrderInfo> get orderInfoList => _orderInfoList;
   User get user => _user;
@@ -82,6 +85,7 @@ class AppState extends ChangeNotifier {
     _deliveries = await deliveryRepo.getDeliveries();
     _orderLines = await orderLineRepo.getOrderLines();
     _orders = await orderRepo.getOrders();
+    _userStorageOrders = await userStorageOrderRepo.getUserStorageOrders();
     _orderStorages = await orderStorageRepo.getOrderStorages();
     _payments = await paymentRepo.getPayments();
     _orderInfoList = await orderInfoRepo.getOrderInfo();
@@ -106,6 +110,7 @@ class AppState extends ChangeNotifier {
       await _setOrderInfoList(data['orderInfoList']);
       await _setOrderLines(data['orderLines']);
       await _setOrders(data['orders']);
+      await _setUserStorageOrders(data['userStorageOrders']);
       await _setOrderStorages(data['orderStorages']);
       await _setPayments(data['payments']);
       await _setAppData(AppData(lastSyncTime: DateTime.now()));
@@ -125,6 +130,7 @@ class AppState extends ChangeNotifier {
     await _setDeliveries([]);
     await _setOrderLines([]);
     await _setOrders([]);
+    await _setUserStorageOrders([]);
     await _setOrderStorages([]);
     await _setPayments([]);
     await _setOrderInfoList([]);
@@ -156,6 +162,11 @@ class AppState extends ChangeNotifier {
   Future<void> _setOrders(List<Order> orders) async {
     _orders = orders;
     await orderRepo.reloadOrders(orders);
+  }
+
+  Future<void> _setUserStorageOrders(List<UserStorageOrder> userStorageOrders) async {
+    _userStorageOrders = userStorageOrders;
+    await userStorageOrderRepo.reloadUserStorageOrders(userStorageOrders);
   }
 
   Future<void> _setOrderStorages(List<OrderStorage> orderStorages) async {
@@ -275,10 +286,8 @@ class AppState extends ChangeNotifier {
     }
 
     Location? location = await GeoLoc.getCurrentLocation();
-    Order updatedOrder = order.copyWith(
-      finished: 1,
-      orderStorageId: order.isPickup ? user.courierStorageId : null
-    );
+    Order updatedOrder = order.copyWith(finished: 1);
+
     List<OrderLine> updatedOrderLines = orderLines;
 
     if (location == null) {
@@ -292,6 +301,19 @@ class AppState extends ChangeNotifier {
     } catch(e, trace) {
       _reportError(e, trace);
       throw AppError(Strings.genericErrorMsg);
+    }
+
+    if (order.isPickup) {
+      UserStorageOrder storageOrder = UserStorageOrder(
+        orderId: updatedOrder.orderId,
+        trackingNumber: updatedOrder.trackingNumber
+      );
+      _userStorageOrders.add(storageOrder);
+      await userStorageOrderRepo.addUserStorageOrder(storageOrder);
+    } else {
+      UserStorageOrder storageOrder = userStorageOrders.firstWhere((e) => e.orderId == updatedOrder.orderId);
+      _userStorageOrders.remove(storageOrder);
+      await userStorageOrderRepo.deleteUserStorageOrder(storageOrder);
     }
 
     _orders.removeWhere((e) => e.id == updatedOrder.id);
@@ -335,6 +357,10 @@ class AppState extends ChangeNotifier {
 
   Future<void> acceptOrder(Order order) async {
     Order updatedOrder = order.copyWith(orderStorageId: user.courierStorageId);
+    UserStorageOrder newStorageOrder = UserStorageOrder(
+      orderId: order.orderId,
+      trackingNumber: order.trackingNumber
+    );
 
     try {
       await api.acceptOrder(order);
@@ -349,14 +375,15 @@ class AppState extends ChangeNotifier {
     _orders.add(updatedOrder);
     await orderRepo.updateOrder(updatedOrder);
 
+    _userStorageOrders.add(newStorageOrder);
+    await userStorageOrderRepo.addUserStorageOrder(newStorageOrder);
+
     notifyListeners();
   }
 
-  Future<void> transferOrder(Order order, OrderStorage orderStorage) async {
-    Order updatedOrder = order.copyWith(orderStorageId: orderStorage.id);
-
+  Future<void> transferUserStorageOrder(UserStorageOrder storageOrder, OrderStorage orderStorage) async {
     try {
-      await api.transferOrder(order, orderStorage);
+      await api.transferUserStorageOrder(storageOrder, orderStorage);
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {
@@ -364,9 +391,18 @@ class AppState extends ChangeNotifier {
       throw AppError(Strings.genericErrorMsg);
     }
 
-    _orders.removeWhere((e) => e.id == updatedOrder.id);
-    _orders.add(updatedOrder);
-    await orderRepo.updateOrder(updatedOrder);
+    if (_orders.any((e) => e.orderId == storageOrder.orderId)) {
+      Order updatedOrder = _orders.firstWhere((e) => e.orderId == storageOrder.orderId).copyWith(
+        orderStorageId: orderStorage.id
+      );
+
+      _orders.removeWhere((e) => e.id == updatedOrder.id);
+      _orders.add(updatedOrder);
+      await orderRepo.updateOrder(updatedOrder);
+    }
+
+    _userStorageOrders.remove(storageOrder);
+    await userStorageOrderRepo.deleteUserStorageOrder(storageOrder);
 
     notifyListeners();
   }
@@ -389,6 +425,19 @@ class AppState extends ChangeNotifier {
     notifyListeners();
 
     return newOrderInfo;
+  }
+
+  Future<void> closeDelivery() async {
+    try {
+      await api.closeDelivery();
+    } on ApiException catch(e) {
+      throw AppError(e.errorMsg);
+    } catch(e, trace) {
+      _reportError(e, trace);
+      throw AppError(Strings.genericErrorMsg);
+    }
+
+    await getData();
   }
 
   Future<void> login(String url, String login, String password) async {

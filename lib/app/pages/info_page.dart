@@ -22,6 +22,7 @@ class _InfoPageState extends State<InfoPage> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   InfoViewModel? _infoViewModel;
   Completer<void> _refresherCompleter = Completer();
+  Completer<void> _dialogCompleter = Completer();
 
   @override
   void initState() {
@@ -50,13 +51,39 @@ class _InfoPageState extends State<InfoPage> {
     _refresherCompleter = Completer();
   }
 
+  Future<void> openDialog() async {
+    showDialog(
+      context: context,
+      builder: (_) => Center(child: CircularProgressIndicator()),
+      barrierDismissible: false
+    );
+    await _dialogCompleter.future;
+    Navigator.of(context).pop();
+  }
+
+  void closeDialog() {
+    _dialogCompleter.complete();
+    _dialogCompleter = Completer();
+  }
+
+  void showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
   Future<void> vmListener() async {
     switch (_infoViewModel!.state) {
-      case InfoState.Failure:
-      case InfoState.DataLoaded:
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_infoViewModel!.message!)));
+      case InfoState.InCloseProgress:
+        openDialog();
+        break;
+      case InfoState.CloseFailure:
+      case InfoState.CloseSuccess:
+        showMessage(_infoViewModel!.message!);
+        closeDialog();
+        break;
+      case InfoState.LoadFailure:
+      case InfoState.LoadSuccess:
+        showMessage(_infoViewModel!.message!);
         closeRefresher();
-
         break;
       default:
     }
@@ -162,11 +189,23 @@ class _InfoPageState extends State<InfoPage> {
           text: TextSpan(
             style: TextStyle(color: Colors.grey),
             children: <TextSpan>[
+              TextSpan(
+                text: vm.deliveries.map((e) => Format.dateStr(e.deliveryDate)).join('\n') + '\n',
+                style: TextStyle(fontSize: 12.0)
+              ),
               TextSpan(text: 'Точек: ${vm.deliveryPointsCnt}\n', style: TextStyle(fontSize: 12.0)),
               TextSpan(text: 'Осталось: ${vm.deliveryPointsLeftCnt}\n', style: TextStyle(fontSize: 12.0))
             ]
           )
-        )
+        ),
+        trailing: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+            primary: Colors.blue,
+          ),
+          child: Text('Завершить день'),
+          onPressed: vm.deliveryPointsCnt == 0 ? null : vm.closeDelivery
+        ),
       ),
     );
   }

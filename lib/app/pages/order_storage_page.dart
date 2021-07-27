@@ -97,11 +97,11 @@ class _OrderStoragePageState extends State<OrderStoragePage> {
     });
   }
 
-  Widget _buildOrderInOwnStorageTile(BuildContext context, Order order) {
+  Widget _buildOrderInOwnStorageTile(BuildContext context, UserStorageOrder storageOrder) {
     OrderStorageViewModel vm = Provider.of<OrderStorageViewModel>(context);
 
     return ListTile(
-      title: Text('Заказ ${order.trackingNumber}', style: TextStyle(fontSize: 14)),
+      title: Text('Заказ ${storageOrder.trackingNumber}', style: TextStyle(fontSize: 14)),
       contentPadding: EdgeInsets.symmetric(horizontal: 20),
       trailing: ElevatedButton(
         style: ElevatedButton.styleFrom(
@@ -109,23 +109,8 @@ class _OrderStoragePageState extends State<OrderStoragePage> {
           primary: Colors.blue,
         ),
         child: Text('Передать'),
-        onPressed: () => vm.transferOrder(order)
+        onPressed: () => vm.transferUserStorageOrder(storageOrder)
       ),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (BuildContext context) => ChangeNotifierProvider<OrderViewModel>(
-              create: (context) => OrderViewModel(
-                context: context,
-                order: order,
-                deliveryPoint: vm.getDeliveryPointForOrder(order)
-              ),
-              child: OrderPage(),
-            )
-          )
-        );
-      },
     );
   }
 

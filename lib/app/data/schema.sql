@@ -1,6 +1,7 @@
 CREATE TABLE deliveries(
     id INTEGER UNIQUE,
     active INTEGER,
+    deliveryDate DATETIME,
 
     localTs DATETIME DEFAULT CURRENT_TIMESTAMP,
     localId INTEGER PRIMARY KEY
@@ -92,6 +93,15 @@ CREATE TABLE orderInfo(
     orderId INTEGER,
 
     comment TEXT,
+    ts DATETIME,
+
+    localTs DATETIME DEFAULT CURRENT_TIMESTAMP,
+    localId INTEGER PRIMARY KEY
+);
+CREATE TABLE userStorageOrders(
+    orderId INTEGER UNIQUE,
+
+    trackingNumber TEXT,
     ts DATETIME,
 
     localTs DATETIME DEFAULT CURRENT_TIMESTAMP,
