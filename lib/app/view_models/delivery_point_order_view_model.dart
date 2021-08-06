@@ -57,7 +57,7 @@ class DeliveryPointOrderViewModel extends BaseViewModel {
   bool get isInProgress => !deliveryPointOrder.isFinished && deliveryPoint.inProgress;
   bool get totalEditable => isInProgress && payment == null && !deliveryPointOrder.isPickup;
   bool get needPayment => totalEditable && orderLines.any((el) => el.price != 0);
-  Payment? get payment => appState.payments.firstWhereOrNull((e) => e.deliveryPointOrderId == order.id);
+  Payment? get payment => appState.payments.firstWhereOrNull((e) => e.deliveryPointOrderId == deliveryPointOrder.id);
   String get orderStatus {
     if (deliveryPointOrder.isCanceled)
       return 'Отменен';
