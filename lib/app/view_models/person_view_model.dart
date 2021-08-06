@@ -34,7 +34,7 @@ class PersonViewModel extends BaseViewModel {
   }
 
   String get username => appState.user.username;
-  String get courierName => appState.user.courierName ?? '';
+  String get name => appState.user.name ?? '';
   String get fullVersion => appState.fullVersion;
   bool get newVersionAvailable => appState.newVersionAvailable;
 

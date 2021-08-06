@@ -16,9 +16,14 @@ class OrderInfo extends Equatable {
   });
 
   @override
-  List<Object> get props => [orderId, comment, ts];
+  List<Object?> get props => [
+    id,
+    orderId,
+    comment,
+    ts,
+  ];
 
-  static OrderInfo fromJson(dynamic json) {
+  factory OrderInfo.fromJson(dynamic json) {
     return OrderInfo(
       id: json['id'],
       orderId: json['orderId'],

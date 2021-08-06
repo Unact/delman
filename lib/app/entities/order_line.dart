@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:quiver/core.dart';
 
 import 'package:delman/app/utils/nullify.dart';
 
@@ -22,9 +23,16 @@ class OrderLine extends Equatable {
   int get currentAmount => factAmount ?? amount;
 
   @override
-  List<Object> get props => [id, orderId, name, amount, price];
+  List<Object?> get props => [
+    id,
+    orderId,
+    name,
+    amount,
+    price,
+    factAmount,
+  ];
 
-  static OrderLine fromJson(dynamic json) {
+  factory OrderLine.fromJson(dynamic json) {
     return OrderLine(
       id: json['id'],
       orderId: json['orderId'],
@@ -52,7 +60,7 @@ class OrderLine extends Equatable {
     String? name,
     int? amount,
     double? price,
-    int? factAmount,
+    Optional<int>? factAmount,
   }) {
     return OrderLine(
       id: id ?? this.id,
@@ -60,7 +68,7 @@ class OrderLine extends Equatable {
       name: name ?? this.name,
       amount: amount ?? this.amount,
       price: price ?? this.price,
-      factAmount: factAmount ?? this.factAmount,
+      factAmount: factAmount != null ? factAmount.orNull : this.factAmount,
     );
   }
 

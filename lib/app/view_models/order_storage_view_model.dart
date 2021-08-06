@@ -28,19 +28,17 @@ class OrderStorageViewModel extends BaseViewModel {
   OrderStorageState get state => _state;
   String? get message => _message;
 
-  List<UserStorageOrder> get ordersInOwnStorage {
-    return appState.userStorageOrders..sort((a, b) => a.trackingNumber.compareTo(b.trackingNumber));
+  List<Order> get ordersInOwnStorage {
+    return appState.orders
+      .where((e) => e.storageId == appState.user.storageId).toList()
+      ..sort((a, b) => a.trackingNumber.compareTo(b.trackingNumber));
   }
 
   List<Order> get ordersInOrderStorage {
     return appState.orders
-      .where((e) => e.orderStorageId == orderStorage.id)
+      .where((e) => e.storageId == orderStorage.id)
       .toList()
       ..sort((a, b) => a.trackingNumber.compareTo(b.trackingNumber));
-  }
-
-  DeliveryPoint getDeliveryPointForOrder(Order order) {
-    return appState.deliveryPoints.firstWhere((e) => e.id == order.deliveryPointId);
   }
 
   Future<void> acceptOrder(Order order) async {
@@ -56,11 +54,11 @@ class OrderStorageViewModel extends BaseViewModel {
     }
   }
 
-  Future<void> transferUserStorageOrder(UserStorageOrder userStorageOrder) async {
+  Future<void> transferOrder(Order order) async {
     _setState(OrderStorageState.InProgress);
 
     try {
-      await appState.transferUserStorageOrder(userStorageOrder, orderStorage);
+      await appState.transferOrder(order, orderStorage);
       _setMessage('Заказ успешно передан в ${orderStorage.name}');
       _setState(OrderStorageState.Transferred);
     } on AppError catch(e) {

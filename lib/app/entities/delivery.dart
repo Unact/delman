@@ -16,9 +16,13 @@ class Delivery extends Equatable {
   bool get isActive => active == 1;
 
   @override
-  List<Object> get props => [id, active];
+  List<Object> get props => [
+    id,
+    active,
+    deliveryDate,
+  ];
 
-  static Delivery fromJson(dynamic json) {
+  factory Delivery.fromJson(dynamic json) {
     return Delivery(
       id: json['id'],
       deliveryDate: Nullify.parseDate(json['deliveryDate'])!,

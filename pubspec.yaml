@@ -37,6 +37,7 @@ dependencies:
   flutter_bluetooth_serial:
     git:
       url: git://github.com/fabiomarini/flutter_bluetooth_serial
+  quiver: ^3.0.1
 
 dev_dependencies:
   flutter_test:

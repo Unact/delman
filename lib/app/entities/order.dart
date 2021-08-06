@@ -1,181 +1,225 @@
 import 'package:equatable/equatable.dart';
+import 'package:quiver/core.dart';
 
 import 'package:delman/app/utils/nullify.dart';
 
 class Order extends Equatable {
   final int id;
-  final int orderId;
-  final int deliveryPointId;
-  final int pickup;
-  final DateTime? timeFrom;
-  final DateTime? timeTo;
+  final DateTime? deliveryDateTimeFrom;
+  final DateTime? deliveryDateTimeTo;
+  final DateTime? pickupDateTimeFrom;
+  final DateTime? pickupDateTimeTo;
   final String number;
   final String trackingNumber;
-  final String? personName;
-  final String? phone;
+  final String? senderName;
+  final String? buyerName;
+  final String? senderPhone;
+  final String? buyerPhone;
   final String? comment;
   final String deliveryTypeName;
-  final int? floor;
-  final String? flat;
-  final int? elevator;
+  final String pickupTypeName;
+  final int? senderFloor;
+  final int? buyerFloor;
+  final String? senderFlat;
+  final String? buyerFlat;
+  final int? senderElevator;
+  final int? buyerElevator;
   final String paymentTypeName;
   final String sellerName;
   final int documentsReturn;
-  final int canceled;
-  final int finished;
   final int cardPaymentAllowed;
-  final int? orderStorageId;
+  final int? storageId;
+  final String deliveryAddressName;
+  final String pickupAddressName;
 
   const Order({
     required this.id,
-    required this.orderId,
-    required this.deliveryPointId,
-    required this.pickup,
-    this.timeFrom,
-    this.timeTo,
+    this.deliveryDateTimeFrom,
+    this.deliveryDateTimeTo,
+    this.pickupDateTimeFrom,
+    this.pickupDateTimeTo,
     required this.number,
     required this.trackingNumber,
-    this.personName,
-    this.phone,
+    this.senderName,
+    this.buyerName,
+    this.senderPhone,
+    this.buyerPhone,
     this.comment,
     required this.deliveryTypeName,
-    this.floor,
-    this.flat,
-    this.elevator,
+    required this.pickupTypeName,
+    this.senderFloor,
+    this.buyerFloor,
+    this.senderFlat,
+    this.buyerFlat,
+    this.senderElevator,
+    this.buyerElevator,
     required this.paymentTypeName,
     required this.sellerName,
     required this.documentsReturn,
-    required this.canceled,
-    required this.finished,
     required this.cardPaymentAllowed,
-    this.orderStorageId
+    this.storageId,
+    required this.deliveryAddressName,
+    required this.pickupAddressName,
   });
 
-  bool get hasElevator => elevator == 1;
-  bool get isFinished => finished == 1;
-  bool get isCanceled => canceled == 1;
-  bool get isPickup => pickup == 1;
+  bool get hasSenderElevator => senderElevator == 1;
+  bool get hasBuyerElevator => buyerElevator == 1;
   bool get isCardPaymentAllowed => cardPaymentAllowed == 1;
   bool get needDocumentsReturn => documentsReturn == 1;
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
     id,
-    orderId,
-    deliveryPointId,
-    pickup,
+    deliveryDateTimeFrom,
+    deliveryDateTimeTo,
+    pickupDateTimeFrom,
+    pickupDateTimeTo,
     number,
     trackingNumber,
+    senderName,
+    buyerName,
+    senderPhone,
+    buyerPhone,
+    comment,
     deliveryTypeName,
+    pickupTypeName,
+    senderFloor,
+    buyerFloor,
+    senderFlat,
+    buyerFlat,
+    senderElevator,
+    buyerElevator,
     paymentTypeName,
     sellerName,
     documentsReturn,
-    canceled,
-    finished,
     cardPaymentAllowed,
+    storageId,
+    deliveryAddressName,
+    pickupAddressName,
   ];
 
   static Order fromJson(dynamic json) {
     return Order(
       id: json['id'],
-      orderId: json['orderId'],
-      deliveryPointId: json['deliveryPointId'],
-      pickup: json['pickup'],
-      timeFrom: Nullify.parseDate(json['timeFrom']),
-      timeTo: Nullify.parseDate(json['timeTo']),
+      deliveryDateTimeFrom: Nullify.parseDate(json['deliveryDateTimeFrom']),
+      deliveryDateTimeTo: Nullify.parseDate(json['deliveryDateTimeTo']),
+      pickupDateTimeFrom: Nullify.parseDate(json['pickupDateTimeFrom']),
+      pickupDateTimeTo: Nullify.parseDate(json['pickupDateTimeTo']),
       number: json['number'],
       trackingNumber: json['trackingNumber'],
-      personName: json['personName'],
-      phone: json['phone'],
+      senderName: json['senderName'],
+      buyerName: json['buyerName'],
+      senderPhone: json['senderPhone'],
+      buyerPhone: json['buyerPhone'],
       comment: json['comment'],
       deliveryTypeName: json['deliveryTypeName'],
-      floor: json['floor'],
-      flat: json['flat'],
-      elevator: json['elevator'],
+      pickupTypeName: json['pickupTypeName'],
+      senderFloor: json['senderFloor'],
+      buyerFloor: json['buyerFloor'],
+      senderFlat: json['senderFlat'],
+      buyerFlat: json['buyerFlat'],
+      senderElevator: json['senderElevator'],
+      buyerElevator: json['buyerElevator'],
       paymentTypeName: json['paymentTypeName'],
       sellerName: json['sellerName'],
       documentsReturn: json['documentsReturn'],
-      canceled: json['canceled'],
-      finished: json['finished'],
       cardPaymentAllowed: json['cardPaymentAllowed'],
-      orderStorageId: json['orderStorageId']
+      storageId: json['storageId'],
+      deliveryAddressName: json['deliveryAddressName'],
+      pickupAddressName: json['pickupAddressName'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'orderId': orderId,
-      'deliveryPointId': deliveryPointId,
-      'pickup': pickup,
-      'timeFrom': timeFrom?.toIso8601String(),
-      'timeTo': timeTo?.toIso8601String(),
+      'deliveryDateTimeFrom': deliveryDateTimeFrom?.toIso8601String(),
+      'deliveryDateTimeTo': deliveryDateTimeTo?.toIso8601String(),
+      'pickupDateTimeFrom': pickupDateTimeFrom?.toIso8601String(),
+      'pickupDateTimeTo': pickupDateTimeTo?.toIso8601String(),
       'number': number,
       'trackingNumber': trackingNumber,
-      'personName': personName,
-      'phone': phone,
+      'senderName': senderName,
+      'buyerName': buyerName,
+      'senderPhone': senderPhone,
+      'buyerPhone': buyerPhone,
       'comment': comment,
       'deliveryTypeName': deliveryTypeName,
-      'floor': floor,
-      'flat': flat,
-      'elevator': elevator,
+      'pickupTypeName': pickupTypeName,
+      'senderFloor': senderFloor,
+      'buyerFloor': buyerFloor,
+      'senderFlat': senderFlat,
+      'buyerFlat': buyerFlat,
+      'senderElevator': senderElevator,
+      'buyerElevator': buyerElevator,
       'paymentTypeName': paymentTypeName,
       'sellerName': sellerName,
       'documentsReturn': documentsReturn,
-      'canceled': canceled,
-      'finished': finished,
       'cardPaymentAllowed': cardPaymentAllowed,
-      'orderStorageId': orderStorageId
+      'storageId': storageId,
+      'deliveryAddressName': deliveryAddressName,
+      'pickupAddressName': pickupAddressName,
     };
   }
 
   Order copyWith({
     int? id,
     int? orderId,
-    int? deliveryPointId,
-    int? pickup,
-    DateTime? timeFrom,
-    DateTime? timeTo,
+    Optional<DateTime>? deliveryDateTimeFrom,
+    Optional<DateTime>? deliveryDateTimeTo,
+    Optional<DateTime>? pickupDateTimeFrom,
+    Optional<DateTime>? pickupDateTimeTo,
     String? number,
     String? trackingNumber,
-    String? personName,
-    String? phone,
+    Optional<String>? senderName,
+    Optional<String>? buyerName,
+    Optional<String>? senderPhone,
+    Optional<String>? buyerPhone,
     String? comment,
     String? deliveryTypeName,
-    int? floor,
-    String? flat,
-    int? elevator,
+    String? pickupTypeName,
+    Optional<int>? senderFloor,
+    Optional<int>? buyerFloor,
+    Optional<String>? senderFlat,
+    Optional<String>? buyerFlat,
+    Optional<int>? senderElevator,
+    Optional<int>? buyerElevator,
     String? paymentTypeName,
     String? sellerName,
     int? documentsReturn,
-    int? canceled,
-    int? finished,
     int? cardPaymentAllowed,
-    int? orderStorageId
+    Optional<int>? storageId,
+    String? deliveryAddressName,
+    String? pickupAddressName
   }) {
     return Order(
       id: id ?? this.id,
-      orderId: orderId ?? this.orderId,
-      deliveryPointId: deliveryPointId ?? this.deliveryPointId,
-      pickup: pickup ?? this.pickup,
-      timeFrom: timeFrom ?? this.timeFrom,
-      timeTo: timeTo ?? this.timeTo,
+      deliveryDateTimeFrom: deliveryDateTimeFrom != null ? deliveryDateTimeFrom.orNull : this.deliveryDateTimeFrom,
+      deliveryDateTimeTo: deliveryDateTimeTo != null ? deliveryDateTimeTo.orNull : this.deliveryDateTimeTo,
+      pickupDateTimeFrom: pickupDateTimeFrom != null ? pickupDateTimeFrom.orNull : this.pickupDateTimeFrom,
+      pickupDateTimeTo: pickupDateTimeTo != null ? pickupDateTimeTo.orNull : this.pickupDateTimeTo,
       number: number ?? this.number,
       trackingNumber: trackingNumber ?? this.trackingNumber,
-      personName: personName ?? this.personName,
-      phone: phone ?? this.phone,
+      senderName: senderName != null ? senderName.orNull : this.senderName,
+      buyerName: buyerName != null ? buyerName.orNull : this.buyerName,
+      senderPhone: senderPhone != null ? senderPhone.orNull : this.senderPhone,
+      buyerPhone: buyerPhone != null ? buyerPhone.orNull : this.buyerPhone,
       comment: comment ?? this.comment,
       deliveryTypeName: deliveryTypeName ?? this.deliveryTypeName,
-      floor: floor ?? this.floor,
-      flat: flat ?? this.flat,
-      elevator: elevator ?? this.elevator,
+      pickupTypeName: pickupTypeName ?? this.pickupTypeName,
+      senderFloor: senderFloor != null ? senderFloor.orNull : this.senderFloor,
+      buyerFloor: buyerFloor != null ? buyerFloor.orNull : this.buyerFloor,
+      senderFlat: senderFlat != null ? senderFlat.orNull : this.senderFlat,
+      buyerFlat: buyerFlat != null ? buyerFlat.orNull : this.buyerFlat,
+      senderElevator: senderElevator != null ? senderElevator.orNull : this.senderElevator,
+      buyerElevator: buyerElevator != null ? buyerElevator.orNull : this.buyerElevator,
       paymentTypeName: paymentTypeName ?? this.paymentTypeName,
       sellerName: sellerName ?? this.sellerName,
       documentsReturn: documentsReturn ?? this.documentsReturn,
-      canceled: canceled ?? this.canceled,
-      finished: finished ?? this.finished,
       cardPaymentAllowed: cardPaymentAllowed ?? this.cardPaymentAllowed,
-      orderStorageId: orderStorageId ?? this.orderStorageId
+      storageId: storageId != null ? storageId.orNull : this.storageId,
+      deliveryAddressName: deliveryAddressName ?? this.deliveryAddressName,
+      pickupAddressName: pickupAddressName ?? this.pickupAddressName,
     );
   }
 

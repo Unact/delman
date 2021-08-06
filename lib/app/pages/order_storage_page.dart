@@ -97,11 +97,21 @@ class _OrderStoragePageState extends State<OrderStoragePage> {
     });
   }
 
-  Widget _buildOrderInOwnStorageTile(BuildContext context, UserStorageOrder storageOrder) {
+  Widget _buildOrderInOwnStorageTile(BuildContext context, Order order) {
     OrderStorageViewModel vm = Provider.of<OrderStorageViewModel>(context);
 
     return ListTile(
-      title: Text('Заказ ${storageOrder.trackingNumber}', style: TextStyle(fontSize: 14)),
+      title: Text('Заказ ${order.trackingNumber}', style: TextStyle(fontSize: 14)),
+      subtitle: RichText(
+        text: TextSpan(
+          style: TextStyle(color: Colors.grey),
+          children: <TextSpan>[
+            TextSpan(text: 'Номер ИМ: ${order.number}\n', style: TextStyle(fontSize: 12.0)),
+            TextSpan(text: 'Адрес доставки: ${order.deliveryAddressName}\n', style: TextStyle(fontSize: 12.0)),
+            TextSpan(text: 'Адрес забора: ${order.pickupAddressName}\n', style: TextStyle(fontSize: 12.0))
+          ]
+        )
+      ),
       contentPadding: EdgeInsets.symmetric(horizontal: 20),
       trailing: ElevatedButton(
         style: ElevatedButton.styleFrom(
@@ -109,8 +119,22 @@ class _OrderStoragePageState extends State<OrderStoragePage> {
           primary: Colors.blue,
         ),
         child: Text('Передать'),
-        onPressed: () => vm.transferUserStorageOrder(storageOrder)
+        onPressed: () => vm.transferOrder(order)
       ),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (BuildContext context) => ChangeNotifierProvider<OrderViewModel>(
+              create: (context) => OrderViewModel(
+                context: context,
+                order: order
+              ),
+              child: OrderPage(),
+            )
+          )
+        );
+      },
     );
   }
 
@@ -119,6 +143,16 @@ class _OrderStoragePageState extends State<OrderStoragePage> {
 
     return ListTile(
       title: Text('Заказ ${order.trackingNumber}', style: TextStyle(fontSize: 14)),
+      subtitle: RichText(
+        text: TextSpan(
+          style: TextStyle(color: Colors.grey),
+          children: <TextSpan>[
+            TextSpan(text: 'Номер ИМ: ${order.number}\n', style: TextStyle(fontSize: 12.0)),
+            TextSpan(text: 'Адрес доставки: ${order.deliveryAddressName}\n', style: TextStyle(fontSize: 12.0)),
+            TextSpan(text: 'Адрес забора: ${order.pickupAddressName}\n', style: TextStyle(fontSize: 12.0))
+          ]
+        )
+      ),
       contentPadding: EdgeInsets.symmetric(horizontal: 20),
       trailing: ElevatedButton(
         style: ElevatedButton.styleFrom(
@@ -135,8 +169,7 @@ class _OrderStoragePageState extends State<OrderStoragePage> {
             builder: (BuildContext context) => ChangeNotifierProvider<OrderViewModel>(
               create: (context) => OrderViewModel(
                 context: context,
-                order: order,
-                deliveryPoint: vm.getDeliveryPointForOrder(order)
+                order: order
               ),
               child: OrderPage(),
             )

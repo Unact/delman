@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:quiver/core.dart';
 
 import 'package:delman/app/utils/nullify.dart';
 
@@ -49,9 +50,28 @@ class DeliveryPoint extends Equatable {
   bool get isFinished => factDeparture != null;
 
   @override
-  List<Object> get props => [id];
+  List<Object?> get props => [
+    id,
+    deliveryId,
+    seq,
+    planArrival,
+    planDeparture,
+    factArrival,
+    factDeparture,
+    addressName,
+    latitude,
+    longitude,
+    phone,
+    paymentTypeName,
+    buyerName,
+    sellerName,
+    deliveryTypeName,
+    pickupSellerName,
+    senderName,
+    senderPhone,
+  ];
 
-  static DeliveryPoint fromJson(dynamic map) {
+  factory DeliveryPoint.fromJson(dynamic map) {
     return DeliveryPoint(
       id: map['id'],
       deliveryId: map['deliveryId'],
@@ -101,10 +121,10 @@ class DeliveryPoint extends Equatable {
     int? id,
     int? deliveryId,
     int? seq,
-    DateTime? planArrival,
-    DateTime? planDeparture,
-    DateTime? factArrival,
-    DateTime? factDeparture,
+    Optional<DateTime>? planArrival,
+    Optional<DateTime>? planDeparture,
+    Optional<DateTime>? factArrival,
+    Optional<DateTime>? factDeparture,
     String? addressName,
     double? latitude,
     double? longitude,
@@ -121,10 +141,10 @@ class DeliveryPoint extends Equatable {
       id: id ?? this.id,
       deliveryId: deliveryId ?? this.deliveryId,
       seq: seq ?? this.seq,
-      planArrival: planArrival ?? this.planArrival,
-      planDeparture: planDeparture ?? this.planDeparture,
-      factArrival: factArrival ?? this.factArrival,
-      factDeparture: factDeparture ?? this.factDeparture,
+      planArrival: planArrival != null ? planArrival.orNull : this.planArrival,
+      planDeparture: planDeparture != null ? planDeparture.orNull : this.planDeparture,
+      factArrival: factArrival != null ? factArrival.orNull : this.factArrival,
+      factDeparture: factDeparture != null ? factDeparture.orNull : this.factDeparture,
       addressName: addressName ?? this.addressName,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,

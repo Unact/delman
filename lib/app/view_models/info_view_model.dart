@@ -62,10 +62,14 @@ class InfoViewModel extends BaseViewModel {
   List<Delivery> get deliveries => appState.deliveries..sort((a, b) => b.deliveryDate.compareTo(a.deliveryDate));
   int get deliveryPointsCnt => appState.deliveryPoints.length;
   int get deliveryPointsLeftCnt => appState.deliveryPoints.where((e) => !e.isFinished).length;
-  int get ordersInOwnStorageCnt => appState.userStorageOrders.length;
-  int get ordersNotInOwnStorageCnt => appState.orders
-    .where((e) => !appState.userStorageOrders.any((o) => e.orderId == o.orderId) && !e.isFinished && !e.isPickup)
-    .length;
+  int get ordersInOwnStorageCnt => appState.orders.where((e) => e.storageId == appState.user.storageId).length;
+  int get ordersNotInOwnStorageCnt {
+    List<int> orderIds = appState.deliveryPointOrders
+      .where((e) => !e.isPickup && !e.isFinished)
+      .map((e) => e.orderId).toList();
+
+    return appState.orders.where((e) => e.storageId != appState.user.storageId && orderIds.contains(e.id)).length;
+  }
   int get paymentsCnt => appState.payments.length;
   int get cashPaymentsCnt => appState.payments.where((e) => !e.isCard).toList().length;
   int get cardPaymentsCnt => appState.payments.where((e) => e.isCard).toList().length;

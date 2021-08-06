@@ -12,22 +12,22 @@ class PaymentRepository {
 
   PaymentRepository({required this.storage});
 
-  Future<List<Payment>> getPayments() async {
+  Future<List<Payment>> getRecords() async {
     return (await storage.db.query(_tableName, orderBy: 'id')).map((e) => Payment.fromJson(e)).toList();
   }
 
-  Future<void> addPayments(List<Payment> payments) async {
+  Future<void> addRecords(List<Payment> payments) async {
     Batch batch = storage.db.batch();
     await Future.wait(payments.map((e) async => await storage.db.insert(_tableName, e.toJson())));
     await batch.commit(noResult: true);
   }
 
-  Future<void> deletePayments() async {
+  Future<void> deleteRecords() async {
     await storage.db.delete(_tableName);
   }
 
-  Future<void> reloadPayments(List<Payment> payments) async {
-    await deletePayments();
-    await addPayments(payments);
+  Future<void> reloadRecords(List<Payment> payments) async {
+    await deleteRecords();
+    await addRecords(payments);
   }
 }

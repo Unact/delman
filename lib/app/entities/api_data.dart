@@ -15,9 +15,14 @@ class ApiData extends Equatable {
   });
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [
+    login,
+    url,
+    password,
+    token
+  ];
 
-  static ApiData fromJson(dynamic json) {
+  factory ApiData.fromJson(dynamic json) {
     return ApiData(
       login: json['login'],
       password: json['password'],

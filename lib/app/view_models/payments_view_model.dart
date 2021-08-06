@@ -11,12 +11,12 @@ class PaymentsViewModel extends BaseViewModel {
   }
 
   Order getOrderForPayment(Payment payment) {
-    return appState.orders.firstWhere((e) => e.id == payment.deliveryPointOrderId);
+    DeliveryPointOrder deliveryPointOrder = getDeliveryPointOrderForPayment(payment);
+
+    return appState.orders.firstWhere((e) => e.id == deliveryPointOrder.orderId);
   }
 
-  DeliveryPoint getDeliveryPointForPayment(Payment payment) {
-    Order order = getOrderForPayment(payment);
-
-    return appState.deliveryPoints.firstWhere((e) => e.id == order.deliveryPointId);
+  DeliveryPointOrder getDeliveryPointOrderForPayment(Payment payment) {
+    return appState.deliveryPointOrders.firstWhere((e) => e.id == payment.deliveryPointOrderId);
   }
 }

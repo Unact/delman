@@ -22,9 +22,17 @@ class Location extends Equatable {
   });
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [
+    latitude,
+    longitude,
+    accuracy,
+    altitude,
+    heading,
+    speed,
+    pointTs,
+  ];
 
-  static Location fromJson(dynamic json) {
+  factory Location.fromJson(dynamic json) {
     return Location(
       latitude: Nullify.parseDouble(json['latitude']),
       longitude: Nullify.parseDouble(json['longitude']),

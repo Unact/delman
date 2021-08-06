@@ -6,9 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:delman/app/constants/strings.dart';
 import 'package:delman/app/entities/entities.dart';
 import 'package:delman/app/utils/format.dart';
-import 'package:delman/app/pages/order_page.dart';
+import 'package:delman/app/pages/delivery_point_order_page.dart';
 import 'package:delman/app/view_models/delivery_point_view_model.dart';
-import 'package:delman/app/view_models/order_view_model.dart';
+import 'package:delman/app/view_models/delivery_point_order_view_model.dart';
 import 'package:delman/app/widgets/widgets.dart';
 
 class DeliveryPointPage extends StatefulWidget {
@@ -111,13 +111,13 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
                       dense: true,
                       contentPadding: EdgeInsets.symmetric(horizontal: 8)
                     ),
-                    vm.deliveryOrders.isEmpty ? Container() : ExpansionTile(
+                    vm.deliveryPointOrders.isEmpty ? Container() : ExpansionTile(
                       title: Text('Доставка'),
                       initiallyExpanded: true,
                       tilePadding: EdgeInsets.symmetric(horizontal: 8),
                       children: _buildDeliveryTiles(context)
                     ),
-                    vm.pickupOrders.isEmpty ? Container() : ExpansionTile(
+                    vm.pickupPointOrders.isEmpty ? Container() : ExpansionTile(
                       title: Text('Забор'),
                       initiallyExpanded: true,
                       tilePadding: EdgeInsets.symmetric(horizontal: 8),
@@ -149,7 +149,7 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
       InfoRow(title: Text('Доставка'), trailing: Text(vm.deliveryPoint.deliveryTypeName ?? '')),
       InfoRow(title: Text('Оплата'), trailing: Text(vm.deliveryPoint.paymentTypeName ?? '')),
       InfoRow(title: Text('Заказы')),
-    ]..addAll(vm.deliveryOrders.map<Widget>((e) => _buildOrderTile(context, e, vm.deliveryPoint)).toList());
+    ]..addAll(vm.deliveryPointOrders.map<Widget>((e) => _buildOrderTile(context, e)).toList());
   }
 
   List<Widget> _buildPickupTiles(BuildContext context) {
@@ -166,10 +166,13 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
         )
       ),
       InfoRow(title: Text('Заказы')),
-    ]..addAll(vm.pickupOrders.map<Widget>((e) => _buildOrderTile(context, e, vm.deliveryPoint)).toList());
+    ]..addAll(vm.pickupPointOrders.map<Widget>((e) => _buildOrderTile(context, e)).toList());
   }
 
-  Widget _buildOrderTile(BuildContext context, Order order, DeliveryPoint deliveryPoint) {
+  Widget _buildOrderTile(BuildContext context, DeliveryPointOrder deliveryPointOrder) {
+    DeliveryPointViewModel vm = Provider.of<DeliveryPointViewModel>(context);
+    Order order = vm.getOrder(deliveryPointOrder);
+
     return ListTile(
       title: Text('Заказ ${order.trackingNumber}', style: TextStyle(fontSize: 14)),
       contentPadding: EdgeInsets.symmetric(horizontal: 20),
@@ -177,13 +180,12 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (BuildContext context) => ChangeNotifierProvider<OrderViewModel>(
-              create: (context) => OrderViewModel(
+            builder: (BuildContext context) => ChangeNotifierProvider<DeliveryPointOrderViewModel>(
+              create: (context) => DeliveryPointOrderViewModel(
                 context: context,
-                order: order,
-                deliveryPoint: deliveryPoint
+                deliveryPointOrder: deliveryPointOrder
               ),
-              child: OrderPage(),
+              child: DeliveryPointOrderPage(),
             )
           )
         );

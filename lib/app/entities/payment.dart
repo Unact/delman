@@ -18,9 +18,14 @@ class Payment extends Equatable {
   bool get isCard => transactionId != null;
 
   @override
-  List<Object> get props => [deliveryPointOrderId, summ];
+  List<Object?> get props => [
+    id,
+    deliveryPointOrderId,
+    summ,
+    transactionId,
+  ];
 
-  static Payment fromJson(dynamic json) {
+  factory Payment.fromJson(dynamic json) {
     return Payment(
       id: json['id'],
       deliveryPointOrderId: json['deliveryPointOrderId'],

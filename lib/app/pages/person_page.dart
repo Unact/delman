@@ -93,7 +93,7 @@ class _PersonPageState extends State<PersonPage> {
       padding: EdgeInsets.only(top: 24, bottom: 24),
       children: [
         InfoRow(title: Text('Логин'), trailing: Text(vm.username)),
-        InfoRow(title: Text('Курьер'), trailing: Text(vm.courierName)),
+        InfoRow(title: Text('Курьер'), trailing: Text(vm.name)),
         InfoRow(title: Text('Обновление БД'), trailing: Text(vm.lastSyncTime)),
         InfoRow(title: Text('Версия'), trailing: Text(vm.fullVersion)),
         !vm.newVersionAvailable ? Container() : Padding(

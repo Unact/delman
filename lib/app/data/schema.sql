@@ -31,30 +31,49 @@ CREATE TABLE deliveryPoints(
     localTs DATETIME DEFAULT CURRENT_TIMESTAMP,
     localId INTEGER PRIMARY KEY
 );
-CREATE TABLE orders(
+CREATE TABLE deliveryPointOrders(
     id INTEGER UNIQUE,
     orderId INTEGER,
     deliveryPointId INTEGER,
 
     pickup INTEGER,
-    timeFrom DATETIME,
-    timeTo DATETIME,
+    canceled INTEGER,
+    finished INTEGER,
+
+    localTs DATETIME DEFAULT CURRENT_TIMESTAMP,
+    localId INTEGER PRIMARY KEY
+);
+CREATE TABLE orders(
+    id INTEGER UNIQUE,
+
+    deliveryDateTimeFrom DATETIME,
+    deliveryDateTimeTo DATETIME,
+    pickupDateTimeFrom DATETIME,
+    pickupDateTimeTo DATETIME,
+
     number TEXT,
     trackingNumber TEXT,
-    personName TEXT,
-    phone TEXT,
+    senderName TEXT,
+    buyerName TEXT,
+    senderPhone TEXT,
+    buyerPhone TEXT,
     comment TEXT,
     deliveryTypeName TEXT,
-    floor INTEGER,
-    flat TEXT,
-    elevator INTEGER,
+    pickupTypeName TEXT,
+    senderFloor INTEGER,
+    buyerFloor INTEGER,
+    senderFlat TEXT,
+    buyerFlat TEXT,
+    senderElevator INTEGER,
+    buyerElevator INTEGER,
     paymentTypeName TEXT,
     sellerName TEXT,
     documentsReturn INTEGER,
-    canceled INTEGER,
-    finished INTEGER,
+    deliveryAddressName TEXT,
+    pickupAddressName TEXT,
+
     cardPaymentAllowed INTEGER,
-    orderStorageId INTEGER,
+    storageId INTEGER,
 
     localTs DATETIME DEFAULT CURRENT_TIMESTAMP,
     localId INTEGER PRIMARY KEY
@@ -83,6 +102,7 @@ CREATE TABLE payments(
 );
 CREATE TABLE orderStorages(
     id INTEGER UNIQUE,
+
     name TEXT,
 
     localTs DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -93,15 +113,6 @@ CREATE TABLE orderInfo(
     orderId INTEGER,
 
     comment TEXT,
-    ts DATETIME,
-
-    localTs DATETIME DEFAULT CURRENT_TIMESTAMP,
-    localId INTEGER PRIMARY KEY
-);
-CREATE TABLE userStorageOrders(
-    orderId INTEGER UNIQUE,
-
-    trackingNumber TEXT,
     ts DATETIME,
 
     localTs DATETIME DEFAULT CURRENT_TIMESTAMP,

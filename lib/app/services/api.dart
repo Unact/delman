@@ -71,41 +71,16 @@ class Api {
       id: userData['id'],
       username: userData['username'],
       email: userData['email'],
-      courierName: userData['courierName'],
-      courierStorageId: userData['courierStorageId'],
+      name: userData['name'],
+      storageId: userData['storageId'],
       version: userData['app']['version']
     );
   }
 
-  Future<Map<String, dynamic>> getData() async {
+  Future<GetDataResponse> getData() async {
     dynamic data = await _get('v1/delman');
-    List<DeliveryPoint> deliveryPoints = data['deliveryPoints']
-      .map<DeliveryPoint>((e) => DeliveryPoint.fromJson(e)).toList();
-    List<Delivery> deliveries = data['deliveries']
-      .map<Delivery>((e) => Delivery.fromJson(e)).toList();
-    List<OrderInfo> orderInfoList = data['orderInfoList']
-      .map<OrderInfo>((e) => OrderInfo.fromJson(e)).toList();
-    List<OrderLine> orderLines = data['orderLines']
-      .map<OrderLine>((e) => OrderLine.fromJson(e)).toList();
-    List<Order> orders = data['orders']
-      .map<Order>((e) => Order.fromJson(e)).toList();
-    List<UserStorageOrder> userStorageOrders = data['userStorageOrders']
-      .map<UserStorageOrder>((e) => UserStorageOrder.fromJson(e)).toList();
-    List<OrderStorage> orderStorages = data['orderStorages']
-      .map<OrderStorage>((e) => OrderStorage.fromJson(e)).toList();
-    List<Payment> payments = data['payments']
-      .map<Payment>((e) => Payment.fromJson(e)).toList();
 
-    return {
-      'deliveryPoints': deliveryPoints,
-      'deliveries': deliveries,
-      'orderInfoList': orderInfoList,
-      'orderLines': orderLines,
-      'orders': orders,
-      'userStorageOrders': userStorageOrders,
-      'orderStorages': orderStorages,
-      'payments': payments
-    };
+    return GetDataResponse.fromJson(data);
   }
 
   Future<void> arriveAtDeliveryPoint(DeliveryPoint deliveryPoint, Location location) async {
@@ -116,23 +91,29 @@ class Api {
     });
   }
 
-  Future<void> cancelOrder(Order order, Location location) async {
+  Future<void> cancelOrder(DeliveryPointOrder deliveryPointOrder, Location location) async {
     await _post('v1/delman/cancel_order', data: {
-      'deliveryPointOrderId': order.id,
+      'deliveryPointOrderId': deliveryPointOrder.id,
       'location': location
     });
   }
 
-  Future<void> confirmOrder(Order order, List<OrderLine> orderLines, Location location) async {
+  Future<void> confirmOrder(
+    DeliveryPointOrder deliveryPointOrder,
+    List<OrderLine> orderLines,
+    Location location
+  ) async {
     await _post('v1/delman/confirm_order', data: {
-      'deliveryPointOrderId': order.id,
+      'deliveryPointOrderId': deliveryPointOrder.id,
       'orderLines': orderLines.map((e) => {'id': e.id, 'factAmount': e.factAmount}).toList(),
       'location': location
     });
   }
 
-  Future<Map<String, dynamic>> getPaymentCredentials() async {
-    return await _get('v1/delman/credentials');
+  Future<PaymentCredentials> getPaymentCredentials() async {
+    dynamic data = await _get('v1/delman/credentials');
+
+    return PaymentCredentials.fromJson(data);
   }
 
   Future<void> acceptPayment(Payment payment, Map<dynamic, dynamic>? transaction, Location location) async {
@@ -162,13 +143,13 @@ class Api {
 
   Future<void> acceptOrder(Order order) async {
     await _post('v1/delman/accept_order', data: {
-      'deliveryPointOrderId': order.id
+      'orderId': order.id
     });
   }
 
-  Future<void> transferUserStorageOrder(UserStorageOrder storageOrder, OrderStorage orderStorage) async {
+  Future<void> transferOrder(Order order, OrderStorage orderStorage) async {
     await _post('v1/delman/transfer_order', data: {
-      'orderId': storageOrder.orderId,
+      'orderId': order.id,
       'storageId': orderStorage.id
     });
   }
@@ -396,4 +377,47 @@ class ApiConnException extends ApiException {
 
 class VersionException extends ApiException {
   VersionException(errorMsg) : super(errorMsg, 410);
+}
+
+class GetDataResponse {
+  List<DeliveryPoint> deliveryPoints;
+  List<Delivery> deliveries;
+  List<OrderInfo> orderInfoList;
+  List<OrderLine> orderLines;
+  List<Order> orders;
+  List<DeliveryPointOrder> deliveryPointOrders;
+  List<OrderStorage> orderStorages;
+  List<Payment> payments;
+
+  GetDataResponse({
+    required this.deliveryPoints,
+    required this.deliveries,
+    required this.orderInfoList,
+    required this.orderLines,
+    required this.orders,
+    required this.deliveryPointOrders,
+    required this.orderStorages,
+    required this.payments,
+  });
+
+  factory GetDataResponse.fromJson(Map<String, dynamic> json) {
+    return GetDataResponse(
+      deliveryPoints: json['deliveryPoints']
+        .map<DeliveryPoint>((e) => DeliveryPoint.fromJson(e)).toList(),
+      deliveryPointOrders: json['deliveryPointOrders']
+        .map<DeliveryPointOrder>((e) => DeliveryPointOrder.fromJson(e)).toList(),
+      deliveries: json['deliveries']
+        .map<Delivery>((e) => Delivery.fromJson(e)).toList(),
+      orderInfoList: json['orderInfoList']
+        .map<OrderInfo>((e) => OrderInfo.fromJson(e)).toList(),
+      orderLines: json['orderLines']
+        .map<OrderLine>((e) => OrderLine.fromJson(e)).toList(),
+      orders: json['orders']
+        .map<Order>((e) => Order.fromJson(e)).toList(),
+      orderStorages: json['orderStorages']
+        .map<OrderStorage>((e) => OrderStorage.fromJson(e)).toList(),
+      payments: json['payments']
+        .map<Payment>((e) => Payment.fromJson(e)).toList(),
+    );
+  }
 }

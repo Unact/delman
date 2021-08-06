@@ -11,22 +11,22 @@ class DeliveryRepository {
 
   DeliveryRepository({required this.storage});
 
-  Future<List<Delivery>> getDeliveries() async {
+  Future<List<Delivery>> getRecords() async {
     return (await storage.db.query(_tableName, orderBy: 'id')).map((e) => Delivery.fromJson(e)).toList();
   }
 
-  Future<void> addDeliveries(List<Delivery> deliveries) async {
+  Future<void> addRecords(List<Delivery> deliveries) async {
     Batch batch = storage.db.batch();
     await Future.wait(deliveries.map((e) async => await storage.db.insert(_tableName, e.toJson())));
     batch.commit(noResult: true);
   }
 
-  Future<void> deleteDeliveries() async {
+  Future<void> deleteRecords() async {
     await storage.db.delete(_tableName);
   }
 
-  Future<void> reloadDeliveries(List<Delivery> deliveries) async {
-    await deleteDeliveries();
-    await addDeliveries(deliveries);
+  Future<void> reloadRecords(List<Delivery> deliveries) async {
+    await deleteRecords();
+    await addRecords(deliveries);
   }
 }

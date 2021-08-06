@@ -10,9 +10,12 @@ class OrderStorage extends Equatable {
   });
 
   @override
-  List<Object> get props => [id, name];
+  List<Object> get props => [
+    id,
+    name,
+  ];
 
-  static OrderStorage fromJson(dynamic json) {
+  factory OrderStorage.fromJson(dynamic json) {
     return OrderStorage(
       id: json['id'],
       name: json['name']

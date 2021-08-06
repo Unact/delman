@@ -25,17 +25,18 @@ class DeliveryPointViewModel extends BaseViewModel {
   DeliveryPointState get state => _state;
   String? get message => _message;
 
-  List<Order> get deliveryOrders {
-    return appState.orders
-      .where((e) => e.deliveryPointId == deliveryPoint.id && !e.isPickup)
-      .toList()
-      ..sort((a, b) => a.trackingNumber.compareTo(b.trackingNumber));
-  }
-  List<Order> get pickupOrders {
-    return appState.orders
-      .where((e) => e.deliveryPointId == deliveryPoint.id && e.isPickup)
-      .toList()
-      ..sort((a, b) => a.trackingNumber.compareTo(b.trackingNumber));
+  List<DeliveryPointOrder> get deliveryPointOrders => appState.deliveryPointOrders
+    .where((e) => e.deliveryPointId == deliveryPoint.id && !e.isPickup)
+    .toList()
+    ..sort((a, b) => getOrder(a).trackingNumber.compareTo(getOrder(b).trackingNumber));
+
+  List<DeliveryPointOrder> get pickupPointOrders => appState.deliveryPointOrders
+    .where((e) => e.deliveryPointId == deliveryPoint.id && e.isPickup)
+    .toList()
+    ..sort((a, b) => getOrder(a).trackingNumber.compareTo(getOrder(b).trackingNumber));
+
+  Order getOrder(DeliveryPointOrder deliveryPointOrder) {
+    return appState.orders.firstWhere((e) => e.id == deliveryPointOrder.orderId);
   }
 
   Future<void> callPhone() async {

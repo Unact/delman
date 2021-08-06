@@ -4,8 +4,8 @@ class User extends Equatable {
   final int id;
   final String username;
   final String? email;
-  final String? courierName;
-  final int? courierStorageId;
+  final String? name;
+  final int? storageId;
   final String? version;
 
   static const int kGuestId = 1;
@@ -17,21 +17,28 @@ class User extends Equatable {
     required this.id,
     required this.username,
     this.email,
-    this.courierName,
-    this.courierStorageId,
+    this.name,
+    this.storageId,
     this.version
   });
 
   @override
-  List<Object> get props => [id, username];
+  List<Object?> get props => [
+    id,
+    username,
+    email,
+    name,
+    storageId,
+    version,
+  ];
 
-  static User fromJson(dynamic json) {
+  factory User.fromJson(dynamic json) {
     return User(
       id: json['id'],
       username: json['username'],
       email: json['email'],
-      courierName: json['courierName'],
-      courierStorageId: json['courierStorageId'],
+      name: json['name'],
+      storageId: json['storageId'],
       version: json['version']
     );
   }
@@ -41,8 +48,8 @@ class User extends Equatable {
       'id': id,
       'username': username,
       'email': email,
-      'courierName': courierName,
-      'courierStorageId': courierStorageId,
+      'name': name,
+      'storageId': storageId,
       'version': version
     };
   }

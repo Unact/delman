@@ -10,9 +10,11 @@ class AppData extends Equatable {
   });
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [
+    lastSyncTime,
+  ];
 
-  static AppData fromJson(dynamic json) {
+  factory AppData.fromJson(dynamic json) {
     return AppData(
       lastSyncTime: Nullify.parseDate(json['lastSyncTime'])
     );

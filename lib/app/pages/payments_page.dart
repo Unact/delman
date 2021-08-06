@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 
 import 'package:delman/app/constants/strings.dart';
 import 'package:delman/app/entities/entities.dart';
-import 'package:delman/app/pages/order_page.dart';
+import 'package:delman/app/pages/delivery_point_order_page.dart';
 import 'package:delman/app/utils/format.dart';
-import 'package:delman/app/view_models/order_view_model.dart';
+import 'package:delman/app/view_models/delivery_point_order_view_model.dart';
 import 'package:delman/app/view_models/payments_view_model.dart';
 
 class PaymentsPage extends StatelessWidget {
@@ -24,7 +24,7 @@ class PaymentsPage extends StatelessWidget {
             padding: EdgeInsets.only(top: 24, left: 8, right: 8, bottom: 24),
             children: vm.payments.map((payment) {
               Order order = vm.getOrderForPayment(payment);
-              DeliveryPoint deliveryPoint = vm.getDeliveryPointForPayment(payment);
+              DeliveryPointOrder deliveryPointOrder = vm.getDeliveryPointOrderForPayment(payment);
 
               return ListTile(
                 isThreeLine: true,
@@ -50,13 +50,12 @@ class PaymentsPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (BuildContext context) => ChangeNotifierProvider<OrderViewModel>(
-                        create: (context) => OrderViewModel(
+                      builder: (BuildContext context) => ChangeNotifierProvider<DeliveryPointOrderViewModel>(
+                        create: (context) => DeliveryPointOrderViewModel(
                           context: context,
-                          order: order,
-                          deliveryPoint: deliveryPoint
+                          deliveryPointOrder: deliveryPointOrder
                         ),
-                        child: OrderPage(),
+                        child: DeliveryPointOrderPage(),
                       )
                     )
                   );

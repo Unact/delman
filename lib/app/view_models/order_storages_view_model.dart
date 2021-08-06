@@ -7,6 +7,6 @@ class OrderStoragesViewModel extends BaseViewModel {
   OrderStoragesViewModel({required BuildContext context}) : super(context: context);
 
   List<OrderStorage> get orderStorages {
-    return appState.orderStorages.where((e) => e.id != appState.user.courierStorageId).toList();
+    return appState.orderStorages.where((e) => e.id != appState.user.storageId).toList();
   }
 }

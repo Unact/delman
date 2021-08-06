@@ -11,23 +11,23 @@ class DeliveryPointRepository {
 
   DeliveryPointRepository({required this.storage});
 
-  Future<List<DeliveryPoint>> getDeliveryPoints() async {
+  Future<List<DeliveryPoint>> getRecords() async {
     return (await storage.db.query(_tableName, orderBy: 'id')).map((e) => DeliveryPoint.fromJson(e)).toList();
   }
 
-  Future<void> addDeliveryPoints(List<DeliveryPoint> deliveries) async {
+  Future<void> addRecords(List<DeliveryPoint> deliveries) async {
     Batch batch = storage.db.batch();
     await Future.wait(deliveries.map((e) async => await storage.db.insert(_tableName, e.toJson())));
     await batch.commit(noResult: true);
   }
 
-  Future<void> deleteDeliveryPoints() async {
+  Future<void> deleteRecords() async {
     await storage.db.delete(_tableName);
   }
 
-  Future<void> reloadDeliveryPoints(List<DeliveryPoint> deliveryPoints) async {
-    await deleteDeliveryPoints();
-    await addDeliveryPoints(deliveryPoints);
+  Future<void> reloadRecords(List<DeliveryPoint> deliveryPoints) async {
+    await deleteRecords();
+    await addRecords(deliveryPoints);
   }
 
   Future<void> updateDeliveryPoint(DeliveryPoint deliveryPoint) async {

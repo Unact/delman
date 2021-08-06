@@ -11,26 +11,26 @@ class OrderLineRepository {
 
   OrderLineRepository({required this.storage});
 
-  Future<List<OrderLine>> getOrderLines() async {
+  Future<List<OrderLine>> getRecords() async {
     return (await storage.db.query(_tableName, orderBy: 'id')).map((e) => OrderLine.fromJson(e)).toList();
   }
 
-  Future<void> addOrderLines(List<OrderLine> orderLines) async {
+  Future<void> addRecords(List<OrderLine> orderLines) async {
     Batch batch = storage.db.batch();
     await Future.wait(orderLines.map((e) async => await storage.db.insert(_tableName, e.toJson())));
     await batch.commit(noResult: true);
   }
 
-  Future<void> deleteOrderLines() async {
+  Future<void> deleteRecords() async {
     await storage.db.delete(_tableName);
   }
 
-  Future<void> reloadOrderLines(List<OrderLine> orderLines) async {
-    await deleteOrderLines();
-    await addOrderLines(orderLines);
+  Future<void> reloadRecords(List<OrderLine> orderLines) async {
+    await deleteRecords();
+    await addRecords(orderLines);
   }
 
-  Future<void> updateOrderLines(List<OrderLine> orderLines) async {
+  Future<void> updateRecords(List<OrderLine> orderLines) async {
     Batch batch = storage.db.batch();
     await Future.wait(
       orderLines.map((e) async => await storage.db.update(_tableName, e.toJson(), where: 'id = ${e.id}'))

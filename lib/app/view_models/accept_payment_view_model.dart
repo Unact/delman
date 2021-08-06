@@ -84,9 +84,9 @@ class AcceptPaymentViewModel extends BaseViewModel {
     _setState(AcceptPaymentState.GettingCredentials);
 
     try {
-      Map<String, dynamic> credentials = await appState.getPaymentCredentials();
+      PaymentCredentials credentials = await appState.getPaymentCredentials();
 
-      await _apiLogin(credentials['login'], credentials['password']);
+      await _apiLogin(credentials.login, credentials.password);
     } on AppError catch(e) {
       _setMessage(e.message);
       _setState(AcceptPaymentState.Failure);
