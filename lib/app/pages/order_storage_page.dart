@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:delman/app/constants/strings.dart';
 import 'package:delman/app/entities/entities.dart';
 import 'package:delman/app/pages/order_page.dart';
 import 'package:delman/app/view_models/order_view_model.dart';
@@ -52,10 +53,30 @@ class _OrderStoragePageState extends State<OrderStoragePage> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  Future<bool> showConfirmationDialog(String message) async {
+    return await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Предупреждение'),
+          content: SingleChildScrollView(child: ListBody(children: <Widget>[Text(message)])),
+          actions: <Widget>[
+            TextButton(child: Text(Strings.ok), onPressed: () => Navigator.of(context).pop(true)),
+            TextButton(child: Text(Strings.cancel), onPressed: () => Navigator.of(context).pop(false))
+          ],
+        );
+      }
+    ) ?? false;
+  }
+
   Future<void> vmListener() async {
     switch (_orderStorageViewModel!.state) {
       case OrderStorageState.InProgress:
         openDialog();
+        break;
+      case OrderStorageState.NeedUserConfirmation:
+        _orderStorageViewModel!.confirmationCallback!(await showConfirmationDialog(_orderStorageViewModel!.message!));
         break;
       case OrderStorageState.Failure:
       case OrderStorageState.Accepted:
@@ -160,7 +181,7 @@ class _OrderStoragePageState extends State<OrderStoragePage> {
           primary: Colors.blue,
         ),
         child: Text('Принять'),
-        onPressed: () => vm.acceptOrder(order)
+        onPressed: () => vm.tryAcceptOrder(order)
       ),
       onTap: () {
         Navigator.push(

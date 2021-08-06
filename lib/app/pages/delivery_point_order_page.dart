@@ -146,7 +146,9 @@ class _DeliveryPointOrderPageState extends State<DeliveryPointOrderPage> {
         closeDialog();
         break;
       case DeliveryPointOrderState.NeedUserConfirmation:
-        _deliveryPointOrderViewModel!.confirmationCallback!(await showConfirmationDialog(_deliveryPointOrderViewModel!.message!));
+        _deliveryPointOrderViewModel!.confirmationCallback!(
+          await showConfirmationDialog(_deliveryPointOrderViewModel!.message!)
+        );
         break;
       default:
     }

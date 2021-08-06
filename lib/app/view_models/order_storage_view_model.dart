@@ -11,12 +11,13 @@ enum OrderStorageState {
   InProgress,
   Accepted,
   Transferred,
-  Failure
+  Failure,
+  NeedUserConfirmation
 }
 
 class OrderStorageViewModel extends BaseViewModel {
   OrderStorage orderStorage;
-
+  Function? _confirmationCallback;
   String? _message;
   OrderStorageState _state = OrderStorageState.Initial;
 
@@ -27,6 +28,7 @@ class OrderStorageViewModel extends BaseViewModel {
 
   OrderStorageState get state => _state;
   String? get message => _message;
+  Function? get confirmationCallback => _confirmationCallback;
 
   List<Order> get ordersInOwnStorage {
     return appState.orders
@@ -39,6 +41,26 @@ class OrderStorageViewModel extends BaseViewModel {
       .where((e) => e.storageId == orderStorage.id)
       .toList()
       ..sort((a, b) => a.trackingNumber.compareTo(b.trackingNumber));
+  }
+
+  Future<void> tryAcceptOrder(Order order) async {
+    if (order.needDocumentsReturn) {
+      _confirmationCallback = (bool confirmed) async {
+        if (!confirmed) {
+          _setMessage('Нельзя принять заказ без возврата документов');
+          _setState(OrderStorageState.Failure);
+          return;
+        }
+
+        await acceptOrder(order);
+      };
+      _setMessage('Вы забрали документы?');
+      _setState(OrderStorageState.NeedUserConfirmation);
+
+      return;
+    }
+
+    await acceptOrder(order);
   }
 
   Future<void> acceptOrder(Order order) async {
