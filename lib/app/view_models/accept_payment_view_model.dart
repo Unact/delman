@@ -26,7 +26,8 @@ enum AcceptPaymentState {
 }
 
 class AcceptPaymentViewModel extends BaseViewModel {
-  Order order;
+  late Order order;
+  DeliveryPointOrder deliveryPointOrder;
   String _message = 'Инициализация платежа';
   AcceptPaymentState _state = AcceptPaymentState.Initial;
   bool _canceled = false;
@@ -40,8 +41,10 @@ class AcceptPaymentViewModel extends BaseViewModel {
     required BuildContext context,
     required this.total,
     required this.cardPayment,
-    required this.order
+    required this.deliveryPointOrder
   }) : super(context: context) {
+    order = appState.orders.firstWhere((e) => e.id == deliveryPointOrder.orderId);
+
     if (!cardPayment) {
       _savePayment();
     } else {
@@ -163,7 +166,7 @@ class AcceptPaymentViewModel extends BaseViewModel {
     _setState(AcceptPaymentState.SavingPayment);
 
     Payment payment = Payment(
-      deliveryPointOrderId: order.id,
+      deliveryPointOrderId: deliveryPointOrder.id,
       summ: total,
       transactionId: transaction != null ? transaction['id'] : null
     );

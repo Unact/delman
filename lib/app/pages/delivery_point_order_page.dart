@@ -100,7 +100,7 @@ class _DeliveryPointOrderPageState extends State<DeliveryPointOrderPage> {
       builder: (_) => ChangeNotifierProvider<AcceptPaymentViewModel>(
         create: (context) => AcceptPaymentViewModel(
           context: context,
-          order: _deliveryPointOrderViewModel!.order,
+          deliveryPointOrder: _deliveryPointOrderViewModel!.deliveryPointOrder,
           total: _deliveryPointOrderViewModel!.total,
           cardPayment: _deliveryPointOrderViewModel!.cardPayment
         ),
