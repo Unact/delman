@@ -18,4 +18,6 @@ class Strings {
   static const genericErrorMsg = 'Произошла непредвиденная ошибка';
   static const ok = 'ОК';
   static const cancel = 'Отмена';
+
+  static const qrCodeVersion = '1';
 }

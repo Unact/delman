@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:delman/app/constants/strings.dart';
 import 'package:delman/app/entities/entities.dart';
 import 'package:delman/app/pages/order_page.dart';
+import 'package:delman/app/pages/qr_scan_page.dart';
 import 'package:delman/app/view_models/order_view_model.dart';
 import 'package:delman/app/view_models/order_storage_view_model.dart';
 
@@ -70,10 +71,20 @@ class _OrderStoragePageState extends State<OrderStoragePage> {
     ) ?? false;
   }
 
+  Future<String?> showQRScanPage() async {
+    return await Navigator.push(
+      context,
+      MaterialPageRoute(fullscreenDialog: true, builder: (BuildContext context) => QRScanPage())
+    );
+  }
+
   Future<void> vmListener() async {
     switch (_orderStorageViewModel!.state) {
       case OrderStorageState.InProgress:
         openDialog();
+        break;
+      case OrderStorageState.StartedQRScan:
+        _orderStorageViewModel!.finishQRScan(await showQRScanPage());
         break;
       case OrderStorageState.NeedUserConfirmation:
         _orderStorageViewModel!.confirmationCallback!(await showConfirmationDialog(_orderStorageViewModel!.message!));
@@ -94,7 +105,14 @@ class _OrderStoragePageState extends State<OrderStoragePage> {
       builder: (context, vm, _) {
         return Scaffold(
           appBar: AppBar(
-            title: Text('Заказы на складе')
+            title: Text('Заказы на складе'),
+            actions: <Widget>[
+              IconButton(
+                color: Colors.white,
+                icon: Icon(Icons.qr_code_scanner),
+                onPressed: vm.startQRScan
+              )
+            ]
           ),
           body: ListView(
             physics: AlwaysScrollableScrollPhysics(),

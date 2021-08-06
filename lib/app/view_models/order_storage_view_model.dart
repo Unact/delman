@@ -1,7 +1,9 @@
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:delman/app/app_state.dart';
+import 'package:delman/app/constants/strings.dart';
 import 'package:delman/app/entities/entities.dart';
 import 'package:delman/app/utils/misc.dart';
 import 'package:delman/app/view_models/base_view_model.dart';
@@ -12,7 +14,8 @@ enum OrderStorageState {
   Accepted,
   Transferred,
   Failure,
-  NeedUserConfirmation
+  NeedUserConfirmation,
+  StartedQRScan
 }
 
 class OrderStorageViewModel extends BaseViewModel {
@@ -41,6 +44,47 @@ class OrderStorageViewModel extends BaseViewModel {
       .where((e) => e.storageId == orderStorage.id)
       .toList()
       ..sort((a, b) => a.trackingNumber.compareTo(b.trackingNumber));
+  }
+
+  Future<void> startQRScan() async {
+    PermissionStatus status = await Permission.camera.request();
+
+    if (status.isPermanentlyDenied || status.isDenied) {
+      _setMessage('Для сканирования QR кода необходимо разрешить использование камеры');
+      _setState(OrderStorageState.Failure);
+      return;
+    }
+
+    _setState(OrderStorageState.StartedQRScan);
+  }
+
+  Future<void> finishQRScan(String? qrCode) async {
+    if (qrCode == null) return;
+
+    List<String> qrCodeData = qrCode.split(' ');
+
+    if (qrCodeData.length < 2 || qrCodeData[0] != Strings.qrCodeVersion) {
+      _setMessage('Считан не поддерживаемый QR код');
+      _setState(OrderStorageState.Failure);
+      return;
+    }
+
+    String qrTrackingNumber = qrCodeData[1];
+
+    if (ordersInOrderStorage.any((e) => e.trackingNumber == qrTrackingNumber)) {
+      Order order = ordersInOrderStorage.firstWhere((e) => e.trackingNumber == qrTrackingNumber);
+      await tryAcceptOrder(order);
+      return;
+    }
+
+    if (ordersInOwnStorage.any((e) => e.trackingNumber == qrTrackingNumber)) {
+      Order order = ordersInOwnStorage.firstWhere((e) => e.trackingNumber == qrTrackingNumber);
+      await transferOrder(order);
+      return;
+    }
+
+    _setMessage('Не удалось найти заказ');
+    _setState(OrderStorageState.Failure);
   }
 
   Future<void> tryAcceptOrder(Order order) async {
