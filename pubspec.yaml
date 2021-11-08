@@ -29,14 +29,13 @@ dependencies:
   provider: ^5.0.0
   url_launcher: ^6.0.6
   location: ^4.1.1
-  yandex_mapkit: ^1.0.0
+  yandex_mapkit:
+    git:
+      url: git://github.com/Unact/yandex_mapkit
   flutter_blue: ^0.8.0
   flutter_signature_pad: ^3.0.0
   iboxpro_flutter: ^1.0.1
-  # https://github.com/edufolly/flutter_bluetooth_serial/pull/122
-  flutter_bluetooth_serial:
-    git:
-      url: git://github.com/fabiomarini/flutter_bluetooth_serial
+  flutter_bluetooth_serial: ^0.3.2
   quiver: ^3.0.1
   qr_code_scanner: ^0.5.2
   permission_handler: ^8.1.4
@@ -49,5 +48,3 @@ flutter:
   uses-material-design: true
   assets:
     - lib/app/data/schema.sql
-    - lib/app/assets/images/placeicon.png
-    - .env

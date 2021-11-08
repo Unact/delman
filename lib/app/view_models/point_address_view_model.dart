@@ -1,7 +1,6 @@
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 import 'package:delman/app/constants/strings.dart';
 import 'package:delman/app/entities/entities.dart';
@@ -11,6 +10,7 @@ import 'package:delman/app/view_models/base_view_model.dart';
 
 enum PointAddressState {
   Initial,
+  SelectionChange,
   Failure
 }
 
@@ -19,34 +19,34 @@ class PointAddressViewModel extends BaseViewModel {
   PointAddressState _state = PointAddressState.Initial;
 
   String? _message;
-  late Placemark _placemark;
 
-  PointAddressViewModel({required BuildContext context, required this.deliveryPoint}) : super(context: context) {
-    _placemark = Placemark(
-      point: Point(longitude: deliveryPoint.longitude, latitude: deliveryPoint.latitude),
-      style: PlacemarkStyle(iconName: 'lib/app/assets/images/placeicon.png'),
-      onTap: (Placemark placemark, Point point) async {
-        Location? location = await GeoLoc.getCurrentLocation();
-        String params = 'rtext=' +
-          '${location?.latitude},${location?.longitude}' +
-          '~' +
-          '${deliveryPoint.latitude},${deliveryPoint.longitude}';
-        String url = 'yandexmaps://maps.yandex.ru?$params';
-
-        if (await canLaunch(url)) {
-          await launch(url);
-        } else {
-          _setMessage(Strings.genericErrorMsg);
-          _setState(PointAddressState.Failure);
-        }
-      }
-    );
-  }
+  PointAddressViewModel({required BuildContext context, required this.deliveryPoint}) : super(context: context);
 
   PointAddressState get state => _state;
   String? get message => _message;
+  List<DeliveryPoint> get deliveryPoints => appState.deliveryPoints..sort((a, b) => a.seq.compareTo(b.seq));
 
-  Placemark get placemark => _placemark;
+  void changeDeliveryPoint(DeliveryPoint newDeliveryPoint) {
+    deliveryPoint = newDeliveryPoint;
+
+    _setState(PointAddressState.SelectionChange);
+  }
+
+  void routeTo() async {
+    Location? location = await GeoLoc.getCurrentLocation();
+    String params = 'rtext=' +
+      '${location?.latitude},${location?.longitude}' +
+      '~' +
+      '${deliveryPoint.latitude},${deliveryPoint.longitude}';
+    String url = 'yandexmaps://maps.yandex.ru?$params';
+
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      _setMessage(Strings.genericErrorMsg);
+      _setState(PointAddressState.Failure);
+    }
+  }
 
   void _setState(PointAddressState state) {
     FLog.info(methodName: Misc.stackFrame(1)['methodName'], text: state.toString());

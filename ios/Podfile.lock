@@ -10,8 +10,6 @@ PODS:
   - flutter_blue/Protos (0.0.1):
     - Flutter
     - Protobuf (~> 3.11.4)
-  - flutter_bluetooth_serial (0.0.1):
-    - Flutter
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
@@ -55,7 +53,6 @@ DEPENDENCIES:
   - fk_user_agent (from `.symlinks/plugins/fk_user_agent/ios`)
   - Flutter (from `Flutter`)
   - flutter_blue (from `.symlinks/plugins/flutter_blue/ios`)
-  - flutter_bluetooth_serial (from `.symlinks/plugins/flutter_bluetooth_serial/ios`)
   - iboxpro_flutter (from `.symlinks/plugins/iboxpro_flutter/ios`)
   - location (from `.symlinks/plugins/location/ios`)
   - package_info (from `.symlinks/plugins/package_info/ios`)
@@ -86,8 +83,6 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_blue:
     :path: ".symlinks/plugins/flutter_blue/ios"
-  flutter_bluetooth_serial:
-    :path: ".symlinks/plugins/flutter_bluetooth_serial/ios"
   iboxpro_flutter:
     :path: ".symlinks/plugins/iboxpro_flutter/ios"
   location:
@@ -116,9 +111,8 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   device_info_plus: e5c5da33f982a436e103237c0c85f9031142abed
   fk_user_agent: 1f47ec39291e8372b1d692b50084b0d54103c545
-  Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
+  Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
   flutter_blue: eeb381dc4727a0954dede73515f683865494b370
-  flutter_bluetooth_serial: a42f785e4f7d2a6390d415cc39da5474ec2fef4f
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   iboxpro_flutter: fe944bd0a3f50fa4f18a7c633ead63603611016d
   location: 3a2eed4dd2fab25e7b7baf2a9efefe82b512d740

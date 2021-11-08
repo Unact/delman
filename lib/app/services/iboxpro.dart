@@ -145,7 +145,7 @@ class Iboxpro {
     blueSerial.FlutterBluetoothSerial bluetooth = blueSerial.FlutterBluetoothSerial.instance;
     List<blueSerial.BluetoothDevice> devices = await bluetooth.getBondedDevices();
 
-    if (!devices.any((device) => device.name.contains(_terminalNamePrefix))) {
+    if (!devices.any((device) => (device.name ?? '').contains(_terminalNamePrefix))) {
       List<blueSerial.BluetoothDiscoveryResult> results = [];
       StreamSubscription<blueSerial.BluetoothDiscoveryResult> subscription = bluetooth.startDiscovery().
         listen((r) => results.add(r));
@@ -156,7 +156,7 @@ class Iboxpro {
     }
 
     blueSerial.BluetoothDevice? device = devices.firstWhereOrNull(
-      (device) => device.name.contains(_terminalNamePrefix)
+      (device) => (device.name ?? '').contains(_terminalNamePrefix)
     );
 
     if (device == null) {

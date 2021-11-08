@@ -18,4 +18,8 @@ class Format {
   static String timeStr(DateTime? dateTime) {
     return dateTime != null ? DateFormat.Hm('ru').format(dateTime) : '';
   }
+
+  static String hourStr(DateTime? dateTime) {
+    return dateTime != null ? DateFormat.H('ru').format(dateTime) : '';
+  }
 }
