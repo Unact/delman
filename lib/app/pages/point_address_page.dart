@@ -24,7 +24,7 @@ class _PointAddressPageState extends State<PointAddressPage> {
   late PointAddressViewModel _pointAddressViewModel;
   late YandexMapController _controller;
 
-  double _kImageFontSize = 50;
+  double _kImageFontSize = 30;
 
   Color _deliveryPointColor(DeliveryPoint deliveryPoint) {
       if (deliveryPoint == _pointAddressViewModel.deliveryPoint) {
@@ -47,10 +47,10 @@ class _PointAddressPageState extends State<PointAddressPage> {
   }
 
   String _deliveryPointLabel(DeliveryPoint deliveryPoint) {
-    final planArrival = Format.hourStr(deliveryPoint.planArrival);
-    final planDeparture = Format.hourStr(deliveryPoint.planDeparture);
+    DateTime? timeFrom = _pointAddressViewModel.getPointTimeFrom(deliveryPoint);
+    DateTime? timeTo = _pointAddressViewModel.getPointTimeTo(deliveryPoint);
 
-    return '${deliveryPoint.seq}. $planArrival - $planDeparture';
+    return '${deliveryPoint.seq}. ${Format.timeStr(timeFrom)} - ${Format.timeStr(timeTo)}';
   }
 
   @override
@@ -297,7 +297,7 @@ class _PointAddressPageState extends State<PointAddressPage> {
 
   Future<Uint8List> _buildPlacemarkAppearance(DeliveryPoint deliveryPoint) async {
     final radius = 20.0;
-    final size = Size(300, 300);
+    final size = Size(300, 200);
 
     return _buildImage(size, (canvas) {
       _drawPointCircle(size, canvas, radius, _deliveryPointColor(deliveryPoint));
@@ -308,7 +308,7 @@ class _PointAddressPageState extends State<PointAddressPage> {
   Future<Uint8List> _buildClusterAppearance(Cluster cluster) async {
     final radius = 50.0;
     final showTextRect = cluster.size <= 3;
-    final size = showTextRect ? Size(300, 300.0 * cluster.size) : Size(300, 300);
+    final size = showTextRect ? Size(300, 200.0 * cluster.size) : Size(300, 200);
     final deliveryPointMapIds = cluster.placemarks.map((e) => e.mapId).toList();
     final deliveryPoints = _pointAddressViewModel.deliveryPoints.fold<List<DeliveryPoint>>([], (acc, e) {
       if (deliveryPointMapIds.contains(_deliveryPointMapId(e))) {

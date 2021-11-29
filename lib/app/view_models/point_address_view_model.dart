@@ -26,6 +26,38 @@ class PointAddressViewModel extends BaseViewModel {
   String? get message => _message;
   List<DeliveryPoint> get deliveryPoints => appState.deliveryPoints..sort((a, b) => a.seq.compareTo(b.seq));
 
+  DateTime? getPointTimeTo(DeliveryPoint deliveryPoint) {
+    List<DeliveryPointOrder> deliveryPointOrders = _getDeliveryPointOrders(deliveryPoint);
+
+    return deliveryPointOrders.fold(null, (prevVal, deliveryPointOrder) {
+      Order order = _getOrder(deliveryPointOrder);
+      DateTime? timeTo = deliveryPointOrder.isPickup ? order.pickupDateTimeTo : order.deliveryDateTimeTo;
+      DateTime? newVal = prevVal ?? timeTo;
+
+      if (timeTo != null && newVal != null) {
+        newVal = timeTo.isAfter(newVal) ? timeTo : newVal;
+      }
+
+      return newVal;
+    });
+  }
+
+  DateTime? getPointTimeFrom(DeliveryPoint deliveryPoint) {
+    List<DeliveryPointOrder> deliveryPointOrders = _getDeliveryPointOrders(deliveryPoint);
+
+    return deliveryPointOrders.fold(null, (prevVal, deliveryPointOrder) {
+      Order order = _getOrder(deliveryPointOrder);
+      DateTime? timeFrom = deliveryPointOrder.isPickup ? order.pickupDateTimeFrom : order.deliveryDateTimeFrom;
+      DateTime? newVal = prevVal ?? timeFrom;
+
+      if (timeFrom != null && newVal != null) {
+        newVal = timeFrom.isBefore(newVal) ? timeFrom : newVal;
+      }
+
+      return newVal;
+    });
+  }
+
   void changeDeliveryPoint(DeliveryPoint newDeliveryPoint) {
     deliveryPoint = newDeliveryPoint;
 
@@ -57,5 +89,15 @@ class PointAddressViewModel extends BaseViewModel {
 
   void _setMessage(String message) {
     _message = message;
+  }
+
+  List<DeliveryPointOrder> _getDeliveryPointOrders(DeliveryPoint deliveryPoint) {
+    return appState.deliveryPointOrders.where(
+      (e) => e.deliveryPointId == deliveryPoint.id
+    ).toList();
+  }
+
+  Order _getOrder(DeliveryPointOrder deliveryPointOrder) {
+    return appState.orders.firstWhere((e) => e.id == deliveryPointOrder.orderId);
   }
 }
