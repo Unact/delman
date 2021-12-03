@@ -31,7 +31,6 @@ class DeliveryPointOrderViewModel extends BaseViewModel {
   String? _message;
   Function? _confirmationCallback;
   DeliveryPointOrderState _state = DeliveryPointOrderState.Initial;
-  late double _total;
   bool _cardPayment = false;
 
   DeliveryPointOrderViewModel({
@@ -43,20 +42,22 @@ class DeliveryPointOrderViewModel extends BaseViewModel {
     orderInfoList = appState.orderInfoList.where((e) => e.orderId == order.id).toList();
     orderLines = appState.orderLines
       .where((e) => e.orderId == order.id)
-      .map((e) => e.copyWith(factAmount: Optional.fromNullable(e.amount)))
+      .map((e) => e.factAmount != null ? e : e.copyWith(factAmount: Optional.fromNullable(e.amount)))
       .toList();
-    _total = _orderLinesTotal;
   }
 
   DeliveryPointOrderState get state => _state;
   String? get message => _message;
   Function? get confirmationCallback => _confirmationCallback;
   bool get cardPayment => _cardPayment;
-  double get total => payment?.summ ?? _total;
+  double get total => payment?.summ ?? _orderLinesTotal;
   bool get withCourier => order.storageId == appState.user.storageId;
   bool get isInProgress => !deliveryPointOrder.isFinished && deliveryPoint.inProgress;
-  bool get totalEditable => isInProgress && payment == null && !deliveryPointOrder.isPickup;
-  bool get needPayment => totalEditable && orderLines.any((el) => el.price != 0);
+  bool get totalEditable => deliveryPointOrder.isFinished &&
+    payment == null &&
+    !deliveryPointOrder.isPickup &&
+    total != 0;
+  bool get orderLinesEditable => isInProgress && !deliveryPointOrder.isPickup;
   Payment? get payment => appState.payments.firstWhereOrNull((e) => e.deliveryPointOrderId == deliveryPointOrder.id);
   String get orderStatus {
     if (deliveryPointOrder.isCanceled)
@@ -102,12 +103,10 @@ class DeliveryPointOrderViewModel extends BaseViewModel {
 
     orderLines.removeWhere((e) => e.id == orderLine.id);
     orderLines.add(updatedOrderLine);
-
-    _total = _orderLinesTotal;
   }
 
   void tryStartPayment(bool cardPayment) {
-    if (_total == 0 || _total < 0) {
+    if (total == 0 || total < 0) {
       _setMessage('Указана некорректная сумма');
       _setState(DeliveryPointOrderState.Failure);
 
@@ -142,7 +141,6 @@ class DeliveryPointOrderViewModel extends BaseViewModel {
       return;
     }
 
-    if (needPayment) messages.add('Заказ не оплачен!');
     if (order.needDocumentsReturn) messages.add('Вы забрали документы?');
     if (messages.isEmpty) messages.add('Вы действительно хотите завершить $typeMsgPart заказа?');
 

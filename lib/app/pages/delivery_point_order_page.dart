@@ -171,7 +171,7 @@ class _DeliveryPointOrderPageState extends State<DeliveryPointOrderPage> {
             title: Text('Заказ ${vm.order.trackingNumber}'),
             centerTitle: true
           ),
-          persistentFooterButtons: vm.deliveryPointOrder.isFinished ? null : [
+          persistentFooterButtons: [
             !vm.totalEditable ? null : TextButton(
               onPressed: () {
                 unfocus();
@@ -188,7 +188,7 @@ class _DeliveryPointOrderPageState extends State<DeliveryPointOrderPage> {
               child: Icon(Icons.credit_card),
               style: TextButton.styleFrom(primary: Colors.redAccent),
             ),
-            TextButton(
+            vm.deliveryPointOrder.isFinished ? null : TextButton(
               style: TextButton.styleFrom(primary: Colors.redAccent),
               child: Text('Отменить'),
               onPressed: () {
@@ -332,7 +332,7 @@ class _DeliveryPointOrderPageState extends State<DeliveryPointOrderPage> {
           Row(
             children: <Widget>[
               Text(Format.numberStr(orderLine.price) + ' x '),
-              !vm.isInProgress || vm.deliveryPointOrder.isPickup ? Text(orderLine.factAmount.toString()) : SizedBox(
+              !vm.orderLinesEditable ? Text(orderLine.factAmount.toString()) : SizedBox(
                 width: 40,
                 height: 36,
                 child: TextFormField(
