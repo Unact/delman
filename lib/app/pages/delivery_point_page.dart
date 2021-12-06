@@ -37,6 +37,7 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
 
   void vmListener() {
     switch (_deliveryPointViewModel!.state) {
+      case DeliveryPointState.OrderDataCopied:
       case DeliveryPointState.Failure:
       case DeliveryPointState.ArrivalSaved:
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_deliveryPointViewModel!.message!)));
@@ -175,6 +176,11 @@ class _DeliveryPointPageState extends State<DeliveryPointPage> {
 
     return ListTile(
       title: Text('Заказ ${order.trackingNumber}', style: TextStyle(fontSize: 14)),
+      trailing: IconButton(
+        icon: Icon(Icons.copy),
+        onPressed: () => vm.copyOrderInfo(order),
+        tooltip: 'Копировать',
+      ),
       contentPadding: EdgeInsets.symmetric(horizontal: 20),
       onTap: () {
         Navigator.push(

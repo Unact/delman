@@ -1,5 +1,6 @@
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:delman/app/app_state.dart';
 import 'package:delman/app/constants/strings.dart';
@@ -11,6 +12,7 @@ enum DeliveryPointState {
   Initial,
   InProgress,
   ArrivalSaved,
+  OrderDataCopied,
   Failure
 }
 
@@ -44,6 +46,17 @@ class DeliveryPointViewModel extends BaseViewModel {
       _setMessage(Strings.genericErrorMsg);
       _setState(DeliveryPointState.Failure);
     });
+  }
+
+  Future<void> copyOrderInfo(Order order) async {
+    String text = 'ИМ: ${order.sellerName}\n' +
+      'Номер в ИМ: ${order.number}\n' +
+      'Трекинг: ${order.trackingNumber}\n' +
+      'Адрес: ${deliveryPoint.addressName}';
+    await Clipboard.setData(ClipboardData(text: text));
+
+    _setMessage('Данные о заказе скопированы');
+    _setState(DeliveryPointState.OrderDataCopied);
   }
 
   Future<void> arrive() async {
