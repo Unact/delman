@@ -26,9 +26,9 @@ dependencies:
   path_provider: ^2.0.2
   package_info: ^2.0.2
   sentry_flutter: ^5.0.0
-  provider: ^5.0.0
   url_launcher: ^6.0.6
   location: ^4.1.1
+  flutter_bloc: ^8.0.0
   yandex_mapkit:
     git:
       url: git://github.com/Unact/yandex_mapkit
