@@ -59,7 +59,7 @@ class InfoViewModel extends PageViewModel<InfoState> {
       emit(timerCallback ? InfoTimerInLoadProgress() : InfoInLoadProgress());
       await appViewModel.getData();
 
-      emit(timerCallback ? InfoTimerLoadSuccess() : InfoLoadSuccess('День успешно завершен'));
+      emit(timerCallback ? InfoTimerLoadSuccess() : InfoLoadSuccess('Данные успешно обновлены'));
     } on AppError catch(e) {
       emit(timerCallback ? InfoTimerLoadFailure(e.message) : InfoLoadFailure(e.message));
     }
@@ -86,7 +86,7 @@ class InfoViewModel extends PageViewModel<InfoState> {
       emit(InfoInCloseProgress());
       await appViewModel.closeDelivery();
 
-      emit(InfoCloseSuccess('Данные успешно обновлены'));
+      emit(InfoCloseSuccess('День успешно завершен'));
     } on AppError catch(e) {
       emit(InfoCloseFailure(e.message));
     }
