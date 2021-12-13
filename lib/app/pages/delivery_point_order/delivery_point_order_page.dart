@@ -153,46 +153,14 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
     return BlocConsumer<DeliveryPointOrderViewModel, DeliveryPointOrderState>(
       builder: (context, state) {
         DeliveryPointOrderViewModel vm = context.read<DeliveryPointOrderViewModel>();
+        bool isPickup = vm.deliveryPointOrder.isPickup;
 
         return Scaffold(
           appBar: AppBar(
             title: Text('Заказ ${vm.order.trackingNumber}'),
             centerTitle: true
           ),
-          persistentFooterButtons: [
-            !vm.totalEditable ? null : TextButton(
-              onPressed: () {
-                unfocus();
-                vm.tryStartPayment(false);
-              },
-              child: Icon(Icons.account_balance_wallet),
-              style: TextButton.styleFrom(primary: Colors.redAccent),
-            ),
-            !vm.totalEditable || !vm.order.isCardPaymentAllowed ? null : TextButton(
-              onPressed: () {
-                unfocus();
-                vm.tryStartPayment(true);
-              },
-              child: Icon(Icons.credit_card),
-              style: TextButton.styleFrom(primary: Colors.redAccent),
-            ),
-            vm.deliveryPointOrder.isFinished ? null : TextButton(
-              style: TextButton.styleFrom(primary: Colors.redAccent),
-              child: Text('Отменить'),
-              onPressed: () {
-                unfocus();
-                vm.tryCancelOrder();
-              }
-            ),
-            !vm.isInProgress ? null : TextButton(
-              style: TextButton.styleFrom(primary: Colors.redAccent),
-              child: Text('Завершить'),
-              onPressed: () {
-                unfocus();
-                vm.tryConfirmOrder();
-              }
-            ),
-          ].whereType<Widget>().toList(),
+          persistentFooterButtons: isPickup ? _buildPickupFooterButtons(context) : _buildDeliveryFooterButtons(context),
           body: Form(
             key: _formKey,
             child: ListView(
@@ -201,7 +169,11 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
               children: [
                 InfoRow(
                   title: Text('Статус'),
-                  trailing: Text(vm.orderStatus)
+                  trailing: Text(
+                    vm.deliveryPointOrder.isCanceled ?
+                      'Отменен' :
+                      (vm.deliveryPointOrder.isFinished ? 'Завершен' : 'Не завершен')
+                  )
                 ),
                 InfoRow(
                   title: Text('Посылка'),
@@ -213,45 +185,7 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
                 ),
                 InfoRow(title: Text('ИМ'), trailing: Text(vm.order.sellerName)),
                 InfoRow(title: Text('Номер в ИМ'), trailing: Text(vm.order.number)),
-                InfoRow(
-                  title: Text(vm.deliveryPointOrder.isPickup ? 'Отправитель' : 'Покупатель'),
-                  trailing: Text(vm.personName ?? '')
-                ),
-                InfoRow(
-                  title: Text('Телефон'),
-                  trailing: GestureDetector(
-                    onTap: vm.callPhone,
-                    child: Text(vm.phone ?? '', style: TextStyle(color: Colors.blue))
-                  )
-                ),
-                vm.dateTimeFrom == null ? Container() : InfoRow(
-                  title: Text('Время ${vm.deliveryPointOrder.isPickup ? 'забора' : 'доставки'}'),
-                  trailing: Text(Format.timeStr(vm.dateTimeFrom) + ' - ' + Format.timeStr(vm.dateTimeTo))
-                ),
-                InfoRow(
-                  title: Text(vm.deliveryPointOrder.isPickup ? 'Забор' : 'Доставка'),
-                  trailing: ExpandingText(
-                    vm.order.deliveryTypeName +
-                      (vm.hasElevator ? '\nлифт' : '\nпешком') +
-                      (vm.floor == null ? '' : '\nэтаж ' + vm.floor.toString())+
-                      (vm.flat == null ? '' : ' квартира ' + vm.flat.toString())
-                  )
-                ),
-                vm.deliveryPointOrder.isPickup ?
-                  Container() :
-                  InfoRow(title: Text('Оплата'), trailing: Text(vm.order.paymentTypeName)),
-                vm.deliveryPointOrder.isPickup ?
-                  Container() :
-                  InfoRow(title: Text('Примечание'), trailing: ExpandingText(vm.order.comment ?? '')),
-                vm.deliveryPointOrder.isPickup ?
-                  Container() :
-                  InfoRow(title: Text('К оплате'), trailing: Text(Format.numberStr(vm.total))),
-                ExpansionTile(
-                  title: Text('Позиции'),
-                  initiallyExpanded: true,
-                  tilePadding: EdgeInsets.symmetric(horizontal: 8),
-                  children: vm.sortedOrderLines.map<Widget>((e) => _buildOrderLineTile(context, e)).toList()
-                ),
+                ...(isPickup ? _buildPickupRows(context) : _buildDeliveryRows(context)),
                 ExpansionTile(
                   title: Text('Служебная информация'),
                   initiallyExpanded: false,
@@ -304,6 +238,156 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
     );
   }
 
+  List<Widget> _buildPickupFooterButtons(BuildContext context) {
+    DeliveryPointOrderViewModel vm = context.read<DeliveryPointOrderViewModel>();
+
+    return [
+      vm.deliveryPointOrder.isFinished ? null : TextButton(
+        style: TextButton.styleFrom(primary: Colors.redAccent),
+        child: Text('Отменить'),
+        onPressed: () {
+          unfocus();
+          vm.tryCancelOrder();
+        }
+      ),
+      vm.deliveryPointOrder.isFinished || !vm.deliveryPoint.inProgress ? null : TextButton(
+        style: TextButton.styleFrom(primary: Colors.redAccent),
+        child: Text('Завершить'),
+        onPressed: () {
+          unfocus();
+          vm.tryConfirmOrder();
+        }
+      ),
+    ].whereType<Widget>().toList();
+  }
+
+  List<Widget> _buildPickupRows(BuildContext context) {
+    DeliveryPointOrderViewModel vm = context.read<DeliveryPointOrderViewModel>();
+
+    return [
+      InfoRow(title: Text('Отправитель'), trailing: Text(vm.order.senderName ?? '')),
+      InfoRow(
+        title: Text('Телефон'),
+        trailing: GestureDetector(
+          onTap: () => vm.callPhone(vm.order.senderPhone),
+          child: Text(vm.order.senderPhone ?? '', style: TextStyle(color: Colors.blue))
+        )
+      ),
+      vm.order.pickupDateTimeFrom == null ? Container() : InfoRow(
+        title: Text('Время забора'),
+        trailing: Text(
+          Format.timeStr(vm.order.pickupDateTimeTo) + ' - ' + Format.timeStr(vm.order.pickupDateTimeTo)
+        )
+      ),
+      InfoRow(
+        title: Text('Забор'),
+        trailing: ExpandingText(
+          _formatTypeText(
+            vm.order.deliveryTypeName,
+            vm.order.hasSenderElevator,
+            vm.order.senderFloor,
+            vm.order.senderFlat
+          )
+        )
+      ),
+      ExpansionTile(
+        title: Text('Позиции'),
+        initiallyExpanded: true,
+        tilePadding: EdgeInsets.symmetric(horizontal: 8),
+        children: vm.sortedOrderLines.map<Widget>((e) => _buildOrderLineTile(context, e, false)).toList()
+      )
+    ];
+  }
+
+  List<Widget> _buildDeliveryFooterButtons(BuildContext context) {
+    DeliveryPointOrderViewModel vm = context.read<DeliveryPointOrderViewModel>();
+    bool totalEditable = vm.deliveryPointOrder.isFinished &&
+      !vm.deliveryPointOrder.isCanceled &&
+      vm.payment == null &&
+      vm.total != 0;
+
+    return [
+      !totalEditable ? null : TextButton(
+        onPressed: () {
+          unfocus();
+          vm.tryStartPayment(false);
+        },
+        child: Icon(Icons.account_balance_wallet),
+        style: TextButton.styleFrom(primary: Colors.redAccent),
+      ),
+      !totalEditable || !vm.order.isCardPaymentAllowed ? null : TextButton(
+        onPressed: () {
+          unfocus();
+          vm.tryStartPayment(true);
+        },
+        child: Icon(Icons.credit_card),
+        style: TextButton.styleFrom(primary: Colors.redAccent),
+      ),
+      vm.deliveryPointOrder.isFinished ? null : TextButton(
+        style: TextButton.styleFrom(primary: Colors.redAccent),
+        child: Text('Отменить'),
+        onPressed: () {
+          unfocus();
+          vm.tryCancelOrder();
+        }
+      ),
+      vm.deliveryPointOrder.isFinished || !vm.deliveryPoint.inProgress ? null : TextButton(
+        style: TextButton.styleFrom(primary: Colors.redAccent),
+        child: Text('Завершить'),
+        onPressed: () {
+          unfocus();
+          vm.tryConfirmOrder();
+        }
+      ),
+    ].whereType<Widget>().toList();
+  }
+
+  List<Widget> _buildDeliveryRows(BuildContext context) {
+    DeliveryPointOrderViewModel vm = context.read<DeliveryPointOrderViewModel>();
+
+    return [
+      InfoRow(
+        title: Text('Покупатель'),
+        trailing: Text(vm.order.buyerName ?? '')
+      ),
+      InfoRow(
+        title: Text('Телефон'),
+        trailing: GestureDetector(
+          onTap: () => vm.callPhone(vm.order.buyerPhone),
+          child: Text(vm.order.buyerPhone ?? '', style: TextStyle(color: Colors.blue))
+        )
+      ),
+      vm.order.deliveryDateTimeFrom == null ? Container() : InfoRow(
+        title: Text('Время доставки'),
+        trailing: Text(
+          Format.timeStr(vm.order.deliveryDateTimeFrom) + ' - ' + Format.timeStr(vm.order.deliveryDateTimeTo)
+        )
+      ),
+      InfoRow(
+        title: Text(vm.deliveryPointOrder.isPickup ? 'Забор' : 'Доставка'),
+        trailing: ExpandingText(
+          _formatTypeText(
+            vm.order.deliveryTypeName,
+            vm.order.hasBuyerElevator,
+            vm.order.buyerFloor,
+            vm.order.buyerFlat
+          )
+        )
+      ),
+      InfoRow(title: Text('Оплата'), trailing: Text(vm.order.paymentTypeName)),
+      InfoRow(title: Text('Примечание'), trailing: ExpandingText(vm.order.comment ?? '')),
+      InfoRow(title: Text('К оплате'), trailing: Text(Format.numberStr(vm.total))),
+      ExpansionTile(
+        title: Text('Позиции'),
+        initiallyExpanded: true,
+        tilePadding: EdgeInsets.symmetric(horizontal: 8),
+        children: vm.sortedOrderLines.map<Widget>(
+          (e) => _buildOrderLineTile(context, e, !vm.deliveryPointOrder.isFinished)
+        ).toList()
+      )
+    ];
+  }
+
   Widget _buildOrderInfoTile(BuildContext context, OrderInfo orderInfo) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -324,7 +408,7 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
     );
   }
 
-  Widget _buildOrderLineTile(BuildContext context, OrderLine orderLine) {
+  Widget _buildOrderLineTile(BuildContext context, OrderLine orderLine, bool editable) {
     DeliveryPointOrderViewModel vm = context.read<DeliveryPointOrderViewModel>();
 
     return ListTile(
@@ -343,7 +427,7 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
           Row(
             children: <Widget>[
               Text(Format.numberStr(orderLine.price) + ' x '),
-              !vm.orderLinesEditable ? Text(orderLine.factAmount.toString()) : SizedBox(
+              !editable ? Text(orderLine.factAmount.toString()) : SizedBox(
                 width: 40,
                 height: 36,
                 child: TextFormField(
@@ -363,5 +447,11 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
       dense: true,
       contentPadding: EdgeInsets.symmetric(horizontal: 16),
     );
+  }
+
+  String _formatTypeText(String typeName, bool hasElevator, int? floor, String? flat) {
+    return typeName + (hasElevator ? '\nлифт' : '\nпешком') +
+      (floor == null ? '' : '\nэтаж ' + floor.toString()) +
+      (flat == null ? '' : ' квартира ' + flat.toString());
   }
 }

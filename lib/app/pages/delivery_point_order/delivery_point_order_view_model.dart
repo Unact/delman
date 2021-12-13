@@ -22,41 +22,14 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState>
   bool get cardPayment => _cardPayment;
   double get total => payment?.summ ?? _orderLinesTotal;
   bool get withCourier => order.storageId == appViewModel.user.storageId;
-  bool get isInProgress => !deliveryPointOrder.isFinished && deliveryPoint.inProgress;
-  bool get totalEditable => deliveryPointOrder.isFinished &&
-    payment == null &&
-    !deliveryPointOrder.isPickup &&
-    total != 0;
-  bool get orderLinesEditable => isInProgress && !deliveryPointOrder.isPickup;
   Payment? get payment => appViewModel.payments
     .firstWhereOrNull((e) => e.deliveryPointOrderId == deliveryPointOrder.id);
-  String get orderStatus {
-    if (deliveryPointOrder.isCanceled)
-      return 'Отменен';
-
-    if (deliveryPointOrder.isPickup)
-      return deliveryPointOrder.isFinished ? 'Забран' : 'Ожидает забора';
-
-    return deliveryPointOrder.isFinished ? 'Доставлен' : 'Ожидает доставки';
-  }
-  bool get hasElevator => deliveryPointOrder.isPickup ? order.hasSenderElevator : order.hasBuyerElevator;
-  int? get floor => deliveryPointOrder.isPickup ? order.senderFloor : order.buyerFloor;
-  String? get flat => deliveryPointOrder.isPickup ? order.senderFlat : order.buyerFlat;
-  String? get personName => deliveryPointOrder.isPickup ? order.senderName : order.buyerName;
-  String? get phone => deliveryPointOrder.isPickup ? order.senderPhone : order.buyerPhone;
-  DateTime? get dateTimeFrom => deliveryPointOrder.isPickup ? order.pickupDateTimeFrom : order.deliveryDateTimeFrom;
-  DateTime? get dateTimeTo => deliveryPointOrder.isPickup ? order.pickupDateTimeTo : order.deliveryDateTimeTo;
   List<OrderInfo> get sortedOrderInfoList => orderInfoList..sort((a, b) => b.ts.compareTo(a.ts));
   List<OrderLine> get sortedOrderLines => orderLines..sort((a, b) => a.name.compareTo(b.name));
+  double get _orderLinesTotal => orderLines.fold(0, (prev, el) => prev + (el.factAmount ?? 0) * el.price);
 
-  double get _orderLinesTotal {
-    return orderLines.fold(0, (prev, el) => prev + (el.factAmount ?? 0) * el.price);
-  }
-
-  Future<void> callPhone() async {
-    await Misc.callPhone(deliveryPointOrder.isPickup ? order.senderPhone : order.buyerPhone, onFailure: () {
-      emit(DeliveryPointOrderFailure(Strings.genericErrorMsg));
-    });
+  Future<void> callPhone(String? phone) async {
+    await Misc.callPhone(phone, onFailure: () => emit(DeliveryPointOrderFailure(Strings.genericErrorMsg)));
   }
 
   void updateOrderLineAmount(OrderLine orderLine, String amount) {
