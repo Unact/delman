@@ -10,16 +10,20 @@ part 'landing_state.dart';
 part 'landing_view_model.dart';
 
 class LandingPage extends StatelessWidget {
+  LandingPage({
+    Key? key
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<LandingViewModel>(
       create: (context) => LandingViewModel(context),
-      child: LandingView(),
+      child: _LandingView(),
     );
   }
 }
 
-class LandingView extends StatelessWidget {
+class _LandingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<LandingViewModel, LandingState>(

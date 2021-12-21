@@ -17,31 +17,32 @@ part 'order_storage_view_model.dart';
 class OrderStoragePage extends StatelessWidget {
   final OrderStorage orderStorage;
 
-  const OrderStoragePage({
+  OrderStoragePage({
+    Key? key,
     required this.orderStorage
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<OrderStorageViewModel>(
       create: (context) => OrderStorageViewModel(context, orderStorage: orderStorage),
-      child: OrderStorageView(),
+      child: _OrderStorageView(),
     );
   }
 }
 
-class OrderStorageView extends StatefulWidget {
+class _OrderStorageView extends StatefulWidget {
   @override
   _OrderStorageViewState createState() => _OrderStorageViewState();
 }
 
-class _OrderStorageViewState extends State<OrderStorageView> {
+class _OrderStorageViewState extends State<_OrderStorageView> {
   Completer<void> _dialogCompleter = Completer();
 
   Future<void> openDialog() async {
     showDialog(
       context: context,
-      builder: (_) => Center(child: CircularProgressIndicator()),
+      builder: (_) => const Center(child: CircularProgressIndicator()),
       barrierDismissible: false
     );
     await _dialogCompleter.future;
@@ -63,11 +64,11 @@ class _OrderStorageViewState extends State<OrderStorageView> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Предупреждение'),
+          title: const Text('Предупреждение'),
           content: SingleChildScrollView(child: ListBody(children: <Widget>[Text(message)])),
           actions: <Widget>[
-            TextButton(child: Text(Strings.ok), onPressed: () => Navigator.of(context).pop(true)),
-            TextButton(child: Text(Strings.cancel), onPressed: () => Navigator.of(context).pop(false))
+            TextButton(child: const Text(Strings.ok), onPressed: () => Navigator.of(context).pop(true)),
+            TextButton(child: const Text(Strings.cancel), onPressed: () => Navigator.of(context).pop(false))
           ],
         );
       }
@@ -77,7 +78,7 @@ class _OrderStorageViewState extends State<OrderStorageView> {
   Future<String?> showQRScanPage() async {
     return await Navigator.push(
       context,
-      MaterialPageRoute(fullscreenDialog: true, builder: (BuildContext context) => QRScanPage())
+      MaterialPageRoute(fullscreenDialog: true, builder: (BuildContext context) => const QRScanPage())
     );
   }
 
@@ -89,29 +90,29 @@ class _OrderStorageViewState extends State<OrderStorageView> {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text('Заказы на складе'),
+            title: const Text('Заказы на складе'),
             actions: <Widget>[
               IconButton(
                 color: Colors.white,
-                icon: Icon(Icons.qr_code_scanner),
+                icon: const Icon(Icons.qr_code_scanner),
                 onPressed: vm.startQRScan
               )
             ]
           ),
           body: ListView(
-            physics: AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.only(top: 24, left: 8, right: 8, bottom: 24),
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(top: 24, left: 8, right: 8, bottom: 24),
             children: [
               ExpansionTile(
                 title: Text(vm.orderStorage.name),
                 initiallyExpanded: true,
-                tilePadding: EdgeInsets.symmetric(horizontal: 8),
+                tilePadding: const EdgeInsets.symmetric(horizontal: 8),
                 children: vm.ordersInOrderStorage.map((e) => _buildOrderNotInOwnStorageTile(context, e)).toList()
               ),
               ExpansionTile(
-                title: Text('Принятые'),
+                title: const Text('Принятые'),
                 initiallyExpanded: true,
-                tilePadding: EdgeInsets.symmetric(horizontal: 8),
+                tilePadding: const EdgeInsets.symmetric(horizontal: 8),
                 children: vm.ordersInOwnStorage.map((e) => _buildOrderInOwnStorageTile(context, e)).toList()
               )
             ]
@@ -144,24 +145,24 @@ class _OrderStorageViewState extends State<OrderStorageView> {
     OrderStorageViewModel vm = context.read<OrderStorageViewModel>();
 
     return ListTile(
-      title: Text('Заказ ${order.trackingNumber}', style: TextStyle(fontSize: 14)),
+      title: Text('Заказ ${order.trackingNumber}', style: const TextStyle(fontSize: 14)),
       subtitle: RichText(
         text: TextSpan(
-          style: TextStyle(color: Colors.grey),
+          style: const TextStyle(color: Colors.grey),
           children: <TextSpan>[
-            TextSpan(text: 'Номер ИМ: ${order.number}\n', style: TextStyle(fontSize: 12.0)),
-            TextSpan(text: 'Адрес доставки: ${order.deliveryAddressName}\n', style: TextStyle(fontSize: 12.0)),
-            TextSpan(text: 'Адрес забора: ${order.pickupAddressName}\n', style: TextStyle(fontSize: 12.0))
+            TextSpan(text: 'Номер ИМ: ${order.number}\n', style: const TextStyle(fontSize: 12.0)),
+            TextSpan(text: 'Адрес доставки: ${order.deliveryAddressName}\n', style: const TextStyle(fontSize: 12.0)),
+            TextSpan(text: 'Адрес забора: ${order.pickupAddressName}\n', style: const TextStyle(fontSize: 12.0))
           ]
         )
       ),
-      contentPadding: EdgeInsets.symmetric(horizontal: 20),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20),
       trailing: ElevatedButton(
         style: ElevatedButton.styleFrom(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
           primary: Colors.blue,
         ),
-        child: Text('Передать'),
+        child: const Text('Передать'),
         onPressed: () => vm.transferOrder(order)
       ),
       onTap: () {
@@ -179,24 +180,24 @@ class _OrderStorageViewState extends State<OrderStorageView> {
     OrderStorageViewModel vm = context.read<OrderStorageViewModel>();
 
     return ListTile(
-      title: Text('Заказ ${order.trackingNumber}', style: TextStyle(fontSize: 14)),
+      title: Text('Заказ ${order.trackingNumber}', style: const TextStyle(fontSize: 14)),
       subtitle: RichText(
         text: TextSpan(
-          style: TextStyle(color: Colors.grey),
+          style: const TextStyle(color: Colors.grey),
           children: <TextSpan>[
-            TextSpan(text: 'Номер ИМ: ${order.number}\n', style: TextStyle(fontSize: 12.0)),
-            TextSpan(text: 'Адрес доставки: ${order.deliveryAddressName}\n', style: TextStyle(fontSize: 12.0)),
-            TextSpan(text: 'Адрес забора: ${order.pickupAddressName}\n', style: TextStyle(fontSize: 12.0))
+            TextSpan(text: 'Номер ИМ: ${order.number}\n', style: const TextStyle(fontSize: 12.0)),
+            TextSpan(text: 'Адрес доставки: ${order.deliveryAddressName}\n', style: const TextStyle(fontSize: 12.0)),
+            TextSpan(text: 'Адрес забора: ${order.pickupAddressName}\n', style: const TextStyle(fontSize: 12.0))
           ]
         )
       ),
-      contentPadding: EdgeInsets.symmetric(horizontal: 20),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20),
       trailing: ElevatedButton(
         style: ElevatedButton.styleFrom(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
           primary: Colors.blue,
         ),
-        child: Text('Принять'),
+        child: const Text('Принять'),
         onPressed: () => vm.tryAcceptOrder(order)
       ),
       onTap: () {

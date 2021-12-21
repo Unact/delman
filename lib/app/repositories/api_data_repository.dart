@@ -11,7 +11,7 @@ class ApiDataRepository {
 
   ApiData getApiData() {
     String? data = storage.prefs.getString('apiData');
-    return data == null ? ApiData() : ApiData.fromJson(json.decode(data));
+    return data == null ? const ApiData() : ApiData.fromJson(json.decode(data));
   }
 
   Future<void> setApiData(ApiData apiData) async {
@@ -19,6 +19,6 @@ class ApiDataRepository {
   }
 
   Future<void> resetApiData() async {
-    await setApiData(ApiData());
+    await setApiData(const ApiData());
   }
 }

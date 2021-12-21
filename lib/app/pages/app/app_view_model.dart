@@ -125,7 +125,7 @@ class AppViewModel extends Cubit<AppState> {
     await _setOrderStorages([]);
     await _setPayments([]);
     await _setOrderInfoList([]);
-    await _setAppData(AppData());
+    await _setAppData(const AppData());
 
     emit(AppClearData());
   }
@@ -370,7 +370,7 @@ class AppViewModel extends Cubit<AppState> {
   }
 
   Future<void> transferOrder(Order order, OrderStorage orderStorage) async {
-    Order updatedOrder = order.copyWith(storageId: Optional.fromNullable(null));
+    Order updatedOrder = order.copyWith(storageId: const Optional.fromNullable(null));
 
     try {
       await api.transferOrder(updatedOrder, orderStorage);

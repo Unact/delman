@@ -11,29 +11,33 @@ part 'payments_state.dart';
 part 'payments_view_model.dart';
 
 class PaymentsPage extends StatelessWidget {
+  PaymentsPage({
+    Key? key
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<PaymentsViewModel>(
       create: (context) => PaymentsViewModel(context),
-      child: PaymentsView(),
+      child: _PaymentsView(),
     );
   }
 }
 
-class PaymentsView extends StatelessWidget {
+class _PaymentsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(Strings.paymentsPageName)
+        title: const Text(Strings.paymentsPageName)
       ),
       body: BlocBuilder<PaymentsViewModel, PaymentsState>(
         builder: (context, state) {
           PaymentsViewModel vm = context.read<PaymentsViewModel>();
 
           return ListView(
-            physics: AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.only(top: 24, left: 8, right: 8, bottom: 24),
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(top: 24, left: 8, right: 8, bottom: 24),
             children: vm.payments.map((payment) {
               Order order = vm.getOrderForPayment(payment);
               DeliveryPointOrder deliveryPointOrder = vm.getDeliveryPointOrderForPayment(payment);
@@ -41,19 +45,19 @@ class PaymentsView extends StatelessWidget {
               return ListTile(
                 isThreeLine: true,
                 dense: true,
-                title: Text('Заказ ${order.trackingNumber}', style: TextStyle(fontSize: 14.0)),
-                contentPadding: EdgeInsets.all(0),
+                title: Text('Заказ ${order.trackingNumber}', style: const TextStyle(fontSize: 14.0)),
+                contentPadding: const EdgeInsets.all(0),
                 subtitle: RichText(
                   text: TextSpan(
-                    style: TextStyle(color: Colors.grey),
+                    style: const TextStyle(color: Colors.grey),
                     children: <TextSpan>[
                       TextSpan(
                         text: 'Сумма: ${Format.numberStr(payment.summ)}\n',
-                        style: TextStyle(fontSize: 12.0)
+                        style: const TextStyle(fontSize: 12.0)
                       ),
                       TextSpan(
                         text: 'Оплата ${payment.isCard ? 'картой' : 'наличными'}\n',
-                        style: TextStyle(fontSize: 12.0)
+                        style: const TextStyle(fontSize: 12.0)
                       ),
                     ]
                   )

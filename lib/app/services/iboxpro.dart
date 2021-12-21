@@ -4,12 +4,12 @@ import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_blue/flutter_blue.dart' as blue;
-import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart' as blueSerial;
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart' as blue_serial;
 import 'package:iboxpro_flutter/iboxpro_flutter.dart';
 
 class Iboxpro {
   static const String _terminalNamePrefix = 'MPOS';
-  Duration _searchTimeout = Duration(seconds: 5);
+  final Duration _searchTimeout = const Duration(seconds: 5);
   String? _deviceName;
   Map<dynamic, dynamic>? _transaction;
   String? _transactionId;
@@ -142,12 +142,12 @@ class Iboxpro {
   }
 
   Future<String?> _findBTDeviceNameAndroid() async {
-    blueSerial.FlutterBluetoothSerial bluetooth = blueSerial.FlutterBluetoothSerial.instance;
-    List<blueSerial.BluetoothDevice> devices = await bluetooth.getBondedDevices();
+    blue_serial.FlutterBluetoothSerial bluetooth = blue_serial.FlutterBluetoothSerial.instance;
+    List<blue_serial.BluetoothDevice> devices = await bluetooth.getBondedDevices();
 
     if (!devices.any((device) => (device.name ?? '').contains(_terminalNamePrefix))) {
-      List<blueSerial.BluetoothDiscoveryResult> results = [];
-      StreamSubscription<blueSerial.BluetoothDiscoveryResult> subscription = bluetooth.startDiscovery().
+      List<blue_serial.BluetoothDiscoveryResult> results = [];
+      StreamSubscription<blue_serial.BluetoothDiscoveryResult> subscription = bluetooth.startDiscovery().
         listen((r) => results.add(r));
       await Future.delayed(_searchTimeout);
       await subscription.cancel();
@@ -155,7 +155,7 @@ class Iboxpro {
       devices.addAll(results.map((result) => result.device));
     }
 
-    blueSerial.BluetoothDevice? device = devices.firstWhereOrNull(
+    blue_serial.BluetoothDevice? device = devices.firstWhereOrNull(
       (device) => (device.name ?? '').contains(_terminalNamePrefix)
     );
 

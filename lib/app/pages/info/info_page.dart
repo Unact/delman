@@ -15,21 +15,25 @@ part 'info_state.dart';
 part 'info_view_model.dart';
 
 class InfoPage extends StatelessWidget {
+  InfoPage({
+    Key? key
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<InfoViewModel>(
       create: (context) => InfoViewModel(context),
-      child: InfoView(),
+      child: _InfoView(),
     );
   }
 }
 
-class InfoView extends StatefulWidget {
+class _InfoView extends StatefulWidget {
   @override
   _InfoViewState createState() => _InfoViewState();
 }
 
-class _InfoViewState extends State<InfoView> {
+class _InfoViewState extends State<_InfoView> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   Completer<void> _refresherCompleter = Completer();
   Completer<void> _dialogCompleter = Completer();
@@ -48,7 +52,7 @@ class _InfoViewState extends State<InfoView> {
   Future<void> openDialog() async {
     showDialog(
       context: context,
-      builder: (_) => Center(child: CircularProgressIndicator()),
+      builder: (_) => const Center(child: CircularProgressIndicator()),
       barrierDismissible: false
     );
     await _dialogCompleter.future;
@@ -68,11 +72,11 @@ class _InfoViewState extends State<InfoView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(Strings.ruAppName),
+        title: const Text(Strings.ruAppName),
         actions: <Widget>[
           IconButton(
             color: Colors.white,
-            icon: Icon(Icons.person),
+            icon: const Icon(Icons.person),
             onPressed: () async {
               Navigator.push(
                 context,
@@ -96,8 +100,8 @@ class _InfoViewState extends State<InfoView> {
               return _refresherCompleter.future;
             },
             child: ListView(
-              physics: AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.only(top: 24, left: 8, right: 8, bottom: 24),
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(top: 24, left: 8, right: 8, bottom: 24),
               children: <Widget>[
                 Column(
                   mainAxisSize: MainAxisSize.min,
@@ -146,13 +150,13 @@ class _InfoViewState extends State<InfoView> {
       child: ListTile(
         onTap: () => vm.changePage(3),
         isThreeLine: true,
-        title: Text(Strings.orderStoragesPageName),
+        title: const Text(Strings.orderStoragesPageName),
         subtitle: RichText(
           text: TextSpan(
-            style: TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey),
             children: <TextSpan>[
-              TextSpan(text: 'Забрать со склада: ${vm.ordersNotInOwnStorageCnt}\n', style: TextStyle(fontSize: 12.0)),
-              TextSpan(text: 'У меня: ${vm.ordersInOwnStorageCnt}\n', style: TextStyle(fontSize: 12.0))
+              TextSpan(text: 'Забрать со склада: ${vm.ordersNotInOwnStorageCnt}\n', style: const TextStyle(fontSize: 12.0)),
+              TextSpan(text: 'У меня: ${vm.ordersInOwnStorageCnt}\n', style: const TextStyle(fontSize: 12.0))
             ]
           )
         )
@@ -167,17 +171,17 @@ class _InfoViewState extends State<InfoView> {
       child: ListTile(
         onTap: () => vm.changePage(1),
         isThreeLine: true,
-        title: Text(Strings.deliveryPageName),
+        title: const Text(Strings.deliveryPageName),
         subtitle: RichText(
           text: TextSpan(
-            style: TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey),
             children: <TextSpan>[
               TextSpan(
                 text: vm.deliveries.map((e) => Format.dateStr(e.deliveryDate)).join('\n') + '\n',
-                style: TextStyle(fontSize: 12.0)
+                style: const TextStyle(fontSize: 12.0)
               ),
-              TextSpan(text: 'Точек: ${vm.deliveryPointsCnt}\n', style: TextStyle(fontSize: 12.0)),
-              TextSpan(text: 'Осталось: ${vm.deliveryPointsLeftCnt}\n', style: TextStyle(fontSize: 12.0))
+              TextSpan(text: 'Точек: ${vm.deliveryPointsCnt}\n', style: const TextStyle(fontSize: 12.0)),
+              TextSpan(text: 'Осталось: ${vm.deliveryPointsLeftCnt}\n', style: const TextStyle(fontSize: 12.0))
             ]
           )
         ),
@@ -186,7 +190,7 @@ class _InfoViewState extends State<InfoView> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
             primary: Colors.blue,
           ),
-          child: Text('Завершить день'),
+          child: const Text('Завершить день'),
           onPressed: vm.deliveryPointsCnt == 0 ? null : vm.closeDelivery
         ),
       ),
@@ -200,22 +204,22 @@ class _InfoViewState extends State<InfoView> {
       child: ListTile(
         onTap: () => vm.changePage(2),
         isThreeLine: true,
-        title: Text(Strings.paymentsPageName),
+        title: const Text(Strings.paymentsPageName),
         subtitle: RichText(
           text: TextSpan(
-            style: TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey),
             children: <TextSpan>[
               TextSpan(
                 text: 'Всего: ${vm.paymentsCnt} на сумму ${Format.numberStr(vm.paymentsSum)}\n',
-                style: TextStyle(fontSize: 12.0)
+                style: const TextStyle(fontSize: 12.0)
               ),
               TextSpan(
                 text: 'Наличными: ${vm.cashPaymentsCnt} на сумму ${Format.numberStr(vm.cashPaymentsSum)}\n',
-                style: TextStyle(fontSize: 12.0)
+                style: const TextStyle(fontSize: 12.0)
               ),
               TextSpan(
                 text: 'Картой: ${vm.cardPaymentsCnt} на сумму ${Format.numberStr(vm.cardPaymentsSum)}\n',
-                style: TextStyle(fontSize: 12.0)
+                style: const TextStyle(fontSize: 12.0)
               )
             ]
           )
@@ -232,7 +236,7 @@ class _InfoViewState extends State<InfoView> {
       return Card(
         child: ListTile(
           isThreeLine: true,
-          title: Text('Ошибки'),
+          title: const Text('Ошибки'),
           subtitle: Text(state.message, style: TextStyle(color: Colors.red[300])),
         )
       );
@@ -245,7 +249,7 @@ class _InfoViewState extends State<InfoView> {
     InfoViewModel vm = context.read<InfoViewModel>();
 
     if (vm.newVersionAvailable) {
-      return Card(
+      return const Card(
         child: ListTile(
           isThreeLine: true,
           title: Text('Информация'),

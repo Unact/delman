@@ -1,7 +1,7 @@
 part of 'payments_page.dart';
 
 abstract class PaymentsState {
-  const PaymentsState();
+  PaymentsState();
 }
 
 class PaymentsInitial extends PaymentsState {}

@@ -22,8 +22,9 @@ class AppPage extends StatelessWidget {
   final App app;
 
   const AppPage({
+    Key? key,
     required this.app
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -38,12 +39,12 @@ class AppPage extends StatelessWidget {
             visualDensity: VisualDensity.adaptivePlatformDensity
           ),
           home: LandingPage(),
-          locale: Locale('ru', 'RU'),
-          localizationsDelegates: [
+          locale: const Locale('ru', 'RU'),
+          localizationsDelegates: const [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
           ],
-          supportedLocales: [
+          supportedLocales: const [
             Locale('en', 'US'),
             Locale('ru', 'RU'),
           ]

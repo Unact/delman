@@ -4,7 +4,7 @@ class InfoRow extends StatelessWidget {
   final Widget? title;
   final Widget? trailing;
 
-  InfoRow({
+  const InfoRow({
     Key? key,
     this.title,
     this.trailing
@@ -13,11 +13,11 @@ class InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Row(
         children: [
           Flexible(
-            child: Container(
+            child: SizedBox(
               height: 48,
               child: Align(
                 alignment: Alignment.centerLeft,
@@ -26,7 +26,7 @@ class InfoRow extends StatelessWidget {
             ),
           ),
           Flexible(
-            child: Container(
+            child: SizedBox(
               height: 48,
               child: Align(
                 alignment: Alignment.centerRight,

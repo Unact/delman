@@ -1,23 +1,23 @@
-import 'package:location/location.dart' as geoLoc;
+import 'package:location/location.dart' as geo_loc;
 
 import 'package:delman/app/entities/entities.dart';
 
 class GeoLoc {
   static Future<Location?> getCurrentLocation() async {
-    geoLoc.Location loc = new geoLoc.Location();
+    geo_loc.Location loc = geo_loc.Location();
 
     if (!(await loc.serviceEnabled()) && !(await loc.requestService())) {
       return null;
     }
 
     if (
-      await loc.hasPermission() == geoLoc.PermissionStatus.denied &&
-      await loc.requestPermission() != geoLoc.PermissionStatus.granted
+      await loc.hasPermission() == geo_loc.PermissionStatus.denied &&
+      await loc.requestPermission() != geo_loc.PermissionStatus.granted
     ) {
       return null;
     }
 
-    geoLoc.LocationData data = await loc.getLocation();
+    geo_loc.LocationData data = await loc.getLocation();
 
     return Location(
       latitude: data.latitude,

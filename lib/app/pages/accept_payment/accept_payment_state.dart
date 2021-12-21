@@ -3,7 +3,7 @@ part of 'accept_payment_page.dart';
 abstract class AcceptPaymentState {
   final String message;
 
-  const AcceptPaymentState(this.message);
+  AcceptPaymentState(this.message);
 }
 
 class AcceptPaymentInitial extends AcceptPaymentState {

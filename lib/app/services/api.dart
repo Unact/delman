@@ -26,8 +26,7 @@ class Api {
   static Api? get instance => _instance;
 
   static Future<Api> init() async {
-    if (_instance != null)
-      return _instance!;
+    if (_instance != null) return _instance!;
 
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
@@ -252,8 +251,7 @@ class Api {
 
   Dio _createDio(ApiData apiData, String method, [Map<String, String>? headers = const {}]) {
     String appName = Strings.appName;
-
-    if (headers == null) headers = {};
+    headers ??= {};
 
     if (apiData.token != null) {
       headers.addAll({
@@ -263,7 +261,7 @@ class Api {
 
     headers.addAll({
       'Accept': 'application/json',
-      appName: '$version',
+      appName: version,
       HttpHeaders.userAgentHeader: '$appName/$version ${FkUserAgent.userAgent}',
     });
 

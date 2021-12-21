@@ -11,7 +11,7 @@ class AppDataRepository {
 
   AppData getAppData() {
     String? data = storage.prefs.getString('appData');
-    return data == null ? AppData() : AppData.fromJson(json.decode(data));
+    return data == null ? const AppData() : AppData.fromJson(json.decode(data));
   }
 
   Future<void> setAppData(AppData appData) async {
@@ -19,6 +19,6 @@ class AppDataRepository {
   }
 
   Future<void> resetAppData() async {
-    await setAppData(AppData());
+    await setAppData(const AppData());
   }
 }

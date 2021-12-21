@@ -41,14 +41,14 @@ class _QRScanPageState extends State<QRScanPage> {
         actions: <Widget>[
           IconButton(
             color: Colors.white,
-            icon: Icon(Icons.flash_on),
+            icon: const Icon(Icons.flash_on),
             onPressed: () async {
               _controller!.toggleFlash();
             }
           ),
           IconButton(
             color: Colors.white,
-            icon: Icon(Icons.switch_camera),
+            icon: const Icon(Icons.switch_camera),
             onPressed: () async {
               _controller!.flipCamera();
             }

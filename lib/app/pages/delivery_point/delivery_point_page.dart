@@ -18,9 +18,10 @@ part 'delivery_point_view_model.dart';
 class DeliveryPointPage extends StatelessWidget {
   final DeliveryPoint deliveryPoint;
 
-  const DeliveryPointPage({
+  DeliveryPointPage({
+    Key? key,
     required this.deliveryPoint
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -29,17 +30,17 @@ class DeliveryPointPage extends StatelessWidget {
         context,
         deliveryPoint: deliveryPoint
       ),
-      child: DeliveryPointView(),
+      child: _DeliveryPointView(),
     );
   }
 }
 
-class DeliveryPointView extends StatefulWidget {
+class _DeliveryPointView extends StatefulWidget {
   @override
   _DeliveryPointViewState createState() => _DeliveryPointViewState();
 }
 
-class _DeliveryPointViewState extends State<DeliveryPointView> {
+class _DeliveryPointViewState extends State<_DeliveryPointView> {
   void showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
@@ -59,11 +60,11 @@ class _DeliveryPointViewState extends State<DeliveryPointView> {
             children: [
               Flexible(
                 child: ListView(
-                  physics: AlwaysScrollableScrollPhysics(),
-                  padding: EdgeInsets.only(top: 24, bottom: 24),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.only(top: 24, bottom: 24),
                   children: [
                     InfoRow(
-                      title: Text(Strings.address),
+                      title: const Text(Strings.address),
                       trailing: GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -73,48 +74,48 @@ class _DeliveryPointViewState extends State<DeliveryPointView> {
                             )
                           );
                         },
-                        child: ExpandingText(vm.deliveryPoint.addressName, style: TextStyle(color: Colors.blue)),
+                        child: ExpandingText(vm.deliveryPoint.addressName, style: const TextStyle(color: Colors.blue)),
                       )
                     ),
                     ListTile(
-                      leading: Text(Strings.planArrival),
+                      leading: const Text(Strings.planArrival),
                       trailing: Text(Format.timeStr(vm.deliveryPoint.planArrival)),
                       dense: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8)
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 8)
                     ),
                     ListTile(
-                      leading: Text(Strings.factArrival),
+                      leading: const Text(Strings.factArrival),
                       trailing: vm.deliveryPoint.inProgress ?
                         Text(Format.timeStr(vm.deliveryPoint.factArrival)) :
                         state is DeliveryPointInProgress ?
-                          SizedBox(child: CircularProgressIndicator()) :
+                          const SizedBox(child: CircularProgressIndicator()) :
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
                               primary: Colors.blue
                             ),
-                            child: Text('Отметить'),
+                            child: const Text('Отметить'),
                             onPressed: () => vm.arrive(),
                           ),
                       dense: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8)
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 8)
                     ),
                     ListTile(
-                      leading: Text(Strings.factDeparture),
+                      leading: const Text(Strings.factDeparture),
                       trailing: Text(Format.timeStr(vm.deliveryPoint.factDeparture)),
                       dense: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8)
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 8)
                     ),
                     vm.deliveryPointOrders.isEmpty ? Container() : ExpansionTile(
-                      title: Text('Доставка'),
+                      title: const Text('Доставка'),
                       initiallyExpanded: true,
-                      tilePadding: EdgeInsets.symmetric(horizontal: 8),
+                      tilePadding: const EdgeInsets.symmetric(horizontal: 8),
                       children: _buildDeliveryTiles(context)
                     ),
                     vm.pickupPointOrders.isEmpty ? Container() : ExpansionTile(
-                      title: Text('Забор'),
+                      title: const Text('Забор'),
                       initiallyExpanded: true,
-                      tilePadding: EdgeInsets.symmetric(horizontal: 8),
+                      tilePadding: const EdgeInsets.symmetric(horizontal: 8),
                       children: _buildPickupTiles(context)
                     )
                   ]
@@ -140,36 +141,38 @@ class _DeliveryPointViewState extends State<DeliveryPointView> {
     DeliveryPointViewModel vm = context.read<DeliveryPointViewModel>();
 
     return [
-      InfoRow(title: Text('ИМ'), trailing: Text(vm.deliveryPoint.sellerName ?? '')),
-      InfoRow(title: Text('Покупатель'), trailing: Text(vm.deliveryPoint.buyerName ?? '')),
+      InfoRow(title: const Text('ИМ'), trailing: Text(vm.deliveryPoint.sellerName ?? '')),
+      InfoRow(title: const Text('Покупатель'), trailing: Text(vm.deliveryPoint.buyerName ?? '')),
       InfoRow(
-        title: Text('Телефон'),
+        title: const Text('Телефон'),
         trailing: GestureDetector(
           onTap: vm.callPhone,
-          child: Text(vm.deliveryPoint.phone ?? '', style: TextStyle(color: Colors.blue))
+          child: Text(vm.deliveryPoint.phone ?? '', style: const TextStyle(color: Colors.blue))
         )
       ),
-      InfoRow(title: Text('Доставка'), trailing: Text(vm.deliveryPoint.deliveryTypeName ?? '')),
-      InfoRow(title: Text('Оплата'), trailing: Text(vm.deliveryPoint.paymentTypeName ?? '')),
-      InfoRow(title: Text('Заказы')),
-    ]..addAll(vm.deliveryPointOrders.map<Widget>((e) => _buildOrderTile(context, e)).toList());
+      InfoRow(title: const Text('Доставка'), trailing: Text(vm.deliveryPoint.deliveryTypeName ?? '')),
+      InfoRow(title: const Text('Оплата'), trailing: Text(vm.deliveryPoint.paymentTypeName ?? '')),
+      const InfoRow(title: Text('Заказы')),
+      ...vm.deliveryPointOrders.map<Widget>((e) => _buildOrderTile(context, e)).toList()
+    ];
   }
 
   List<Widget> _buildPickupTiles(BuildContext context) {
     DeliveryPointViewModel vm = context.read<DeliveryPointViewModel>();
 
     return [
-      InfoRow(title: Text('ИМ'), trailing: Text(vm.deliveryPoint.pickupSellerName ?? '')),
-      InfoRow(title: Text('Отправитель'), trailing: Text(vm.deliveryPoint.senderName ?? '')),
+      InfoRow(title: const Text('ИМ'), trailing: Text(vm.deliveryPoint.pickupSellerName ?? '')),
+      InfoRow(title: const Text('Отправитель'), trailing: Text(vm.deliveryPoint.senderName ?? '')),
       InfoRow(
-        title: Text('Телефон'),
+        title: const Text('Телефон'),
         trailing: GestureDetector(
           onTap: vm.callPhone,
-          child: Text(vm.deliveryPoint.senderPhone ?? '', style: TextStyle(color: Colors.blue))
+          child: Text(vm.deliveryPoint.senderPhone ?? '', style: const TextStyle(color: Colors.blue))
         )
       ),
-      InfoRow(title: Text('Заказы')),
-    ]..addAll(vm.pickupPointOrders.map<Widget>((e) => _buildOrderTile(context, e)).toList());
+      const InfoRow(title: Text('Заказы')),
+      ...vm.pickupPointOrders.map<Widget>((e) => _buildOrderTile(context, e)).toList()
+    ];
   }
 
   Widget _buildOrderTile(BuildContext context, DeliveryPointOrder deliveryPointOrder) {
@@ -177,13 +180,13 @@ class _DeliveryPointViewState extends State<DeliveryPointView> {
     Order order = vm.getOrder(deliveryPointOrder);
 
     return ListTile(
-      title: Text('Заказ ${order.trackingNumber}', style: TextStyle(fontSize: 14)),
+      title: Text('Заказ ${order.trackingNumber}', style: const TextStyle(fontSize: 14)),
       trailing: IconButton(
-        icon: Icon(Icons.copy),
+        icon: const Icon(Icons.copy),
         onPressed: () => vm.copyOrderInfo(order),
         tooltip: 'Копировать',
       ),
-      contentPadding: EdgeInsets.symmetric(horizontal: 20),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20),
       onTap: () {
         Navigator.push(
           context,

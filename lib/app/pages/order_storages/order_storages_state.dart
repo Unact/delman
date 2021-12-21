@@ -1,7 +1,7 @@
 part of 'order_storages_page.dart';
 
 abstract class OrderStoragesState {
-  const OrderStoragesState();
+  OrderStoragesState();
 }
 
 class OrderStoragesInitial extends OrderStoragesState {}

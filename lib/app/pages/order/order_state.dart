@@ -1,7 +1,7 @@
 part of 'order_page.dart';
 
 abstract class OrderState {
-  const OrderState();
+  OrderState();
 }
 
 class OrderInitial extends OrderState {}

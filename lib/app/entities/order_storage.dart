@@ -24,8 +24,8 @@ class OrderStorage extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': this.id,
-      'name': this.name
+      'id': id,
+      'name': name
     };
   }
 

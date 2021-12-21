@@ -13,25 +13,26 @@ part 'order_view_model.dart';
 class OrderPage extends StatelessWidget {
   final Order order;
 
-  const OrderPage({
+  OrderPage({
+    Key? key,
     required this.order
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<OrderViewModel>(
       create: (context) => OrderViewModel(context, order: order),
-      child: OrderView(),
+      child: _OrderView(),
     );
   }
 }
 
-class OrderView extends StatefulWidget {
+class _OrderView extends StatefulWidget {
   @override
   _OrderViewState createState() => _OrderViewState();
 }
 
-class _OrderViewState extends State<OrderView> {
+class _OrderViewState extends State<_OrderView> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<OrderViewModel, OrderState>(
@@ -44,46 +45,46 @@ class _OrderViewState extends State<OrderView> {
             centerTitle: true
           ),
           body: ListView(
-            physics: AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.only(top: 24, bottom: 24),
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(top: 24, bottom: 24),
             children: [
               InfoRow(
-                title: Text('Посылка'),
+                title: const Text('Посылка'),
                 trailing: Text(vm.withCourier ? 'На борту' : 'Не на борту')
               ),
               InfoRow(
-                title: Text('Возврат документов'),
+                title: const Text('Возврат документов'),
                 trailing: Text(vm.order.needDocumentsReturn ? 'Да' : 'Нет')
               ),
-              InfoRow(title: Text('ИМ'), trailing: Text(vm.order.sellerName)),
-              InfoRow(title: Text('Номер в ИМ'), trailing: Text(vm.order.number)),
+              InfoRow(title: const Text('ИМ'), trailing: Text(vm.order.sellerName)),
+              InfoRow(title: const Text('Номер в ИМ'), trailing: Text(vm.order.number)),
               InfoRow(
-                title: Text('Отправитель'),
+                title: const Text('Отправитель'),
                 trailing: Text(vm.order.senderName ?? '')
               ),
               InfoRow(
-                title: Text('Покупатель'),
+                title: const Text('Покупатель'),
                 trailing: Text(vm.order.buyerName ?? '')
               ),
               InfoRow(
-                title: Text('Адрес забора'),
+                title: const Text('Адрес забора'),
                 trailing: Text(vm.order.pickupAddressName)
               ),
               InfoRow(
-                title: Text('Адрес доставки'),
+                title: const Text('Адрес доставки'),
                 trailing: Text(vm.order.deliveryAddressName)
               ),
-              InfoRow(title: Text('Примечание'), trailing: ExpandingText(vm.order.comment ?? '')),
+              InfoRow(title: const Text('Примечание'), trailing: ExpandingText(vm.order.comment ?? '')),
               ExpansionTile(
-                title: Text('Позиции'),
+                title: const Text('Позиции'),
                 initiallyExpanded: true,
-                tilePadding: EdgeInsets.symmetric(horizontal: 8),
+                tilePadding: const EdgeInsets.symmetric(horizontal: 8),
                 children: vm.sortedOrderLines.map<Widget>((e) => _buildOrderLineTile(context, e)).toList()
               ),
               ExpansionTile(
-                title: Text('Служебная информация'),
+                title: const Text('Служебная информация'),
                 initiallyExpanded: false,
-                tilePadding: EdgeInsets.symmetric(horizontal: 8),
+                tilePadding: const EdgeInsets.symmetric(horizontal: 8),
                 children: vm.sortedOrderInfoList.map<Widget>((e) => _buildOrderInfoTile(context, e)).toList()
               ),
             ],
@@ -95,16 +96,19 @@ class _OrderViewState extends State<OrderView> {
 
   Widget _buildOrderInfoTile(BuildContext context, OrderInfo orderInfo) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Flexible(
-            child: Container(
+            child: SizedBox(
               height: 20,
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: ExpandingText(orderInfo.comment, textAlign: TextAlign.left, style: TextStyle(fontSize: 12)),
+                child: ExpandingText(orderInfo.comment,
+                  textAlign: TextAlign.left,
+                  style: const TextStyle(fontSize: 12)
+                ),
               )
             )
           ),
@@ -119,11 +123,11 @@ class _OrderViewState extends State<OrderView> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Flexible(
-            child: Container(
+            child: SizedBox(
               height: 36,
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: ExpandingText(orderLine.name, textAlign: TextAlign.left, style: TextStyle(fontSize: 12)),
+                child: ExpandingText(orderLine.name, textAlign: TextAlign.left, style: const TextStyle(fontSize: 12)),
               )
             )
           ),
@@ -136,7 +140,7 @@ class _OrderViewState extends State<OrderView> {
         ]
       ),
       dense: true,
-      contentPadding: EdgeInsets.symmetric(horizontal: 16),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
     );
   }
 }

@@ -12,16 +12,20 @@ part 'home_state.dart';
 part 'home_view_model.dart';
 
 class HomePage extends StatelessWidget {
+  HomePage({
+    Key? key
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<HomeViewModel>(
       create: (context) => HomeViewModel(context),
-      child: HomeView(),
+      child: _HomeView(),
     );
   }
 }
 
-class HomeView extends StatelessWidget {
+class _HomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<HomeViewModel, HomeState>(
@@ -48,7 +52,7 @@ class HomeView extends StatelessWidget {
       currentIndex: vm.currentIndex,
       onTap: vm.setCurrentIndex,
       type: BottomNavigationBarType.fixed,
-      items: [
+      items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
           label: Strings.infoPageName

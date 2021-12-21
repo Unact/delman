@@ -1,7 +1,7 @@
 part of 'app_page.dart';
 
 abstract class AppState {
-  const AppState();
+  AppState();
 }
 
 class AppInitial extends AppState {}

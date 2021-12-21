@@ -1,7 +1,7 @@
 part of 'home_page.dart';
 
 abstract class HomeState {
-  const HomeState();
+  HomeState();
 }
 
 class HomeInitial extends HomeState {}

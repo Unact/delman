@@ -21,9 +21,10 @@ part 'delivery_point_order_view_model.dart';
 class DeliveryPointOrderPage extends StatelessWidget {
   final DeliveryPointOrder deliveryPointOrder;
 
-  const DeliveryPointOrderPage({
+  DeliveryPointOrderPage({
+    Key? key,
     required this.deliveryPointOrder
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -32,24 +33,24 @@ class DeliveryPointOrderPage extends StatelessWidget {
         context,
         deliveryPointOrder: deliveryPointOrder
       ),
-      child: DeliveryPointOrderView(),
+      child: _DeliveryPointOrderView(),
     );
   }
 }
 
-class DeliveryPointOrderView extends StatefulWidget {
+class _DeliveryPointOrderView extends StatefulWidget {
   @override
   _DeliveryPointOrderViewState createState() => _DeliveryPointOrderViewState();
 }
 
-class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
+class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   Completer<void> _dialogCompleter = Completer();
 
   Future<void> openDialog() async {
     showDialog(
       context: context,
-      builder: (_) => Center(child: CircularProgressIndicator()),
+      builder: (_) => const Center(child: CircularProgressIndicator()),
       barrierDismissible: false
     );
     await _dialogCompleter.future;
@@ -81,8 +82,8 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Комментарий'),
-          content: Container(
+          title: const Text('Комментарий'),
+          content: SizedBox(
             child: TextField(
               textCapitalization: TextCapitalization.words,
               controller: controller,
@@ -95,13 +96,13 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
                 Navigator.of(context).pop();
                 vm.addComment(controller.text);
               },
-              child: Text('Сохранить')
+              child: const Text('Сохранить')
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Отменить')
+              child: const Text('Отменить')
             )
           ]
         );
@@ -129,11 +130,11 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Предупреждение'),
+          title: const Text('Предупреждение'),
           content: SingleChildScrollView(child: ListBody(children: <Widget>[Text(message)])),
           actions: <Widget>[
-            TextButton(child: Text(Strings.ok), onPressed: () => Navigator.of(context).pop(true)),
-            TextButton(child: Text(Strings.cancel), onPressed: () => Navigator.of(context).pop(false))
+            TextButton(child: const Text(Strings.ok), onPressed: () => Navigator.of(context).pop(true)),
+            TextButton(child: const Text(Strings.cancel), onPressed: () => Navigator.of(context).pop(false))
           ],
         );
       }
@@ -164,11 +165,11 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
           body: Form(
             key: _formKey,
             child: ListView(
-              physics: AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.only(top: 24, bottom: 24),
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(top: 24, bottom: 24),
               children: [
                 InfoRow(
-                  title: Text('Статус'),
+                  title: const Text('Статус'),
                   trailing: Text(
                     vm.deliveryPointOrder.isCanceled ?
                       'Отменен' :
@@ -176,32 +177,32 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
                   )
                 ),
                 InfoRow(
-                  title: Text('Посылка'),
+                  title: const Text('Посылка'),
                   trailing: Text(vm.withCourier ? 'На борту' : 'Не на борту')
                 ),
                 InfoRow(
-                  title: Text('Возврат документов'),
+                  title: const Text('Возврат документов'),
                   trailing: Text(vm.order.needDocumentsReturn ? 'Да' : 'Нет')
                 ),
-                InfoRow(title: Text('ИМ'), trailing: Text(vm.order.sellerName)),
-                InfoRow(title: Text('Номер в ИМ'), trailing: Text(vm.order.number)),
+                InfoRow(title: const Text('ИМ'), trailing: Text(vm.order.sellerName)),
+                InfoRow(title: const Text('Номер в ИМ'), trailing: Text(vm.order.number)),
                 ...(isPickup ? _buildPickupRows(context) : _buildDeliveryRows(context)),
                 ExpansionTile(
-                  title: Text('Служебная информация'),
+                  title: const Text('Служебная информация'),
                   initiallyExpanded: false,
-                  tilePadding: EdgeInsets.symmetric(horizontal: 8),
+                  tilePadding: const EdgeInsets.symmetric(horizontal: 8),
                   children: vm.sortedOrderInfoList.
                     map<Widget>((e) => _buildOrderInfoTile(context, e)).toList()..
                     add(
                       Padding(
-                        padding: EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.only(right: 8),
                         child: Align(
                           alignment: Alignment.centerRight,
                           heightFactor: 0.75,
                           child: TextButton(
                             style: TextButton.styleFrom(primary: Colors.green),
                             onPressed: () => showAddOrderInfoDialog(context),
-                            child: Text('Добавить')
+                            child: const Text('Добавить')
                           )
                         )
                       )
@@ -244,7 +245,7 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
     return [
       vm.deliveryPointOrder.isFinished ? null : TextButton(
         style: TextButton.styleFrom(primary: Colors.redAccent),
-        child: Text('Отменить'),
+        child: const Text('Отменить'),
         onPressed: () {
           unfocus();
           vm.tryCancelOrder();
@@ -252,7 +253,7 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
       ),
       vm.deliveryPointOrder.isFinished || !vm.deliveryPoint.inProgress ? null : TextButton(
         style: TextButton.styleFrom(primary: Colors.redAccent),
-        child: Text('Завершить'),
+        child: const Text('Завершить'),
         onPressed: () {
           unfocus();
           vm.tryConfirmOrder();
@@ -265,22 +266,22 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
     DeliveryPointOrderViewModel vm = context.read<DeliveryPointOrderViewModel>();
 
     return [
-      InfoRow(title: Text('Отправитель'), trailing: Text(vm.order.senderName ?? '')),
+      InfoRow(title: const Text('Отправитель'), trailing: Text(vm.order.senderName ?? '')),
       InfoRow(
-        title: Text('Телефон'),
+        title: const Text('Телефон'),
         trailing: GestureDetector(
           onTap: () => vm.callPhone(vm.order.senderPhone),
-          child: Text(vm.order.senderPhone ?? '', style: TextStyle(color: Colors.blue))
+          child: Text(vm.order.senderPhone ?? '', style: const TextStyle(color: Colors.blue))
         )
       ),
       vm.order.pickupDateTimeFrom == null ? Container() : InfoRow(
-        title: Text('Время забора'),
+        title: const Text('Время забора'),
         trailing: Text(
           Format.timeStr(vm.order.pickupDateTimeTo) + ' - ' + Format.timeStr(vm.order.pickupDateTimeTo)
         )
       ),
       InfoRow(
-        title: Text('Забор'),
+        title: const Text('Забор'),
         trailing: ExpandingText(
           _formatTypeText(
             vm.order.deliveryTypeName,
@@ -291,9 +292,9 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
         )
       ),
       ExpansionTile(
-        title: Text('Позиции'),
+        title: const Text('Позиции'),
         initiallyExpanded: true,
-        tilePadding: EdgeInsets.symmetric(horizontal: 8),
+        tilePadding: const EdgeInsets.symmetric(horizontal: 8),
         children: vm.sortedOrderLines.map<Widget>((e) => _buildOrderLineTile(context, e, false)).toList()
       )
     ];
@@ -312,7 +313,7 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
           unfocus();
           vm.tryStartPayment(false);
         },
-        child: Icon(Icons.account_balance_wallet),
+        child: const Icon(Icons.account_balance_wallet),
         style: TextButton.styleFrom(primary: Colors.redAccent),
       ),
       !totalEditable || !vm.order.isCardPaymentAllowed ? null : TextButton(
@@ -320,12 +321,12 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
           unfocus();
           vm.tryStartPayment(true);
         },
-        child: Icon(Icons.credit_card),
+        child: const Icon(Icons.credit_card),
         style: TextButton.styleFrom(primary: Colors.redAccent),
       ),
       vm.deliveryPointOrder.isFinished ? null : TextButton(
         style: TextButton.styleFrom(primary: Colors.redAccent),
-        child: Text('Отменить'),
+        child: const Text('Отменить'),
         onPressed: () {
           unfocus();
           vm.tryCancelOrder();
@@ -333,7 +334,7 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
       ),
       vm.deliveryPointOrder.isFinished || !vm.deliveryPoint.inProgress ? null : TextButton(
         style: TextButton.styleFrom(primary: Colors.redAccent),
-        child: Text('Завершить'),
+        child: const Text('Завершить'),
         onPressed: () {
           unfocus();
           vm.tryConfirmOrder();
@@ -347,24 +348,24 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
 
     return [
       InfoRow(
-        title: Text('Покупатель'),
+        title: const Text('Покупатель'),
         trailing: Text(vm.order.buyerName ?? '')
       ),
       InfoRow(
-        title: Text('Телефон'),
+        title: const Text('Телефон'),
         trailing: GestureDetector(
           onTap: () => vm.callPhone(vm.order.buyerPhone),
-          child: Text(vm.order.buyerPhone ?? '', style: TextStyle(color: Colors.blue))
+          child: Text(vm.order.buyerPhone ?? '', style: const TextStyle(color: Colors.blue))
         )
       ),
       vm.order.deliveryDateTimeFrom == null ? Container() : InfoRow(
-        title: Text('Время доставки'),
+        title: const Text('Время доставки'),
         trailing: Text(
           Format.timeStr(vm.order.deliveryDateTimeFrom) + ' - ' + Format.timeStr(vm.order.deliveryDateTimeTo)
         )
       ),
       InfoRow(
-        title: Text(vm.deliveryPointOrder.isPickup ? 'Забор' : 'Доставка'),
+        title: const Text('Доставка'),
         trailing: ExpandingText(
           _formatTypeText(
             vm.order.deliveryTypeName,
@@ -374,13 +375,13 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
           )
         )
       ),
-      InfoRow(title: Text('Оплата'), trailing: Text(vm.order.paymentTypeName)),
-      InfoRow(title: Text('Примечание'), trailing: ExpandingText(vm.order.comment ?? '')),
-      InfoRow(title: Text('К оплате'), trailing: Text(Format.numberStr(vm.total))),
+      InfoRow(title: const Text('Оплата'), trailing: Text(vm.order.paymentTypeName)),
+      InfoRow(title: const Text('Примечание'), trailing: ExpandingText(vm.order.comment ?? '')),
+      InfoRow(title: const Text('К оплате'), trailing: Text(Format.numberStr(vm.total))),
       ExpansionTile(
-        title: Text('Позиции'),
+        title: const Text('Позиции'),
         initiallyExpanded: true,
-        tilePadding: EdgeInsets.symmetric(horizontal: 8),
+        tilePadding: const EdgeInsets.symmetric(horizontal: 8),
         children: vm.sortedOrderLines.map<Widget>(
           (e) => _buildOrderLineTile(context, e, !vm.deliveryPointOrder.isFinished)
         ).toList()
@@ -390,16 +391,18 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
 
   Widget _buildOrderInfoTile(BuildContext context, OrderInfo orderInfo) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Flexible(
-            child: Container(
+            child: SizedBox(
               height: 20,
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: ExpandingText(orderInfo.comment, textAlign: TextAlign.left, style: TextStyle(fontSize: 12)),
+                child: ExpandingText(orderInfo.comment,
+                  textAlign: TextAlign.left, style: const TextStyle(fontSize: 12)
+                ),
               )
             )
           ),
@@ -416,11 +419,11 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Flexible(
-            child: Container(
+            child: SizedBox(
               height: 36,
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: ExpandingText(orderLine.name, textAlign: TextAlign.left, style: TextStyle(fontSize: 12)),
+                child: ExpandingText(orderLine.name, textAlign: TextAlign.left, style: const TextStyle(fontSize: 12)),
               )
             )
           ),
@@ -434,8 +437,8 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
                   initialValue: orderLine.factAmount?.toString(),
                   textAlign: TextAlign.center,
                   onChanged: (newValue) => vm.updateOrderLineAmount(orderLine, newValue),
-                  keyboardType: TextInputType.numberWithOptions(signed: true),
-                  decoration: InputDecoration(
+                  keyboardType: const TextInputType.numberWithOptions(signed: true),
+                  decoration: const InputDecoration(
                     contentPadding: EdgeInsets.only(bottom: 12)
                   ),
                 )
@@ -445,7 +448,7 @@ class _DeliveryPointOrderViewState extends State<DeliveryPointOrderView> {
         ]
       ),
       dense: true,
-      contentPadding: EdgeInsets.symmetric(horizontal: 16),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
     );
   }
 

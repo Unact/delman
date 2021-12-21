@@ -35,8 +35,7 @@ class App {
   static App? get instance => _instance;
 
   static Future<App> init() async {
-    if (_instance != null)
-      return _instance!;
+    if (_instance != null) return _instance!;
 
     AndroidDeviceInfo androidDeviceInfo;
     IosDeviceInfo iosDeviceInfo;
@@ -77,8 +76,8 @@ class App {
   }
 
   Future<void> reportError(dynamic error, dynamic stackTrace) async {
-    print(error);
-    print(stackTrace);
+    debugPrint(error);
+    debugPrint(stackTrace);
     await Sentry.captureException(error, stackTrace: stackTrace);
   }
 
@@ -99,8 +98,7 @@ class App {
     required String dsn,
     required bool capture
   }) async {
-    if (!capture)
-      return;
+    if (!capture) return;
 
     await SentryFlutter.init(
       (options) {

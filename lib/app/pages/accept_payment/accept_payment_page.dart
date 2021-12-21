@@ -19,11 +19,12 @@ class AcceptPaymentPage extends StatelessWidget {
   final double total;
   final bool cardPayment;
 
-  const AcceptPaymentPage({
+  AcceptPaymentPage({
+    Key? key,
     required this.deliveryPointOrder,
     required this.total,
     required this.cardPayment
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -34,17 +35,17 @@ class AcceptPaymentPage extends StatelessWidget {
         total: total,
         cardPayment: cardPayment
       ),
-      child: AcceptPaymentView(),
+      child: _AcceptPaymentView(),
     );
   }
 }
 
-class AcceptPaymentView extends StatefulWidget {
+class _AcceptPaymentView extends StatefulWidget {
   @override
   _AcceptPaymentViewState createState() => _AcceptPaymentViewState();
 }
 
-class _AcceptPaymentViewState extends State<AcceptPaymentView> {
+class _AcceptPaymentViewState extends State<_AcceptPaymentView> {
   final GlobalKey<SignatureState> _sign = GlobalKey<SignatureState>();
 
   Future<Uint8List> getSignatureData() async {
@@ -85,17 +86,17 @@ class _AcceptPaymentViewState extends State<AcceptPaymentView> {
     AcceptPaymentViewModel vm = context.read<AcceptPaymentViewModel>();
 
     return [
-      CircularProgressIndicator(
+      const CircularProgressIndicator(
         backgroundColor: Colors.white70,
         valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
       ),
-      Container(height: 40),
-      Text(vm.state.message, style: TextStyle(fontSize: 18, color: Colors.white70), textAlign: TextAlign.center),
-      Container(height: 40),
-      Container(
+      const SizedBox(height: 40),
+      Text(vm.state.message, style: const TextStyle(fontSize: 18, color: Colors.white70), textAlign: TextAlign.center),
+      const SizedBox(height: 40),
+      SizedBox(
         height: 32,
         child: vm.isCancelable ? ElevatedButton(
-          child: Text('Отмена', style: TextStyle(color: Colors.black)),
+          child: const Text('Отмена', style: TextStyle(color: Colors.black)),
           style: ElevatedButton.styleFrom(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
             primary: Colors.white
@@ -103,29 +104,28 @@ class _AcceptPaymentViewState extends State<AcceptPaymentView> {
           onPressed: vm.cancelPayment
         ) : Container()
       ),
-      Container(height: 40)
+      const SizedBox(height: 40)
     ];
   }
 
   List<Widget> _buildInfoPart(BuildContext context) {
     AcceptPaymentViewModel vm = context.read<AcceptPaymentViewModel>();
 
-    if (!vm.requiredSignature)
-      return [Container(height: 272)];
+    if (!vm.requiredSignature) return [const SizedBox(height: 272)];
 
     return [
       Container(
         height: 200,
         width: 350,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(40.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(40.0)),
           border: Border.all(color: Colors.grey),
           color: Colors.white
         ),
         child: Signature(key: _sign, strokeWidth: 5)
       ),
-      Container(height: 40),
-      Container(
+      const SizedBox(height: 40),
+      SizedBox(
         height: 32,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -135,7 +135,7 @@ class _AcceptPaymentViewState extends State<AcceptPaymentView> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
                 primary: Colors.white
               ),
-              child: Text('Очистить', style: TextStyle(color: Colors.black)),
+              child: const Text('Очистить', style: TextStyle(color: Colors.black)),
               onPressed: () => _sign.currentState!.clear()
             ),
             Container(width: 40),
@@ -144,7 +144,7 @@ class _AcceptPaymentViewState extends State<AcceptPaymentView> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
                 primary: Colors.white
               ),
-              child: Text('Подтвердить', style: TextStyle(color: Colors.black)),
+              child: const Text('Подтвердить', style: TextStyle(color: Colors.black)),
               onPressed: () async => vm.adjustPayment(await getSignatureData())
             )
           ]

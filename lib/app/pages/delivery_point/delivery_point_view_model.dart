@@ -26,9 +26,9 @@ class DeliveryPointViewModel extends PageViewModel<DeliveryPointState> {
   }
 
   Future<void> copyOrderInfo(Order order) async {
-    String text = 'ИМ: ${order.sellerName}\n' +
-      'Номер в ИМ: ${order.number}\n' +
-      'Трекинг: ${order.trackingNumber}\n' +
+    String text = 'ИМ: ${order.sellerName}\n'
+      'Номер в ИМ: ${order.number}\n'
+      'Трекинг: ${order.trackingNumber}\n'
       'Адрес: ${deliveryPoint.addressName}';
     await Clipboard.setData(ClipboardData(text: text));
 

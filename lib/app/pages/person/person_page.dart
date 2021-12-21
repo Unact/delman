@@ -15,26 +15,31 @@ part 'person_state.dart';
 part 'person_view_model.dart';
 
 class PersonPage extends StatelessWidget {
+  PersonPage({
+    Key? key
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<PersonViewModel>(
       create: (context) => PersonViewModel(context),
-      child: PersonView(),
+      child: _PersonView(),
     );
   }
 }
 
-class PersonView extends StatefulWidget {
+class _PersonView extends StatefulWidget {
+  @override
   _PersonViewState createState() => _PersonViewState();
 }
 
-class _PersonViewState extends State<PersonView> {
+class _PersonViewState extends State<_PersonView> {
   Completer<void> _dialogCompleter = Completer();
 
   Future<void> openDialog() async {
     showDialog(
       context: context,
-      builder: (_) => Center(child: CircularProgressIndicator()),
+      builder: (_) => const Center(child: CircularProgressIndicator()),
       barrierDismissible: false
     );
     await _dialogCompleter.future;
@@ -58,11 +63,11 @@ class _PersonViewState extends State<PersonView> {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text('Пользователь'),
+            title: const Text('Пользователь'),
             actions: [
               IconButton(
                 color: Colors.white,
-                icon: Icon(Icons.send),
+                icon: const Icon(Icons.send),
                 onPressed: vm.sendLogs
               )
             ],
@@ -91,14 +96,14 @@ class _PersonViewState extends State<PersonView> {
     PersonViewModel vm = context.read<PersonViewModel>();
 
     return ListView(
-      padding: EdgeInsets.only(top: 24, bottom: 24),
+      padding: const EdgeInsets.only(top: 24, bottom: 24),
       children: [
-        InfoRow(title: Text('Логин'), trailing: Text(vm.username)),
-        InfoRow(title: Text('Курьер'), trailing: Text(vm.name)),
-        InfoRow(title: Text('Обновление БД'), trailing: Text(vm.lastSyncTime)),
-        InfoRow(title: Text('Версия'), trailing: Text(vm.fullVersion)),
+        InfoRow(title: const Text('Логин'), trailing: Text(vm.username)),
+        InfoRow(title: const Text('Курьер'), trailing: Text(vm.name)),
+        InfoRow(title: const Text('Обновление БД'), trailing: Text(vm.lastSyncTime)),
+        InfoRow(title: const Text('Версия'), trailing: Text(vm.fullVersion)),
         !vm.newVersionAvailable ? Container() : Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -108,14 +113,14 @@ class _PersonViewState extends State<PersonView> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
                   primary: Colors.blue,
                 ),
-                child: Text('Обновить приложение'),
+                child: const Text('Обновить приложение'),
                 onPressed: vm.launchAppUpdate
               )
             ],
           )
         ),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -126,7 +131,7 @@ class _PersonViewState extends State<PersonView> {
                   primary: Colors.blue,
                 ),
                 onPressed: vm.apiLogout,
-                child: Text('Выйти'),
+                child: const Text('Выйти'),
               ),
             ]
           )

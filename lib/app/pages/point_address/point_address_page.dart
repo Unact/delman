@@ -4,8 +4,6 @@ import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
@@ -22,28 +20,29 @@ part 'point_address_view_model.dart';
 class PointAddressPage extends StatelessWidget {
   final DeliveryPoint deliveryPoint;
 
-  const PointAddressPage({
+  PointAddressPage({
+    Key? key,
     required this.deliveryPoint
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<PointAddressViewModel>(
       create: (context) => PointAddressViewModel(context, deliveryPoint: deliveryPoint),
-      child: PointAddressView(),
+      child: _PointAddressView(),
     );
   }
 }
 
-class PointAddressView extends StatefulWidget {
+class _PointAddressView extends StatefulWidget {
   @override
   _PointAddressViewState createState() => _PointAddressViewState();
 }
 
-class _PointAddressViewState extends State<PointAddressView> {
+class _PointAddressViewState extends State<_PointAddressView> {
   late YandexMapController _controller;
 
-  double _kImageFontSize = 30;
+  final double _kImageFontSize = 30;
 
   void showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
@@ -52,19 +51,7 @@ class _PointAddressViewState extends State<PointAddressView> {
   Color _deliveryPointColor(DeliveryPoint deliveryPoint) {
     PointAddressViewModel vm = context.read<PointAddressViewModel>();
 
-    if (deliveryPoint == vm.deliveryPoint) {
-      return Colors.red[700]!;
-    }
-
-    if (deliveryPoint.isFinished) {
-      return Colors.green[700]!;
-    }
-
-    if (deliveryPoint.inProgress) {
-      return Colors.yellow[700]!;
-    }
-
-    return Colors.blue[700]!;
+    return deliveryPoint == vm.deliveryPoint ? Colors.red[700]! : Colors.blue[700]!;
   }
 
   MapObjectId _deliveryPointMapId(DeliveryPoint deliveryPoint) {
@@ -142,8 +129,8 @@ class _PointAddressViewState extends State<PointAddressView> {
       right: size.width/12,
       child: Container(
         width: size.width - size.width/12,
-        padding: EdgeInsets.only(left: 8),
-        decoration: BoxDecoration(
+        padding: const EdgeInsets.only(left: 8),
+        decoration: const BoxDecoration(
           color: Colors.white,
           boxShadow: [
             BoxShadow(color: Colors.black, blurRadius: 2, spreadRadius: -1, offset: Offset(0, 1)),
@@ -156,17 +143,17 @@ class _PointAddressViewState extends State<PointAddressView> {
             Expanded(
               child: Text(
                 vm.deliveryPoint.addressName,
-                style: TextStyle(fontWeight: FontWeight.bold)
+                style: const TextStyle(fontWeight: FontWeight.bold)
               )
             ),
             Container(
-              margin: EdgeInsets.only(left: 8),
-              decoration: BoxDecoration(
+              margin: const EdgeInsets.only(left: 8),
+              decoration: const BoxDecoration(
                 border: Border(left: BorderSide(color: Colors.black, width: 2)),
                 shape: BoxShape.rectangle,
               ),
               child: IconButton(
-                icon: Icon(Icons.drive_eta),
+                icon: const Icon(Icons.drive_eta),
                 onPressed: vm.routeTo,
                 tooltip: 'Проложить маршрут',
               )
@@ -195,7 +182,7 @@ class _PointAddressViewState extends State<PointAddressView> {
 
     await _controller.updateMapObjects([
       ClusterizedPlacemarkCollection(
-        mapId: MapObjectId('delivery_points_cluster'),
+        mapId: const MapObjectId('delivery_points_cluster'),
         placemarks: placemarks,
         radius: 20,
         minZoom: (await _controller.getMaxZoom()).toInt(),
@@ -232,7 +219,7 @@ class _PointAddressViewState extends State<PointAddressView> {
 
     final rrect = RRect.fromRectAndRadius(
       Rect.fromCenter(center: rrectOffset, width: size.width - 10, height: painter.height),
-      Radius.circular(10)
+      const Radius.circular(10)
     );
     final rrectShadowPath = Path()
       ..addRRect(rrect);
@@ -308,8 +295,8 @@ class _PointAddressViewState extends State<PointAddressView> {
   }
 
   Future<Uint8List> _buildPlacemarkAppearance(DeliveryPoint deliveryPoint) async {
-    final radius = 20.0;
-    final size = Size(300, 200);
+    const radius = 20.0;
+    const size = Size(300, 200);
 
     return _buildImage(size, (canvas) {
       _drawPointCircle(size, canvas, radius, _deliveryPointColor(deliveryPoint));
@@ -319,9 +306,9 @@ class _PointAddressViewState extends State<PointAddressView> {
 
   Future<Uint8List> _buildClusterAppearance(Cluster cluster) async {
     PointAddressViewModel vm = context.read<PointAddressViewModel>();
-    final radius = 50.0;
+    const radius = 50.0;
     final showTextRect = cluster.size <= 3;
-    final size = showTextRect ? Size(300, 200.0 * cluster.size) : Size(300, 200);
+    final size = showTextRect ? Size(300, 200.0 * cluster.size) : const Size(300, 200);
     final deliveryPointMapIds = cluster.placemarks.map((e) => e.mapId).toList();
     final deliveryPoints = vm.deliveryPoints.fold<List<DeliveryPoint>>([], (acc, e) {
       if (deliveryPointMapIds.contains(_deliveryPointMapId(e))) {

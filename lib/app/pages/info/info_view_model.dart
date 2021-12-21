@@ -1,7 +1,7 @@
 part of 'info_page.dart';
 
 class InfoViewModel extends PageViewModel<InfoState> {
-  HomeViewModel _homeViewModel;
+  final HomeViewModel _homeViewModel;
   Timer? fetchDataTimer;
 
   InfoViewModel(BuildContext context) :
@@ -14,14 +14,11 @@ class InfoViewModel extends PageViewModel<InfoState> {
     InfoInLoadProgress,
     InfoTimerInLoadProgress,
     InfoInCloseProgress
-  ].indexOf(state.runtimeType) != -1;
+  ].contains(state.runtimeType);
 
   bool get needRefresh {
-    if (isBusy)
-      return false;
-
-    if (appViewModel.appData.lastSyncTime == null)
-      return true;
+    if (isBusy) return false;
+    if (appViewModel.appData.lastSyncTime == null) return true;
 
     DateTime lastAttempt = appViewModel.appData.lastSyncTime!;
     DateTime time = DateTime.now();
@@ -52,8 +49,7 @@ class InfoViewModel extends PageViewModel<InfoState> {
     appViewModel.payments.where((e) => e.isCard).toList().fold(0, (prev, el) => prev + el.summ);
 
   Future<void> refresh([bool timerCallback = false]) async {
-    if (isBusy)
-      return;
+    if (isBusy) return;
 
     try {
       emit(timerCallback ? InfoTimerInLoadProgress() : InfoInLoadProgress());
@@ -71,7 +67,7 @@ class InfoViewModel extends PageViewModel<InfoState> {
 
   void _startRefreshTimer() {
     if (fetchDataTimer == null || !fetchDataTimer!.isActive) {
-      fetchDataTimer = Timer.periodic(Duration(minutes: 1), (_) => refresh(true));
+      fetchDataTimer = Timer.periodic(const Duration(minutes: 10), (_) => refresh(true));
     }
   }
 

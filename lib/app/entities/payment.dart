@@ -36,10 +36,10 @@ class Payment extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': this.id,
-      'deliveryPointOrderId': this.deliveryPointOrderId,
-      'summ': this.summ,
-      'transactionId': this.transactionId
+      'id': id,
+      'deliveryPointOrderId': deliveryPointOrderId,
+      'summ': summ,
+      'transactionId': transactionId
     };
   }
 

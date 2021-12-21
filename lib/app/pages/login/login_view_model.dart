@@ -29,7 +29,7 @@ class LoginViewModel extends PageViewModel<LoginState> {
   void setPassword(String password) {
     _password = password;
 
-    FLog.debug(text: password.replaceAll(new RegExp('.'), '*'));
+    FLog.debug(text: password.replaceAll(RegExp('.'), '*'));
   }
 
   void setUrl(String url) {

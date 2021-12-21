@@ -10,29 +10,33 @@ part 'order_storages_state.dart';
 part 'order_storages_view_model.dart';
 
 class OrderStoragesPage extends StatelessWidget {
+  OrderStoragesPage({
+    Key? key
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<OrderStoragesViewModel>(
       create: (context) => OrderStoragesViewModel(context),
-      child: OrderStoragesView(),
+      child: _OrderStoragesView(),
     );
   }
 }
 
-class OrderStoragesView extends StatelessWidget {
+class _OrderStoragesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(Strings.orderStoragesPageName)
+        title: const Text(Strings.orderStoragesPageName)
       ),
       body: BlocBuilder<OrderStoragesViewModel, OrderStoragesState>(
         builder: (context, state) {
           OrderStoragesViewModel vm = context.read<OrderStoragesViewModel>();
 
           return ListView(
-            physics: AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.only(top: 24, left: 8, right: 8, bottom: 24),
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(top: 24, left: 8, right: 8, bottom: 24),
             children: vm.orderStorages.map((e) => _orderStorageTile(context, e)).toList()
           );
         }
@@ -42,7 +46,7 @@ class OrderStoragesView extends StatelessWidget {
 
   Widget _orderStorageTile(BuildContext context, OrderStorage orderStorage) {
     return ListTile(
-      title: Text(orderStorage.name, style: TextStyle(fontSize: 14.0)),
+      title: Text(orderStorage.name, style: const TextStyle(fontSize: 14.0)),
       onTap: () {
         Navigator.push(
           context,

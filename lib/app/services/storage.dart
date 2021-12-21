@@ -19,8 +19,7 @@ class Storage {
   static Storage? get instance => _instance;
 
   static Future<Storage> init() async {
-    if (_instance != null)
-      return _instance!;
+    if (_instance != null) return _instance!;
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     Database db = await _setupDataStores(prefs: prefs);

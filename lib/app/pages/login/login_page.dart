@@ -13,27 +13,31 @@ part 'login_state.dart';
 part 'login_view_model.dart';
 
 class LoginPage extends StatelessWidget {
+  LoginPage({
+    Key? key
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<LoginViewModel>(
       create: (context) => LoginViewModel(context),
-      child: LoginView(),
+      child: _LoginView(),
     );
   }
 }
 
-class LoginView extends StatefulWidget {
+class _LoginView extends StatefulWidget {
   @override
   _LoginViewState createState() => _LoginViewState();
 }
 
-class _LoginViewState extends State<LoginView> {
+class _LoginViewState extends State<_LoginView> {
   Completer<void> _dialogCompleter = Completer();
 
   Future<void> openDialog() async {
     showDialog(
       context: context,
-      builder: (_) => Center(child: CircularProgressIndicator()),
+      builder: (_) => const Center(child: CircularProgressIndicator()),
       barrierDismissible: false
     );
     await _dialogCompleter.future;
@@ -61,7 +65,7 @@ class _LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Войти в приложение'),
+        title: const Text('Войти в приложение'),
         automaticallyImplyLeading: false,
         centerTitle: true,
       ),
@@ -76,7 +80,7 @@ class _LoginViewState extends State<LoginView> {
               _buildLoginForm(context),
               Expanded(child: Container()),
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
                 child: Text('Версия ${vm.fullVersion}')
               )
             ]
@@ -102,16 +106,16 @@ class _LoginViewState extends State<LoginView> {
   Widget _buildLoginForm(BuildContext context) {
     LoginViewModel vm = context.read<LoginViewModel>();
 
-    return Container(
+    return SizedBox(
       height: 320,
       child: ListView(
-        padding: EdgeInsets.symmetric(vertical: 24, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
         children: <Widget>[
           TextField(
             controller: TextEditingController(text: vm.login),
             onChanged: vm.setLogin,
             keyboardType: TextInputType.url,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Телефон или e-mail или login',
             ),
           ),
@@ -120,7 +124,7 @@ class _LoginViewState extends State<LoginView> {
             onChanged: vm.setPassword,
             keyboardType: TextInputType.number,
             obscureText: true,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Пароль'
             ),
           ),
@@ -128,7 +132,7 @@ class _LoginViewState extends State<LoginView> {
             controller: TextEditingController(text: vm.url),
             onChanged: vm.setUrl,
             keyboardType: TextInputType.url,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Url'
             ),
           ) : Container(),
@@ -136,8 +140,8 @@ class _LoginViewState extends State<LoginView> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-                child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                child: SizedBox(
                   width: 160,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -148,13 +152,13 @@ class _LoginViewState extends State<LoginView> {
                       unfocus();
                       vm.apiLogin();
                     },
-                    child: Text('Войти'),
+                    child: const Text('Войти'),
                   ),
                 )
               ),
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-                child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                child: SizedBox(
                   width: 160,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -165,7 +169,7 @@ class _LoginViewState extends State<LoginView> {
                       unfocus();
                       vm.getNewPassword();
                     },
-                    child: Text('Получить пароль', textAlign: TextAlign.center,),
+                    child: const Text('Получить пароль', textAlign: TextAlign.center,),
                   ),
                 )
               ),
