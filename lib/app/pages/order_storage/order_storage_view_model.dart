@@ -29,31 +29,30 @@ class OrderStorageViewModel extends PageViewModel<OrderStorageState> {
     emit(OrderStorageStartedQRScan());
   }
 
-  Future<void> finishQRScan(String? qrCode) async {
-    if (qrCode == null) return;
+  Order? orderFromManualInput(String trackingNumber, String packageNumberStr) {
+    int packageNumber = int.tryParse(packageNumberStr) ?? 1;
 
-    List<String> qrCodeData = qrCode.split(' ');
+    Order? order = appViewModel.orders.firstWhereOrNull((e) => e.trackingNumber == trackingNumber);
 
-    if (qrCodeData.length < 2 || qrCodeData[0] != Strings.qrCodeVersion) {
-      emit(OrderStorageFailure('Считан не поддерживаемый QR код'));
-      return;
+    if (order == null) {
+      emit(OrderStorageFailure('Не удалось найти заказ'));
+      return null;
     }
 
-    String qrTrackingNumber = qrCodeData[1];
-
-    if (ordersInOrderStorage.any((e) => e.trackingNumber == qrTrackingNumber)) {
-      Order order = ordersInOrderStorage.firstWhere((e) => e.trackingNumber == qrTrackingNumber);
-      await tryAcceptOrder(order);
-      return;
+    if (order.packages != packageNumber) {
+      emit(OrderStorageFailure('Указанное кол-во мест не совпадает с кол-вом мест заказа'));
+      return null;
     }
 
-    if (ordersInOwnStorage.any((e) => e.trackingNumber == qrTrackingNumber)) {
-      Order order = ordersInOwnStorage.firstWhere((e) => e.trackingNumber == qrTrackingNumber);
+    return order;
+  }
+
+  Future<void> tryMoveOrder(Order order) async {
+    if (order.storageId == appViewModel.user.storageId) {
       await transferOrder(order);
-      return;
+    } else {
+      await tryAcceptOrder(order);
     }
-
-    emit(OrderStorageFailure('Не удалось найти заказ'));
   }
 
   Future<void> tryAcceptOrder(Order order) async {

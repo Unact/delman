@@ -31,6 +31,7 @@ class Order extends Equatable {
   final int? storageId;
   final String deliveryAddressName;
   final String pickupAddressName;
+  final int packages;
 
   const Order({
     required this.id,
@@ -60,6 +61,7 @@ class Order extends Equatable {
     this.storageId,
     required this.deliveryAddressName,
     required this.pickupAddressName,
+    required this.packages
   });
 
   bool get hasSenderElevator => senderElevator == 1;
@@ -96,6 +98,7 @@ class Order extends Equatable {
     storageId,
     deliveryAddressName,
     pickupAddressName,
+    packages
   ];
 
   static Order fromJson(dynamic json) {
@@ -127,6 +130,7 @@ class Order extends Equatable {
       storageId: json['storageId'],
       deliveryAddressName: json['deliveryAddressName'],
       pickupAddressName: json['pickupAddressName'],
+      packages: json['packages']
     );
   }
 
@@ -159,6 +163,7 @@ class Order extends Equatable {
       'storageId': storageId,
       'deliveryAddressName': deliveryAddressName,
       'pickupAddressName': pickupAddressName,
+      'packages': packages
     };
   }
 
@@ -190,7 +195,8 @@ class Order extends Equatable {
     int? cardPaymentAllowed,
     Optional<int>? storageId,
     String? deliveryAddressName,
-    String? pickupAddressName
+    String? pickupAddressName,
+    int? packages
   }) {
     return Order(
       id: id ?? this.id,
@@ -220,6 +226,7 @@ class Order extends Equatable {
       storageId: storageId != null ? storageId.orNull : this.storageId,
       deliveryAddressName: deliveryAddressName ?? this.deliveryAddressName,
       pickupAddressName: pickupAddressName ?? this.pickupAddressName,
+      packages: packages ?? this.packages
     );
   }
 

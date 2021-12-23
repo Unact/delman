@@ -1,15 +1,16 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'package:delman/app/constants/strings.dart';
 import 'package:delman/app/entities/entities.dart';
-import 'package:delman/app/pages/order/order_page.dart';
-import 'package:delman/app/pages/qr_scan_page.dart';
 import 'package:delman/app/pages/app/app_page.dart';
+import 'package:delman/app/pages/order/order_page.dart';
 import 'package:delman/app/pages/shared/page_view_model.dart';
+import 'package:delman/app/pages/order_qr_scan/order_qr_scan_page.dart';
 
 part 'order_storage_state.dart';
 part 'order_storage_view_model.dart';
@@ -75,11 +76,64 @@ class _OrderStorageViewState extends State<_OrderStorageView> {
     ) ?? false;
   }
 
-  Future<String?> showQRScanPage() async {
-    return await Navigator.push(
+  Future<void> showQRPage() async {
+    OrderStorageViewModel vm = context.read<OrderStorageViewModel>();
+
+     Order? order = await Navigator.push(
       context,
-      MaterialPageRoute(fullscreenDialog: true, builder: (BuildContext context) => const QRScanPage())
+      MaterialPageRoute(fullscreenDialog: true, builder: (BuildContext context) => OrderQRScanPage())
     );
+
+    if (order != null) await vm.tryMoveOrder(order);
+  }
+
+  Future<void> showManualInput() async {
+    OrderStorageViewModel vm = context.read<OrderStorageViewModel>();
+    TextEditingController trackingNumberController = TextEditingController();
+    TextEditingController packagesController = TextEditingController();
+
+    Order? order = await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                enableInteractiveSelection: false,
+                textCapitalization: TextCapitalization.words,
+                controller: trackingNumberController,
+                decoration: const InputDecoration(labelText: 'Трекинг'),
+              ),
+              TextField(
+                enableInteractiveSelection: false,
+                textCapitalization: TextCapitalization.words,
+                controller: packagesController,
+                decoration: const InputDecoration(labelText: 'Кол-во мест'),
+              )
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Order? order = vm.orderFromManualInput(trackingNumberController.text, packagesController.text);
+
+                Navigator.of(context).pop(order);
+              },
+              child: const Text('Подтвердить')
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Отменить')
+            )
+          ]
+        );
+      }
+    );
+
+    if (order != null) await vm.tryMoveOrder(order);
   }
 
   @override
@@ -93,10 +147,15 @@ class _OrderStorageViewState extends State<_OrderStorageView> {
             title: const Text('Заказы на складе'),
             actions: <Widget>[
               IconButton(
-                color: Colors.white,
-                icon: const Icon(Icons.qr_code_scanner),
-                onPressed: vm.startQRScan
-              )
+                icon: const Icon(Icons.qr_code),
+                onPressed: vm.startQRScan,
+                tooltip: 'Сканировать QR код'
+              ),
+              IconButton(
+                icon: const Icon(Icons.text_fields),
+                onPressed: showManualInput,
+                tooltip: 'Указать вручную',
+              ),
             ]
           ),
           body: ListView(
@@ -118,32 +177,29 @@ class _OrderStorageViewState extends State<_OrderStorageView> {
             ]
           )
         );
-    },
-    listener: (context, state) async {
-      OrderStorageViewModel vm = context.read<OrderStorageViewModel>();
-
-      if (state is OrderStorageInProgress) {
-        openDialog();
-      } else if (state is OrderStorageStartedQRScan) {
-        vm.finishQRScan(await showQRScanPage());
-      } else if (state is OrderStorageNeedUserConfirmation) {
-        state.confirmationCallback(await showConfirmationDialog(state.message));
-      } else if (state is OrderStorageFailure) {
-        showMessage(state.message);
-        closeDialog();
-      } else if (state is OrderStorageAccepted) {
-        showMessage(state.message);
-        closeDialog();
-      } else if (state is OrderStorageTransferred) {
-        showMessage(state.message);
-        closeDialog();
+      },
+      listener: (context, state) async {
+        if (state is OrderStorageInProgress) {
+          openDialog();
+        } else if (state is OrderStorageStartedQRScan) {
+          await showQRPage();
+        } else if (state is OrderStorageNeedUserConfirmation) {
+          state.confirmationCallback(await showConfirmationDialog(state.message));
+        } else if (state is OrderStorageFailure) {
+          showMessage(state.message);
+          closeDialog();
+        } else if (state is OrderStorageAccepted) {
+          showMessage(state.message);
+          closeDialog();
+        } else if (state is OrderStorageTransferred) {
+          showMessage(state.message);
+          closeDialog();
+        }
       }
-    });
+    );
   }
 
   Widget _buildOrderInOwnStorageTile(BuildContext context, Order order) {
-    OrderStorageViewModel vm = context.read<OrderStorageViewModel>();
-
     return ListTile(
       title: Text('Заказ ${order.trackingNumber}', style: const TextStyle(fontSize: 14)),
       subtitle: RichText(
@@ -157,14 +213,6 @@ class _OrderStorageViewState extends State<_OrderStorageView> {
         )
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-      trailing: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-          primary: Colors.blue,
-        ),
-        child: const Text('Передать'),
-        onPressed: () => vm.transferOrder(order)
-      ),
       onTap: () {
         Navigator.push(
           context,
@@ -177,8 +225,6 @@ class _OrderStorageViewState extends State<_OrderStorageView> {
   }
 
   Widget _buildOrderNotInOwnStorageTile(BuildContext context, Order order) {
-    OrderStorageViewModel vm = context.read<OrderStorageViewModel>();
-
     return ListTile(
       title: Text('Заказ ${order.trackingNumber}', style: const TextStyle(fontSize: 14)),
       subtitle: RichText(
@@ -192,14 +238,6 @@ class _OrderStorageViewState extends State<_OrderStorageView> {
         )
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-      trailing: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-          primary: Colors.blue,
-        ),
-        child: const Text('Принять'),
-        onPressed: () => vm.tryAcceptOrder(order)
-      ),
       onTap: () {
         Navigator.push(
           context,
