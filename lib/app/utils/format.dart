@@ -15,7 +15,14 @@ class Format {
     return dateTime != null ? DateFormat.Hm('ru').format(dateTime) : '';
   }
 
-  static String timeStr(DateTime? dateTime) {
+  static String timeStrFromDateTime(DateTime? dateTime) {
     return dateTime != null ? DateFormat.Hm('ru').format(dateTime) : '';
+  }
+
+  static String timeStrFromInt(int value) {
+    final int hour = value ~/ 60;
+    final int minutes = value % 60;
+
+    return '${hour.toString().padLeft(2, "0")}:${minutes.toString().padLeft(2, "0")}';
   }
 }

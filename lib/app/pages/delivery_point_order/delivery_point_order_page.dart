@@ -274,10 +274,16 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
           child: Text(vm.order.senderPhone ?? '', style: const TextStyle(color: Colors.blue))
         )
       ),
+      InfoRow(
+        title: const Text('Погрузка'),
+        trailing: Text(Format.timeStrFromInt(vm.order.pickupLoadDuration))
+      ),
       vm.order.pickupDateTimeFrom == null ? Container() : InfoRow(
         title: const Text('Время забора'),
         trailing: Text(
-          Format.timeStr(vm.order.pickupDateTimeTo) + ' - ' + Format.timeStr(vm.order.pickupDateTimeTo)
+          Format.timeStrFromDateTime(vm.order.pickupDateTimeTo) +
+          ' - ' +
+          Format.timeStrFromDateTime(vm.order.pickupDateTimeTo)
         )
       ),
       InfoRow(
@@ -358,10 +364,16 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
           child: Text(vm.order.buyerPhone ?? '', style: const TextStyle(color: Colors.blue))
         )
       ),
+      InfoRow(
+        title: const Text('Разгрузка'),
+        trailing: Text(Format.timeStrFromInt(vm.order.pickupLoadDuration))
+      ),
       vm.order.deliveryDateTimeFrom == null ? Container() : InfoRow(
         title: const Text('Время доставки'),
         trailing: Text(
-          Format.timeStr(vm.order.deliveryDateTimeFrom) + ' - ' + Format.timeStr(vm.order.deliveryDateTimeTo)
+          Format.timeStrFromDateTime(vm.order.deliveryDateTimeFrom) +
+          ' - ' +
+          Format.timeStrFromDateTime(vm.order.deliveryDateTimeTo)
         )
       ),
       InfoRow(

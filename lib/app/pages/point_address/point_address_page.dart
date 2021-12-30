@@ -63,7 +63,7 @@ class _PointAddressViewState extends State<_PointAddressView> {
     DateTime? timeFrom = vm.getPointTimeFrom(deliveryPoint);
     DateTime? timeTo = vm.getPointTimeTo(deliveryPoint);
 
-    return '${deliveryPoint.seq}. ${Format.timeStr(timeFrom)} - ${Format.timeStr(timeTo)}';
+    return '${deliveryPoint.seq}. ${Format.timeStrFromDateTime(timeFrom)} - ${Format.timeStrFromDateTime(timeTo)}';
   }
 
   @override

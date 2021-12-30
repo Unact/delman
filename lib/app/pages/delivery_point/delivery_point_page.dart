@@ -79,14 +79,14 @@ class _DeliveryPointViewState extends State<_DeliveryPointView> {
                     ),
                     ListTile(
                       leading: const Text(Strings.planArrival),
-                      trailing: Text(Format.timeStr(vm.deliveryPoint.planArrival)),
+                      trailing: Text(Format.timeStrFromDateTime(vm.deliveryPoint.planArrival)),
                       dense: true,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 8)
                     ),
                     ListTile(
                       leading: const Text(Strings.factArrival),
                       trailing: vm.deliveryPoint.inProgress ?
-                        Text(Format.timeStr(vm.deliveryPoint.factArrival)) :
+                        Text(Format.timeStrFromDateTime(vm.deliveryPoint.factArrival)) :
                         state is DeliveryPointInProgress ?
                           const SizedBox(child: CircularProgressIndicator()) :
                           ElevatedButton(
@@ -102,7 +102,7 @@ class _DeliveryPointViewState extends State<_DeliveryPointView> {
                     ),
                     ListTile(
                       leading: const Text(Strings.factDeparture),
-                      trailing: Text(Format.timeStr(vm.deliveryPoint.factDeparture)),
+                      trailing: Text(Format.timeStrFromDateTime(vm.deliveryPoint.factDeparture)),
                       dense: true,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 8)
                     ),

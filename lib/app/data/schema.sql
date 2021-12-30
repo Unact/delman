@@ -72,6 +72,8 @@ CREATE TABLE orders(
     deliveryAddressName TEXT,
     pickupAddressName TEXT,
     packages INTEGER,
+    deliveryLoadDuration INTEGER,
+    pickupLoadDuration INTEGER,
 
     cardPaymentAllowed INTEGER,
     storageId INTEGER,

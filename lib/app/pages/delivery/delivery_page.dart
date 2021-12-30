@@ -72,15 +72,15 @@ class _DeliveryView extends StatelessWidget {
         text: TextSpan(
           children: <TextSpan>[
             TextSpan(
-              text: '${Strings.planArrival}: ${Format.timeStr(deliveryPoint.planArrival)}\n',
+              text: '${Strings.planArrival}: ${Format.timeStrFromDateTime(deliveryPoint.planArrival)}\n',
               style: const TextStyle(color: Colors.grey, fontSize: 12.0)
             ),
             TextSpan(
-              text: '${Strings.factArrival}: ${Format.timeStr(deliveryPoint.factArrival)}\n',
+              text: '${Strings.factArrival}: ${Format.timeStrFromDateTime(deliveryPoint.factArrival)}\n',
               style: const TextStyle(color: Colors.grey, fontSize: 12.0)
             ),
             TextSpan(
-              text: '${Strings.factDeparture}: ${Format.timeStr(deliveryPoint.factDeparture)}\n',
+              text: '${Strings.factDeparture}: ${Format.timeStrFromDateTime(deliveryPoint.factDeparture)}\n',
               style: const TextStyle(color: Colors.grey, fontSize: 12.0)
             ),
           ]

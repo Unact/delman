@@ -32,6 +32,8 @@ class Order extends Equatable {
   final String deliveryAddressName;
   final String pickupAddressName;
   final int packages;
+  final int deliveryLoadDuration;
+  final int pickupLoadDuration;
 
   const Order({
     required this.id,
@@ -61,7 +63,9 @@ class Order extends Equatable {
     this.storageId,
     required this.deliveryAddressName,
     required this.pickupAddressName,
-    required this.packages
+    required this.packages,
+    required this.deliveryLoadDuration,
+    required this.pickupLoadDuration,
   });
 
   bool get hasSenderElevator => senderElevator == 1;
@@ -98,7 +102,9 @@ class Order extends Equatable {
     storageId,
     deliveryAddressName,
     pickupAddressName,
-    packages
+    packages,
+    deliveryLoadDuration,
+    pickupLoadDuration,
   ];
 
   static Order fromJson(dynamic json) {
@@ -130,7 +136,9 @@ class Order extends Equatable {
       storageId: json['storageId'],
       deliveryAddressName: json['deliveryAddressName'],
       pickupAddressName: json['pickupAddressName'],
-      packages: json['packages']
+      packages: json['packages'],
+      deliveryLoadDuration: json['deliveryLoadDuration'],
+      pickupLoadDuration: json['pickupLoadDuration'],
     );
   }
 
@@ -163,7 +171,9 @@ class Order extends Equatable {
       'storageId': storageId,
       'deliveryAddressName': deliveryAddressName,
       'pickupAddressName': pickupAddressName,
-      'packages': packages
+      'packages': packages,
+      'deliveryLoadDuration': deliveryLoadDuration,
+      'pickupLoadDuration': pickupLoadDuration,
     };
   }
 
@@ -196,7 +206,9 @@ class Order extends Equatable {
     Optional<int>? storageId,
     String? deliveryAddressName,
     String? pickupAddressName,
-    int? packages
+    int? packages,
+    int? deliveryLoadDuration,
+    int? pickupLoadDuration,
   }) {
     return Order(
       id: id ?? this.id,
@@ -226,7 +238,9 @@ class Order extends Equatable {
       storageId: storageId != null ? storageId.orNull : this.storageId,
       deliveryAddressName: deliveryAddressName ?? this.deliveryAddressName,
       pickupAddressName: pickupAddressName ?? this.pickupAddressName,
-      packages: packages ?? this.packages
+      packages: packages ?? this.packages,
+      deliveryLoadDuration: deliveryLoadDuration ?? this.deliveryLoadDuration,
+      pickupLoadDuration: pickupLoadDuration ?? this.pickupLoadDuration,
     );
   }
 
