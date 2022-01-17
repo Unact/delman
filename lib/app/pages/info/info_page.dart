@@ -93,6 +93,8 @@ class _InfoViewState extends State<_InfoView> {
         builder: (context, state) {
           InfoViewModel vm = context.read<InfoViewModel>();
 
+          if (state is InfoInitial && vm.needRefresh) openRefresher();
+
           return RefreshIndicator(
             key: _refreshIndicatorKey,
             onRefresh: () async {
