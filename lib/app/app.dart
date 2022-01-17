@@ -76,8 +76,8 @@ class App {
   }
 
   Future<void> reportError(dynamic error, dynamic stackTrace) async {
-    debugPrint(error);
-    debugPrint(stackTrace);
+    debugPrint(error.toString());
+    debugPrint(stackTrace.toString());
     await Sentry.captureException(error, stackTrace: stackTrace);
   }
 
