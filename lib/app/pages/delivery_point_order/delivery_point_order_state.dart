@@ -41,7 +41,7 @@ class DeliveryPointOrderState {
 
   double get total => payment?.summ ?? orderLines.fold(0, (prev, el) => prev + (el.factAmount ?? 0) * el.price);
   bool get withCourier => deliveryPointOrderEx.o.storageId == user?.storageId;
-  bool get isFinishable => !(deliveryPointOrderEx.dpo.finished || deliveryPointEx?.isInProgress == false);
+  bool get isFinishable => !(deliveryPointOrderEx.dpo.finished || deliveryPointEx?.isNotArrived == true);
   bool get needPayment => !deliveryPointOrderEx.dpo.pickup &&
     deliveryPointOrderEx.dpo.finished &&
     !deliveryPointOrderEx.dpo.canceled &&

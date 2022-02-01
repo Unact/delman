@@ -9,6 +9,8 @@ class DeliveryViewModel extends PageViewModel<DeliveryState, DeliveryStateStatus
   @override
   TableUpdateQuery get listenForTables => TableUpdateQuery.onAllTables([
     app.storage.deliveryPoints,
+    app.storage.deliveryPointOrders,
+    app.storage.orders,
   ]);
 
   @override

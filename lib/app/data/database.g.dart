@@ -4583,18 +4583,17 @@ mixin _$DeliveriesDaoMixin on DatabaseAccessor<AppStorage> {
       attachedDatabase.deliveryPointOrders;
   Selectable<DeliveryPointExResult> deliveryPointEx() {
     return customSelect(
-        'SELECT\n        "dp"."id" AS "nested_0.id", "dp"."delivery_id" AS "nested_0.delivery_id", "dp"."seq" AS "nested_0.seq", "dp"."plan_arrival" AS "nested_0.plan_arrival", "dp"."plan_departure" AS "nested_0.plan_departure", "dp"."fact_arrival" AS "nested_0.fact_arrival", "dp"."fact_departure" AS "nested_0.fact_departure", "dp"."address_name" AS "nested_0.address_name", "dp"."latitude" AS "nested_0.latitude", "dp"."longitude" AS "nested_0.longitude", "dp"."seller_name" AS "nested_0.seller_name", "dp"."buyer_name" AS "nested_0.buyer_name", "dp"."phone" AS "nested_0.phone", "dp"."payment_type_name" AS "nested_0.payment_type_name", "dp"."delivery_type_name" AS "nested_0.delivery_type_name", "dp"."pickup_seller_name" AS "nested_0.pickup_seller_name", "dp"."sender_name" AS "nested_0.sender_name", "dp"."sender_phone" AS "nested_0.sender_phone",\n        EXISTS(\n          SELECT 1\n          FROM delivery_point_orders AS dpo\n          JOIN orders AS o ON o.id = dpo.order_id\n          WHERE\n            dpo.delivery_point_id = dp.id AND\n            dp.fact_arrival IS NULL\n        ) is_not_in_progress,\n        EXISTS(\n          SELECT 1\n          FROM delivery_point_orders AS dpo\n          JOIN orders AS o ON o.id = dpo.order_id\n          WHERE\n            dpo.delivery_point_id = dp.id AND\n            dp.fact_arrival IS NOT NULL AND\n            dp.fact_departure IS NULL\n        ) is_in_progress,\n        EXISTS(\n          SELECT 1\n          FROM delivery_point_orders AS dpo\n          JOIN orders AS o ON o.id = dpo.order_id\n          WHERE\n            dpo.pickup = 0 AND\n            dpo.finished = 1 AND\n            dpo.delivery_point_id = dp.id AND\n            o.need_payment = 1 AND\n            dp.fact_arrival IS NOT NULL AND\n            dp.fact_departure IS NOT NULL\n        ) is_incomplete,\n        dp.fact_arrival IS NOT NULL AND\n          dp.fact_departure IS NOT NULL AND (\n            NOT EXISTS(\n              SELECT 1\n              FROM delivery_point_orders AS dpo\n              JOIN orders AS o ON o.id = dpo.order_id\n              WHERE\n                dpo.pickup = 0 AND\n                dpo.finished = 1 AND\n                dpo.delivery_point_id = dp.id AND\n                o.need_payment = 1\n            ) OR EXISTS(\n              SELECT 1\n              FROM delivery_point_orders AS dpo\n              JOIN orders AS o ON o.id = dpo.order_id\n              WHERE\n                dpo.pickup = 1 AND\n                dpo.finished = 1 AND\n                dpo.delivery_point_id = dp.id\n            )\n          ) is_completed,\n          (\n            SELECT MAX(CASE dpo.pickup WHEN 1 THEN o.pickup_date_time_from ELSE o.delivery_date_time_from END)\n            FROM delivery_point_orders dpo\n            JOIN orders o ON o.id = dpo.order_id\n            WHERE dpo.delivery_point_id = dp.id\n          ) date_time_from,\n          (\n            SELECT MAX(CASE dpo.pickup WHEN 1 THEN o.pickup_date_time_to ELSE o.delivery_date_time_to END)\n            FROM delivery_point_orders dpo\n            JOIN orders o ON o.id = dpo.order_id\n            WHERE dpo.delivery_point_id = dp.id\n          ) date_time_to\n      FROM deliveries AS d\n      JOIN delivery_points AS dp ON dp.delivery_id = d.id\n      ORDER BY d.delivery_date ASC, dp.seq ASC',
+        'SELECT\n        "dp"."id" AS "nested_0.id", "dp"."delivery_id" AS "nested_0.delivery_id", "dp"."seq" AS "nested_0.seq", "dp"."plan_arrival" AS "nested_0.plan_arrival", "dp"."plan_departure" AS "nested_0.plan_departure", "dp"."fact_arrival" AS "nested_0.fact_arrival", "dp"."fact_departure" AS "nested_0.fact_departure", "dp"."address_name" AS "nested_0.address_name", "dp"."latitude" AS "nested_0.latitude", "dp"."longitude" AS "nested_0.longitude", "dp"."seller_name" AS "nested_0.seller_name", "dp"."buyer_name" AS "nested_0.buyer_name", "dp"."phone" AS "nested_0.phone", "dp"."payment_type_name" AS "nested_0.payment_type_name", "dp"."delivery_type_name" AS "nested_0.delivery_type_name", "dp"."pickup_seller_name" AS "nested_0.pickup_seller_name", "dp"."sender_name" AS "nested_0.sender_name", "dp"."sender_phone" AS "nested_0.sender_phone",\n        CAST(\n          CASE WHEN dp.fact_arrival IS NULL THEN 1 ELSE 0 END AS BOOLEAN\n        ) is_not_arrived,\n        CAST(\n          NOT EXISTS(\n            SELECT 1\n            FROM delivery_point_orders AS dpo\n            JOIN orders AS o ON o.id = dpo.order_id\n            WHERE\n              dpo.delivery_point_id = dp.id AND\n              dpo.finished = 0\n          ) AS BOOLEAN\n        ) is_finished,\n        CAST(\n          CASE\n            WHEN\n              (CASE WHEN dp.fact_arrival IS NULL THEN 1 ELSE 0 END = 1) AND\n              NOT EXISTS(\n                SELECT 1\n                FROM delivery_point_orders AS dpo\n                JOIN orders AS o ON o.id = dpo.order_id\n                WHERE\n                  dpo.delivery_point_id = dp.id AND\n                  dpo.finished = 0\n              )\n            THEN 1\n            WHEN\n              (CASE WHEN dp.fact_arrival IS NULL THEN 1 ELSE 0 END = 0) AND\n              NOT EXISTS(\n                SELECT 1\n                FROM delivery_point_orders AS dpo\n                JOIN orders AS o ON o.id = dpo.order_id\n                WHERE\n                  dpo.delivery_point_id = dp.id AND\n                  dpo.finished = 0\n              )\n            THEN NOT EXISTS(\n                SELECT 1\n                FROM delivery_point_orders AS dpo\n                JOIN orders AS o ON o.id = dpo.order_id\n                WHERE\n                  dpo.pickup = 0 AND\n                  dpo.delivery_point_id = dp.id AND\n                  o.need_payment = 1\n              )\n            ELSE 0\n          END AS BOOLEAN\n        ) is_completed,\n        (\n          SELECT MAX(CASE dpo.pickup WHEN 1 THEN o.pickup_date_time_from ELSE o.delivery_date_time_from END)\n          FROM delivery_point_orders dpo\n          JOIN orders o ON o.id = dpo.order_id\n          WHERE dpo.delivery_point_id = dp.id\n        ) date_time_from,\n        (\n          SELECT MAX(CASE dpo.pickup WHEN 1 THEN o.pickup_date_time_to ELSE o.delivery_date_time_to END)\n          FROM delivery_point_orders dpo\n          JOIN orders o ON o.id = dpo.order_id\n          WHERE dpo.delivery_point_id = dp.id\n        ) date_time_to\n      FROM deliveries AS d\n      JOIN delivery_points AS dp ON dp.delivery_id = d.id\n      ORDER BY d.delivery_date ASC, dp.seq ASC',
         variables: [],
         readsFrom: {
+          deliveryPoints,
           deliveryPointOrders,
           orders,
-          deliveryPoints,
           deliveries,
         }).map((QueryRow row) {
       return DeliveryPointExResult(
-        isNotInProgress: row.read<bool>('is_not_in_progress'),
-        isInProgress: row.read<bool>('is_in_progress'),
-        isIncomplete: row.read<bool>('is_incomplete'),
+        isNotArrived: row.read<bool>('is_not_arrived'),
+        isFinished: row.read<bool>('is_finished'),
         isCompleted: row.read<bool>('is_completed'),
         dateTimeFrom: row.read<DateTime?>('date_time_from'),
         dateTimeTo: row.read<DateTime?>('date_time_to'),
@@ -4620,17 +4619,15 @@ mixin _$DeliveriesDaoMixin on DatabaseAccessor<AppStorage> {
 }
 
 class DeliveryPointExResult {
-  final bool isNotInProgress;
-  final bool isInProgress;
-  final bool isIncomplete;
+  final bool isNotArrived;
+  final bool isFinished;
   final bool isCompleted;
   final DateTime? dateTimeFrom;
   final DateTime? dateTimeTo;
   final DeliveryPoint dp;
   DeliveryPointExResult({
-    required this.isNotInProgress,
-    required this.isInProgress,
-    required this.isIncomplete,
+    required this.isNotArrived,
+    required this.isFinished,
     required this.isCompleted,
     this.dateTimeFrom,
     this.dateTimeTo,

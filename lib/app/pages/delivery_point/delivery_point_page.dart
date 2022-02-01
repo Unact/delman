@@ -94,7 +94,7 @@ class _DeliveryPointViewState extends State<_DeliveryPointView> {
                     ),
                     ListTile(
                       leading: const Text(Strings.factArrival),
-                      trailing: !state.deliveryPointEx.isNotInProgress ?
+                      trailing: state.deliveryPointEx.isFinished ?
                         Text(Format.timeStr(deliveryPoint.factArrival)) :
                         state.status.isInProgress ?
                           const SizedBox(child: CircularProgressIndicator()) :

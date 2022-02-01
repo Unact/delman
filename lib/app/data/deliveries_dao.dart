@@ -6,68 +6,66 @@ part of 'database.dart';
     'deliveryPointEx': '''
       SELECT
         dp.**,
-        EXISTS(
-          SELECT 1
-          FROM delivery_point_orders AS dpo
-          JOIN orders AS o ON o.id = dpo.order_id
-          WHERE
-            dpo.delivery_point_id = dp.id AND
-            dp.fact_arrival IS NULL
-        ) is_not_in_progress,
-        EXISTS(
-          SELECT 1
-          FROM delivery_point_orders AS dpo
-          JOIN orders AS o ON o.id = dpo.order_id
-          WHERE
-            dpo.delivery_point_id = dp.id AND
-            dp.fact_arrival IS NOT NULL AND
-            dp.fact_departure IS NULL
-        ) is_in_progress,
-        EXISTS(
-          SELECT 1
-          FROM delivery_point_orders AS dpo
-          JOIN orders AS o ON o.id = dpo.order_id
-          WHERE
-            dpo.pickup = 0 AND
-            dpo.finished = 1 AND
-            dpo.delivery_point_id = dp.id AND
-            o.need_payment = 1 AND
-            dp.fact_arrival IS NOT NULL AND
-            dp.fact_departure IS NOT NULL
-        ) is_incomplete,
-        dp.fact_arrival IS NOT NULL AND
-          dp.fact_departure IS NOT NULL AND (
-            NOT EXISTS(
-              SELECT 1
-              FROM delivery_point_orders AS dpo
-              JOIN orders AS o ON o.id = dpo.order_id
-              WHERE
-                dpo.pickup = 0 AND
-                dpo.finished = 1 AND
-                dpo.delivery_point_id = dp.id AND
-                o.need_payment = 1
-            ) OR EXISTS(
-              SELECT 1
-              FROM delivery_point_orders AS dpo
-              JOIN orders AS o ON o.id = dpo.order_id
-              WHERE
-                dpo.pickup = 1 AND
-                dpo.finished = 1 AND
-                dpo.delivery_point_id = dp.id
-            )
-          ) is_completed,
-          (
-            SELECT MAX(CASE dpo.pickup WHEN 1 THEN o.pickup_date_time_from ELSE o.delivery_date_time_from END)
-            FROM delivery_point_orders dpo
-            JOIN orders o ON o.id = dpo.order_id
-            WHERE dpo.delivery_point_id = dp.id
-          ) date_time_from,
-          (
-            SELECT MAX(CASE dpo.pickup WHEN 1 THEN o.pickup_date_time_to ELSE o.delivery_date_time_to END)
-            FROM delivery_point_orders dpo
-            JOIN orders o ON o.id = dpo.order_id
-            WHERE dpo.delivery_point_id = dp.id
-          ) date_time_to
+        CAST(
+          CASE WHEN dp.fact_arrival IS NULL THEN 1 ELSE 0 END AS BOOLEAN
+        ) is_not_arrived,
+        CAST(
+          NOT EXISTS(
+            SELECT 1
+            FROM delivery_point_orders AS dpo
+            JOIN orders AS o ON o.id = dpo.order_id
+            WHERE
+              dpo.delivery_point_id = dp.id AND
+              dpo.finished = 0
+          ) AS BOOLEAN
+        ) is_finished,
+        CAST(
+          CASE
+            WHEN
+              (CASE WHEN dp.fact_arrival IS NULL THEN 1 ELSE 0 END = 1) AND
+              NOT EXISTS(
+                SELECT 1
+                FROM delivery_point_orders AS dpo
+                JOIN orders AS o ON o.id = dpo.order_id
+                WHERE
+                  dpo.delivery_point_id = dp.id AND
+                  dpo.finished = 0
+              )
+            THEN 1
+            WHEN
+              (CASE WHEN dp.fact_arrival IS NULL THEN 1 ELSE 0 END = 0) AND
+              NOT EXISTS(
+                SELECT 1
+                FROM delivery_point_orders AS dpo
+                JOIN orders AS o ON o.id = dpo.order_id
+                WHERE
+                  dpo.delivery_point_id = dp.id AND
+                  dpo.finished = 0
+              )
+            THEN NOT EXISTS(
+                SELECT 1
+                FROM delivery_point_orders AS dpo
+                JOIN orders AS o ON o.id = dpo.order_id
+                WHERE
+                  dpo.pickup = 0 AND
+                  dpo.delivery_point_id = dp.id AND
+                  o.need_payment = 1
+              )
+            ELSE 0
+          END AS BOOLEAN
+        ) is_completed,
+        (
+          SELECT MAX(CASE dpo.pickup WHEN 1 THEN o.pickup_date_time_from ELSE o.delivery_date_time_from END)
+          FROM delivery_point_orders dpo
+          JOIN orders o ON o.id = dpo.order_id
+          WHERE dpo.delivery_point_id = dp.id
+        ) date_time_from,
+        (
+          SELECT MAX(CASE dpo.pickup WHEN 1 THEN o.pickup_date_time_to ELSE o.delivery_date_time_to END)
+          FROM delivery_point_orders dpo
+          JOIN orders o ON o.id = dpo.order_id
+          WHERE dpo.delivery_point_id = dp.id
+        ) date_time_to
       FROM deliveries AS d
       JOIN delivery_points AS dp ON dp.delivery_id = d.id
       ORDER BY d.delivery_date ASC, dp.seq ASC
