@@ -1,11 +1,12 @@
+import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:delman/app/constants/strings.dart';
-import 'package:delman/app/entities/entities.dart';
-import 'package:delman/app/pages/delivery_point_order/delivery_point_order_page.dart';
-import 'package:delman/app/utils/format.dart';
-import 'package:delman/app/pages/shared/page_view_model.dart';
+import '/app/data/database.dart';
+import '/app/constants/strings.dart';
+import '/app/pages/delivery_point_order/delivery_point_order_page.dart';
+import '/app/pages/shared/page_view_model.dart';
+import '/app/utils/format.dart';
 
 part 'payments_state.dart';
 part 'payments_view_model.dart';
@@ -33,30 +34,29 @@ class _PaymentsView extends StatelessWidget {
       ),
       body: BlocBuilder<PaymentsViewModel, PaymentsState>(
         builder: (context, state) {
-          PaymentsViewModel vm = context.read<PaymentsViewModel>();
-
           return ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.only(top: 24, left: 8, right: 8, bottom: 24),
-            children: vm.payments.map((payment) {
-              Order order = vm.getOrderForPayment(payment);
-              DeliveryPointOrder deliveryPointOrder = vm.getDeliveryPointOrderForPayment(payment);
+            children: state.exPayments.map((exPayment) {
 
               return ListTile(
                 isThreeLine: true,
                 dense: true,
-                title: Text('Заказ ${order.trackingNumber}', style: const TextStyle(fontSize: 14.0)),
+                title: Text(
+                  'Заказ ${exPayment.deliveryPointOrderEx.o.trackingNumber}',
+                  style: const TextStyle(fontSize: 14.0)
+                ),
                 contentPadding: const EdgeInsets.all(0),
                 subtitle: RichText(
                   text: TextSpan(
                     style: const TextStyle(color: Colors.grey),
                     children: <TextSpan>[
                       TextSpan(
-                        text: 'Сумма: ${Format.numberStr(payment.summ)}\n',
+                        text: 'Сумма: ${Format.numberStr(exPayment.payment.summ)}\n',
                         style: const TextStyle(fontSize: 12.0)
                       ),
                       TextSpan(
-                        text: 'Оплата ${payment.isCard ? 'картой' : 'наличными'}\n',
+                        text: 'Оплата ${exPayment.payment.transactionId != null ? 'картой' : 'наличными'}\n',
                         style: const TextStyle(fontSize: 12.0)
                       ),
                     ]
@@ -66,7 +66,9 @@ class _PaymentsView extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (BuildContext context) => DeliveryPointOrderPage(deliveryPointOrder: deliveryPointOrder)
+                      builder: (BuildContext context) => DeliveryPointOrderPage(
+                        deliveryPointOrderEx: exPayment.deliveryPointOrderEx
+                      )
                     )
                   );
                 },

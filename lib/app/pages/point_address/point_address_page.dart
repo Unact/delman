@@ -1,24 +1,28 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
+import 'package:drift/drift.dart' show TableUpdateQuery;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
-import 'package:delman/app/entities/entities.dart';
-import 'package:delman/app/constants/strings.dart';
-import 'package:delman/app/utils/format.dart';
-import 'package:delman/app/utils/geo_loc.dart';
-import 'package:delman/app/pages/shared/page_view_model.dart';
+import '/app/constants/strings.dart';
+import '/app/data/database.dart';
+import '/app/entities/entities.dart';
+import '/app/pages/shared/page_view_model.dart';
+import '/app/utils/format.dart';
+import '/app/utils/geo_loc.dart';
+import '/app/utils/styling.dart';
 
 part 'point_address_state.dart';
 part 'point_address_view_model.dart';
 
 class PointAddressPage extends StatelessWidget {
-  final DeliveryPoint deliveryPoint;
+  final DeliveryPointExResult deliveryPoint;
 
   PointAddressPage({
     Key? key,
@@ -28,7 +32,7 @@ class PointAddressPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<PointAddressViewModel>(
-      create: (context) => PointAddressViewModel(context, deliveryPoint: deliveryPoint),
+      create: (context) => PointAddressViewModel(context, deliveryPointEx: deliveryPoint),
       child: _PointAddressView(),
     );
   }
@@ -48,33 +52,31 @@ class _PointAddressViewState extends State<_PointAddressView> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  Color _deliveryPointColor(DeliveryPoint deliveryPoint) {
+  Color _deliveryPointColor(DeliveryPointExResult deliveryPointEx) {
     PointAddressViewModel vm = context.read<PointAddressViewModel>();
+    if (deliveryPointEx.dp == vm.state.deliveryPointEx.dp) return Colors.red[700]!;
 
-    return deliveryPoint == vm.deliveryPoint ? Colors.red[700]! : Colors.blue[700]!;
+    return Styling.deliveryPointColor(deliveryPointEx);
   }
 
-  MapObjectId _deliveryPointMapId(DeliveryPoint deliveryPoint) {
-    return MapObjectId('delivery_point_${deliveryPoint.id}');
+  MapObjectId _deliveryPointMapId(DeliveryPointExResult deliveryPointEx) {
+    return MapObjectId('delivery_point_${deliveryPointEx.dp.id}');
   }
 
-  String _deliveryPointLabel(DeliveryPoint deliveryPoint) {
-    PointAddressViewModel vm = context.read<PointAddressViewModel>();
-    DateTime? timeFrom = vm.getPointTimeFrom(deliveryPoint);
-    DateTime? timeTo = vm.getPointTimeTo(deliveryPoint);
+  String _deliveryPointLabel(DeliveryPointExResult deliveryPointEx) {
+    String dateTimeFromStr = Format.timeStr(deliveryPointEx.dateTimeFrom);
+    String dateTimeToStr = Format.timeStr(deliveryPointEx.dateTimeTo);
 
-    return '${deliveryPoint.seq}. ${Format.timeStrFromDateTime(timeFrom)} - ${Format.timeStrFromDateTime(timeTo)}';
+    return '${deliveryPointEx.dp.seq}. $dateTimeFromStr - $dateTimeToStr';
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<PointAddressViewModel, PointAddressState>(
       builder: (context, state) {
-        PointAddressViewModel vm = context.read<PointAddressViewModel>();
-
         return Scaffold(
           appBar: AppBar(
-            title: Text('Точка ${vm.deliveryPoint.seq}')
+            title: Text('Точка ${state.deliveryPointEx.dp.seq}')
           ),
           body: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -91,11 +93,16 @@ class _PointAddressViewState extends State<_PointAddressView> {
           )
         );
       },
-      listener: (context, state) {
-        if (state is PointAddressFailure) {
-          showMessage(state.message);
-        } else if (state is PointAddressSelectionChange) {
-          _rebuildPlacemarks();
+      listener: (context, state) async {
+        switch (state.status) {
+          case PointAddressStateStatus.failure:
+            showMessage(state.message);
+            break;
+          case PointAddressStateStatus.dataLoaded:
+          case PointAddressStateStatus.selectionChange:
+            await _rebuildPlacemarks();
+            break;
+          default:
         }
       }
     );
@@ -110,8 +117,8 @@ class _PointAddressViewState extends State<_PointAddressView> {
         await _rebuildPlacemarks();
         await _controller.move(cameraPosition: CameraPosition(
           target: Point(
-            latitude: vm.deliveryPoint.latitude,
-            longitude: vm.deliveryPoint.longitude
+            latitude: vm.state.deliveryPointEx.dp.latitude,
+            longitude: vm.state.deliveryPointEx.dp.longitude
           ),
           zoom: 17.0
         ));
@@ -142,7 +149,7 @@ class _PointAddressViewState extends State<_PointAddressView> {
           children: [
             Expanded(
               child: Text(
-                vm.deliveryPoint.addressName,
+                vm.state.deliveryPointEx.dp.addressName,
                 style: const TextStyle(fontWeight: FontWeight.bold)
               )
             ),
@@ -166,11 +173,11 @@ class _PointAddressViewState extends State<_PointAddressView> {
 
   Future<void> _rebuildPlacemarks() async {
     PointAddressViewModel vm = context.read<PointAddressViewModel>();
-    final futurePlacemarks = vm.deliveryPoints.map((deliveryPoint) async {
+    final futurePlacemarks = vm.state.allPoints.map((deliveryPoint) async {
       return Placemark(
         mapId: _deliveryPointMapId(deliveryPoint),
-        point: Point(latitude: deliveryPoint.latitude, longitude: deliveryPoint.longitude),
-        zIndex: deliveryPoint == vm.deliveryPoint ? 1 : 0,
+        point: Point(latitude: deliveryPoint.dp.latitude, longitude: deliveryPoint.dp.longitude),
+        zIndex: deliveryPoint.dp == vm.state.deliveryPointEx.dp ? 1 : 0,
         style: PlacemarkStyle(
           opacity: 1,
           rawImageData: await _buildPlacemarkAppearance(deliveryPoint)
@@ -294,13 +301,13 @@ class _PointAddressViewState extends State<_PointAddressView> {
     return pngBytes!.buffer.asUint8List();
   }
 
-  Future<Uint8List> _buildPlacemarkAppearance(DeliveryPoint deliveryPoint) async {
+  Future<Uint8List> _buildPlacemarkAppearance(DeliveryPointExResult deliveryPointEx) async {
     const radius = 20.0;
     const size = Size(300, 200);
 
     return _buildImage(size, (canvas) {
-      _drawPointCircle(size, canvas, radius, _deliveryPointColor(deliveryPoint));
-      _drawTextRect(size, canvas, _deliveryPointLabel(deliveryPoint));
+      _drawPointCircle(size, canvas, radius, _deliveryPointColor(deliveryPointEx));
+      _drawTextRect(size, canvas, _deliveryPointLabel(deliveryPointEx));
     });
   }
 
@@ -310,14 +317,11 @@ class _PointAddressViewState extends State<_PointAddressView> {
     final showTextRect = cluster.size <= 3;
     final size = showTextRect ? Size(300, 200.0 * cluster.size) : const Size(300, 200);
     final deliveryPointMapIds = cluster.placemarks.map((e) => e.mapId).toList();
-    final deliveryPoints = vm.deliveryPoints.fold<List<DeliveryPoint>>([], (acc, e) {
-      if (deliveryPointMapIds.contains(_deliveryPointMapId(e))) {
-        acc.add(e);
-      }
+    final deliveryPoints = vm.state.allPoints.fold<List<DeliveryPointExResult>>([], (acc, e) {
+      if (deliveryPointMapIds.contains(_deliveryPointMapId(e))) acc.add(e);
 
       return acc;
     });
-
 
     return _buildImage(size, (canvas) {
       _drawClusterCircle(size, canvas, radius, deliveryPoints.map((e) => _deliveryPointColor(e)).toList());

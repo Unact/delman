@@ -1,26 +1,31 @@
+import 'dart:async';
+
+import 'package:drift/drift.dart' show TableUpdateQuery, Value;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:delman/app/constants/strings.dart';
-import 'package:delman/app/entities/entities.dart';
-import 'package:delman/app/utils/format.dart';
-import 'package:delman/app/utils/misc.dart';
-import 'package:delman/app/pages/delivery_point_order/delivery_point_order_page.dart';
-import 'package:delman/app/pages/point_address/point_address_page.dart';
-import 'package:delman/app/pages/app/app_page.dart';
-import 'package:delman/app/pages/shared/page_view_model.dart';
-import 'package:delman/app/widgets/widgets.dart';
+import '/app/constants/strings.dart';
+import '/app/entities/entities.dart';
+import '/app/data/database.dart';
+import '/app/pages/delivery_point_order/delivery_point_order_page.dart';
+import '/app/pages/point_address/point_address_page.dart';
+import '/app/pages/shared/page_view_model.dart';
+import '/app/services/api.dart';
+import '/app/utils/format.dart';
+import '/app/utils/geo_loc.dart';
+import '/app/utils/misc.dart';
+import '/app/widgets/widgets.dart';
 
 part 'delivery_point_state.dart';
 part 'delivery_point_view_model.dart';
 
 class DeliveryPointPage extends StatelessWidget {
-  final DeliveryPoint deliveryPoint;
+  final DeliveryPointExResult deliveryPointEx;
 
   DeliveryPointPage({
     Key? key,
-    required this.deliveryPoint
+    required this.deliveryPointEx
   }) : super(key: key);
 
   @override
@@ -28,7 +33,7 @@ class DeliveryPointPage extends StatelessWidget {
     return BlocProvider<DeliveryPointViewModel>(
       create: (context) => DeliveryPointViewModel(
         context,
-        deliveryPoint: deliveryPoint
+        deliveryPointEx: deliveryPointEx
       ),
       child: _DeliveryPointView(),
     );
@@ -50,10 +55,11 @@ class _DeliveryPointViewState extends State<_DeliveryPointView> {
     return BlocConsumer<DeliveryPointViewModel, DeliveryPointState>(
       builder: (context, state) {
         DeliveryPointViewModel vm = context.read<DeliveryPointViewModel>();
+        DeliveryPoint deliveryPoint = state.deliveryPointEx.dp;
 
         return Scaffold(
           appBar: AppBar(
-            title: Text('Точка ${vm.deliveryPoint.seq}')
+            title: Text('Точка ${deliveryPoint.seq}')
           ),
           body: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -70,24 +76,27 @@ class _DeliveryPointViewState extends State<_DeliveryPointView> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (BuildContext context) => PointAddressPage(deliveryPoint: vm.deliveryPoint)
+                              builder: (BuildContext context) => PointAddressPage(deliveryPoint: state.deliveryPointEx)
                             )
                           );
                         },
-                        child: ExpandingText(vm.deliveryPoint.addressName, style: const TextStyle(color: Colors.blue)),
+                        child: ExpandingText(
+                          deliveryPoint.addressName,
+                          style: const TextStyle(color: Colors.blue)
+                        ),
                       )
                     ),
                     ListTile(
                       leading: const Text(Strings.planArrival),
-                      trailing: Text(Format.timeStrFromDateTime(vm.deliveryPoint.planArrival)),
+                      trailing: Text(Format.timeStr(deliveryPoint.planArrival)),
                       dense: true,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 8)
                     ),
                     ListTile(
                       leading: const Text(Strings.factArrival),
-                      trailing: vm.deliveryPoint.inProgress ?
-                        Text(Format.timeStrFromDateTime(vm.deliveryPoint.factArrival)) :
-                        state is DeliveryPointInProgress ?
+                      trailing: !state.deliveryPointEx.isNotInProgress ?
+                        Text(Format.timeStr(deliveryPoint.factArrival)) :
+                        state.status.isInProgress ?
                           const SizedBox(child: CircularProgressIndicator()) :
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
@@ -102,17 +111,17 @@ class _DeliveryPointViewState extends State<_DeliveryPointView> {
                     ),
                     ListTile(
                       leading: const Text(Strings.factDeparture),
-                      trailing: Text(Format.timeStrFromDateTime(vm.deliveryPoint.factDeparture)),
+                      trailing: Text(Format.timeStr(deliveryPoint.factDeparture)),
                       dense: true,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 8)
                     ),
-                    vm.deliveryPointOrders.isEmpty ? Container() : ExpansionTile(
+                    state.deliveryOrders.isEmpty ? Container() : ExpansionTile(
                       title: const Text('Доставка'),
                       initiallyExpanded: true,
                       tilePadding: const EdgeInsets.symmetric(horizontal: 8),
                       children: _buildDeliveryTiles(context)
                     ),
-                    vm.pickupPointOrders.isEmpty ? Container() : ExpansionTile(
+                    state.pickupPointOrders.isEmpty ? Container() : ExpansionTile(
                       title: const Text('Забор'),
                       initiallyExpanded: true,
                       tilePadding: const EdgeInsets.symmetric(horizontal: 8),
@@ -126,12 +135,13 @@ class _DeliveryPointViewState extends State<_DeliveryPointView> {
         );
       },
       listener: (context, state) {
-        if (state is DeliveryPointOrderDataCopied) {
-          showMessage(state.message);
-        } else if (state is DeliveryPointArrivalSaved) {
-          showMessage(state.message);
-        } else if (state is DeliveryPointFailure) {
-          showMessage(state.message);
+        switch (state.status) {
+          case DeliveryPointStateStatus.orderDataCopied:
+          case DeliveryPointStateStatus.arrivalSaved:
+          case DeliveryPointStateStatus.failure:
+            showMessage(state.message);
+            break;
+          default:
         }
       },
     );
@@ -139,45 +149,47 @@ class _DeliveryPointViewState extends State<_DeliveryPointView> {
 
   List<Widget> _buildDeliveryTiles(BuildContext context) {
     DeliveryPointViewModel vm = context.read<DeliveryPointViewModel>();
+    DeliveryPoint deliveryPoint = vm.state.deliveryPointEx.dp;
 
     return [
-      InfoRow(title: const Text('ИМ'), trailing: Text(vm.deliveryPoint.sellerName ?? '')),
-      InfoRow(title: const Text('Покупатель'), trailing: Text(vm.deliveryPoint.buyerName ?? '')),
+      InfoRow(title: const Text('ИМ'), trailing: Text(deliveryPoint.sellerName ?? '')),
+      InfoRow(title: const Text('Покупатель'), trailing: Text(deliveryPoint.buyerName ?? '')),
       InfoRow(
         title: const Text('Телефон'),
         trailing: GestureDetector(
           onTap: vm.callPhone,
-          child: Text(vm.deliveryPoint.phone ?? '', style: const TextStyle(color: Colors.blue))
+          child: Text(deliveryPoint.phone ?? '', style: const TextStyle(color: Colors.blue))
         )
       ),
-      InfoRow(title: const Text('Доставка'), trailing: Text(vm.deliveryPoint.deliveryTypeName ?? '')),
-      InfoRow(title: const Text('Оплата'), trailing: Text(vm.deliveryPoint.paymentTypeName ?? '')),
+      InfoRow(title: const Text('Доставка'), trailing: Text(deliveryPoint.deliveryTypeName ?? '')),
+      InfoRow(title: const Text('Оплата'), trailing: Text(deliveryPoint.paymentTypeName ?? '')),
       const InfoRow(title: Text('Заказы')),
-      ...vm.deliveryPointOrders.map<Widget>((e) => _buildOrderTile(context, e)).toList()
+      ...vm.state.deliveryOrders.map<Widget>((e) => _buildOrderTile(context, e)).toList()
     ];
   }
 
   List<Widget> _buildPickupTiles(BuildContext context) {
     DeliveryPointViewModel vm = context.read<DeliveryPointViewModel>();
+    DeliveryPoint deliveryPoint = vm.state.deliveryPointEx.dp;
 
     return [
-      InfoRow(title: const Text('ИМ'), trailing: Text(vm.deliveryPoint.pickupSellerName ?? '')),
-      InfoRow(title: const Text('Отправитель'), trailing: Text(vm.deliveryPoint.senderName ?? '')),
+      InfoRow(title: const Text('ИМ'), trailing: Text(deliveryPoint.pickupSellerName ?? '')),
+      InfoRow(title: const Text('Отправитель'), trailing: Text(deliveryPoint.senderName ?? '')),
       InfoRow(
         title: const Text('Телефон'),
         trailing: GestureDetector(
           onTap: vm.callPhone,
-          child: Text(vm.deliveryPoint.senderPhone ?? '', style: const TextStyle(color: Colors.blue))
+          child: Text(deliveryPoint.senderPhone ?? '', style: const TextStyle(color: Colors.blue))
         )
       ),
       const InfoRow(title: Text('Заказы')),
-      ...vm.pickupPointOrders.map<Widget>((e) => _buildOrderTile(context, e)).toList()
+      ...vm.state.pickupPointOrders.map<Widget>((e) => _buildOrderTile(context, e)).toList()
     ];
   }
 
-  Widget _buildOrderTile(BuildContext context, DeliveryPointOrder deliveryPointOrder) {
+  Widget _buildOrderTile(BuildContext context, DeliveryPointOrderExResult deliveryPointOrderEx) {
     DeliveryPointViewModel vm = context.read<DeliveryPointViewModel>();
-    Order order = vm.getOrder(deliveryPointOrder);
+    Order order = deliveryPointOrderEx.o;
 
     return ListTile(
       title: Text('Заказ ${order.trackingNumber}', style: const TextStyle(fontSize: 14)),
@@ -191,7 +203,7 @@ class _DeliveryPointViewState extends State<_DeliveryPointView> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (BuildContext context) => DeliveryPointOrderPage(deliveryPointOrder: deliveryPointOrder)
+            builder: (BuildContext context) => DeliveryPointOrderPage(deliveryPointOrderEx: deliveryPointOrderEx)
           )
         );
       },

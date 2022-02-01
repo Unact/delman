@@ -1,19 +1,37 @@
+import 'dart:async';
+
+import 'package:drift/drift.dart' show TableUpdateQuery;
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:delman/app/pages/app/app_page.dart';
-import 'package:delman/app/utils/misc.dart';
+import '/app/app.dart';
+import '/app/utils/misc.dart';
 
-abstract class PageViewModel<T> extends Cubit<T> {
+abstract class PageViewModel<T, P> extends Cubit<T> {
+  late final StreamSubscription _subscription;
+  late final App app;
   final BuildContext context;
 
   bool closed = false;
-  AppViewModel appViewModel;
 
-  PageViewModel(this.context, T state) :
-    appViewModel = context.read<AppViewModel>(),
-    super(state);
+  PageViewModel(this.context, T state) : super(state) {
+    initViewModel();
+  }
+
+  P get status;
+
+  TableUpdateQuery get listenForTables => TableUpdateQuery.onAllTables([]);
+
+  @mustCallSuper
+  Future<void> initViewModel() async {
+    app = await App.init();
+    _subscription = app.storage.tableUpdates(listenForTables).listen((event) => loadData());
+    await loadData();
+  }
+
+  @protected
+  Future<void> loadData();
 
   @override
   void emit(T state) {
@@ -21,7 +39,7 @@ abstract class PageViewModel<T> extends Cubit<T> {
     FLog.info(
       className: stackFrame['className'],
       methodName: stackFrame['methodName'],
-      text: state.runtimeType.toString()
+      text: status.runtimeType.toString()
     );
 
     if (!closed) super.emit(state);
@@ -29,7 +47,9 @@ abstract class PageViewModel<T> extends Cubit<T> {
 
   @override
   Future<void> close() async {
+    _subscription.cancel();
     closed = true;
+
     super.close();
   }
 }

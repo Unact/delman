@@ -1,87 +1,95 @@
 part of 'login_page.dart';
 
-class LoginViewModel extends PageViewModel<LoginState> {
-  String? _login;
-  String? _password;
-  late String _url;
-  bool _showUrl = false;
+class LoginViewModel extends PageViewModel<LoginState, LoginStateStatus> {
+  LoginViewModel(BuildContext context) : super(context, LoginState());
 
-  LoginViewModel(BuildContext context) : super(context, LoginInitial()) {
-    String debugUrl = Platform.isIOS ? 'http://localhost:3000' : 'http://10.0.2.2:3000';
-    String baseUrl = appViewModel.app.isDebug ? debugUrl : 'https://data.unact.ru';
+  @override
+  LoginStateStatus get status => state.status;
 
-    _url = '$baseUrl/api/';
+  @override
+  Future<void> loadData() async {
+    emit(state.copyWith(fullVersion: app.fullVersion));
   }
 
-  String get fullVersion => appViewModel.fullVersion;
-
-  String? get login => _login;
-  String? get password => _password;
-  String get url => _url;
-  bool get showUrl => _showUrl;
-
-  void setLogin(String login) {
-    _login = login;
-
-    FLog.debug(text: login);
-  }
-
-  void setPassword(String password) {
-    _password = password;
-
-    FLog.debug(text: password.replaceAll(RegExp('.'), '*'));
-  }
-
-  void setUrl(String url) {
-    _url = url;
-
-    FLog.debug(text: url);
-  }
-
-  Future<void> apiLogin() async {
-    if (_login == _password && _login == Strings.optsKeyword) {
-      _showUrl = true;
-      _login = null;
-      _password = null;
-      emit(LoginInitial());
+  Future<void> apiLogin(String url, String login, String password) async {
+    if (login == password && login == Strings.optsKeyword) {
+      emit(state.copyWith(
+        status: LoginStateStatus.urlFieldActivated,
+        login: '',
+        password: '',
+        showUrl: true
+      ));
 
       return;
     }
 
-    if (_login == null || _login == '') {
-      emit(LoginFailure('Не заполнено поле с логином'));
+    if (login == '') {
+      emit(state.copyWith(status: LoginStateStatus.failure, message: 'Не заполнено поле с логином'));
       return;
     }
 
-    if (_password == null || _password == '') {
-      emit(LoginFailure('Не заполнено поле с паролем'));
+    if (password == '') {
+      emit(state.copyWith(status: LoginStateStatus.failure, message: 'Не заполнено поле с паролем'));
       return;
     }
 
-    emit(LoginInProgress());
+    emit(state.copyWith(
+      login: login,
+      password: password,
+      url: url,
+      status: LoginStateStatus.inProgress
+    ));
 
     try {
-      await appViewModel.login(_url, _login!, _password!);
-      emit(LoginLoggedIn());
+      await _login(url, login, password);
+      emit(state.copyWith(status: LoginStateStatus.loggedIn));
     } on AppError catch(e) {
-      emit(LoginFailure(e.message));
+      emit(state.copyWith(status: LoginStateStatus.failure, message: e.message));
     }
   }
 
-  Future<void> getNewPassword() async {
-    if (_login == null || _login == '') {
-      emit(LoginFailure('Не заполнено поле с логином'));
-
+  Future<void> getNewPassword(String url, String login) async {
+    if (login == '') {
+      emit(state.copyWith(status: LoginStateStatus.failure, message: 'Не заполнено поле с логином'));
       return;
     }
 
-    emit(LoginInProgress());
+    emit(state.copyWith(
+      login: login,
+      password: '',
+      url: url,
+      status: LoginStateStatus.inProgress
+    ));
 
     try {
-      await appViewModel.resetPassword(url, login!);
-      emit(LoginPasswordSent('Пароль отправлен на почту'));
+      await _resetPassword(url, login);
+      emit(state.copyWith(status: LoginStateStatus.passwordSent, message: 'Пароль отправлен на почту'));
     } on AppError catch(e) {
-      emit(LoginFailure(e.message));
+      emit(state.copyWith(status: LoginStateStatus.failure, message: e.message));
+    }
+  }
+
+  Future<void> _login(String url, String login, String password) async {
+    try {
+      await Api(storage: app.storage).login(url: url, login: login, password: password);
+    } on ApiException catch(e) {
+      throw AppError(e.errorMsg);
+    } catch(e, trace) {
+      await app.reportError(e, trace);
+      throw AppError(Strings.genericErrorMsg);
+    }
+
+    await app.loadUserData();
+  }
+
+  Future<void> _resetPassword(String url, String login) async {
+    try {
+      await Api(storage: app.storage).resetPassword(url: url, login: login);
+    } on ApiException catch(e) {
+      throw AppError(e.errorMsg);
+    } catch(e, trace) {
+      await app.reportError(e, trace);
+      throw AppError(Strings.genericErrorMsg);
     }
   }
 }

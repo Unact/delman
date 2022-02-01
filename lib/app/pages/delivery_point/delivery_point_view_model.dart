@@ -1,27 +1,35 @@
 part of 'delivery_point_page.dart';
 
-class DeliveryPointViewModel extends PageViewModel<DeliveryPointState> {
-  DeliveryPoint deliveryPoint;
+class DeliveryPointViewModel extends PageViewModel<DeliveryPointState, DeliveryPointStateStatus> {
+  DeliveryPointViewModel(
+    BuildContext context,
+    {
+      required DeliveryPointExResult deliveryPointEx
+    }
+  ) : super(context, DeliveryPointState(deliveryPointEx: deliveryPointEx));
 
-  DeliveryPointViewModel(BuildContext context, {required this.deliveryPoint}) : super(context, DeliveryPointInitial());
+  @override
+  DeliveryPointStateStatus get status => state.status;
 
-  List<DeliveryPointOrder> get deliveryPointOrders => appViewModel.deliveryPointOrders
-    .where((e) => e.deliveryPointId == deliveryPoint.id && !e.isPickup)
-    .toList()
-    ..sort((a, b) => getOrder(a).trackingNumber.compareTo(getOrder(b).trackingNumber));
+  @override
+  TableUpdateQuery get listenForTables => TableUpdateQuery.onAllTables([
+    app.storage.deliveryPoints,
+    app.storage.deliveryPointOrders,
+    app.storage.orders,
+  ]);
 
-  List<DeliveryPointOrder> get pickupPointOrders => appViewModel.deliveryPointOrders
-    .where((e) => e.deliveryPointId == deliveryPoint.id && e.isPickup)
-    .toList()
-    ..sort((a, b) => getOrder(a).trackingNumber.compareTo(getOrder(b).trackingNumber));
-
-  Order getOrder(DeliveryPointOrder deliveryPointOrder) {
-    return appViewModel.orders.firstWhere((e) => e.id == deliveryPointOrder.orderId);
+  @override
+  Future<void> loadData() async {
+    emit(state.copyWith(
+      status: DeliveryPointStateStatus.dataLoaded,
+      deliveryPointEx: await app.storage.deliveriesDao.getExDeliveryPoint(state.deliveryPointEx.dp.id),
+      deliveryPointOrdersEx: await app.storage.deliveriesDao.getExDeliveryPointOrders(state.deliveryPointEx.dp.id)
+    ));
   }
 
   Future<void> callPhone() async {
-    await Misc.callPhone(deliveryPoint.phone, onFailure: () {
-      emit(DeliveryPointFailure(Strings.genericErrorMsg));
+    await Misc.callPhone(state.deliveryPointEx.dp.phone, onFailure: () {
+      emit(state.copyWith(status: DeliveryPointStateStatus.failure, message: Strings.genericErrorMsg));
     });
   }
 
@@ -29,21 +37,48 @@ class DeliveryPointViewModel extends PageViewModel<DeliveryPointState> {
     String text = 'ИМ: ${order.sellerName}\n'
       'Номер в ИМ: ${order.number}\n'
       'Трекинг: ${order.trackingNumber}\n'
-      'Адрес: ${deliveryPoint.addressName}';
+      'Адрес: ${state.deliveryPointEx.dp.addressName}';
     await Clipboard.setData(ClipboardData(text: text));
 
-    emit(DeliveryPointOrderDataCopied('Данные о заказе скопированы'));
+    emit(state.copyWith(status: DeliveryPointStateStatus.orderDataCopied, message: 'Данные о заказе скопированы'));
   }
 
   Future<void> arrive() async {
-    emit(DeliveryPointInProgress());
+    emit(state.copyWith(status: DeliveryPointStateStatus.inProgress));
 
     try {
-      deliveryPoint = await appViewModel.arriveAtDeliveryPoint(deliveryPoint);
+      await _arriveAtDeliveryPoint();
 
-      emit(DeliveryPointArrivalSaved('Прибытие успешно отмечено'));
+      emit(state.copyWith(status: DeliveryPointStateStatus.arrivalSaved, message: 'Прибытие успешно отмечено'));
     } on AppError catch(e) {
-      emit(DeliveryPointFailure(e.message));
+      emit(state.copyWith(status: DeliveryPointStateStatus.failure, message: e.message));
     }
+  }
+
+  Future<void> _arriveAtDeliveryPoint() async {
+    Location? location = await GeoLoc.getCurrentLocation();
+    DateTime factArrival = DateTime.now();
+
+    if (location == null) {
+      throw AppError('Для работы с приложением необходимо разрешить определение местоположения');
+    }
+
+    try {
+      await Api(storage: app.storage).arriveAtDeliveryPoint(
+        deliveryPointId: state.deliveryPointEx.dp.id,
+        factArrival: factArrival,
+        location: location
+      );
+    } on ApiException catch(e) {
+      throw AppError(e.errorMsg);
+    } catch(e, trace) {
+      await app.reportError(e, trace);
+      throw AppError(Strings.genericErrorMsg);
+    }
+
+    await app.storage.deliveriesDao.updateDeliveryPoint(
+      state.deliveryPointEx.dp.id,
+      DeliveryPointsCompanion(factArrival: Value(factArrival))
+    );
   }
 }

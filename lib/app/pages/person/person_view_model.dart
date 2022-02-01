@@ -1,50 +1,87 @@
 part of 'person_page.dart';
 
-class PersonViewModel extends PageViewModel<PersonState> {
-  PersonViewModel(BuildContext context) : super(context, PersonInitial());
+class PersonViewModel extends PageViewModel<PersonState, PersonStateStatus> {
+  static const String _kRepoUrl = 'https://unact.github.io/mobile_apps/delman/';
 
-  String get lastSyncTime {
-    DateTime? lastSyncTime = appViewModel.appData.lastSyncTime;
+  PersonViewModel(BuildContext context) : super(context, PersonState());
 
-    return lastSyncTime != null ? Format.dateTimeStr(lastSyncTime) : 'Не проводилось';
+  @override
+  PersonStateStatus get status => state.status;
+
+  @override
+  TableUpdateQuery get listenForTables => TableUpdateQuery.onAllTables([
+    app.storage.users
+  ]);
+
+  @override
+  Future<void> loadData() async {
+    emit(state.copyWith(
+      status: PersonStateStatus.dataLoaded,
+      user: await app.storage.usersDao.getUser(),
+      lastSyncTime: (await app.storage.getSetting()).lastSync,
+      fullVersion: app.fullVersion,
+      newVersionAvailable: await app.newVersionAvailable,
+    ));
   }
 
-  String get username => appViewModel.user.username;
-  String get name => appViewModel.user.name ?? '';
-  String get fullVersion => appViewModel.fullVersion;
-  bool get newVersionAvailable => appViewModel.newVersionAvailable;
-
   Future<void> apiLogout() async {
-    emit(PersonInProgress());
+    emit(state.copyWith(status: PersonStateStatus.inProgress));
 
     try {
-      await appViewModel.logout();
-      emit(PersonLoggedOut());
+      await _apiLogout();
+      emit(state.copyWith(status: PersonStateStatus.loggedOut));
     } on AppError catch(e) {
-      emit(PersonFailure(e.message));
+      emit(state.copyWith(status: PersonStateStatus.failure, message: e.message));
     }
   }
 
   Future<void> launchAppUpdate() async {
-    String androidUpdateUrl = "https://github.com/Unact/delman/releases/download/${appViewModel.user.version}/app-release.apk";
-    String iosUpdateUrl = 'itms-services://?action=download-manifest&url=https://unact.github.io/mobile_apps/delman/manifest.plist';
+    String version = state.user!.version;
+    String androidUpdateUrl = '$_kRepoUrl/releases/download/$version/app-release.apk';
+    String iosUpdateUrl = 'itms-services://?action=download-manifest&url=$_kRepoUrl/manifest.plist';
     String url = Platform.isIOS ? iosUpdateUrl : androidUpdateUrl;
 
     if (await canLaunch(url)) {
       await launch(url);
     } else {
-      emit(PersonFailure(Strings.genericErrorMsg));
+      emit(state.copyWith(status: PersonStateStatus.failure, message: Strings.genericErrorMsg));
     }
   }
 
   Future<void> sendLogs() async {
-    emit(PersonInProgress());
+    emit(state.copyWith(status: PersonStateStatus.inProgress));
 
     try {
-      await appViewModel.sendLogs();
-      emit(PersonLogsSent('Информация успешно отправлена'));
+      await _sendLogs();
+      emit(state.copyWith(status: PersonStateStatus.logsSend, message: 'Информация успешно отправлена'));
     } on AppError catch(e) {
-      emit(PersonFailure(e.message));
+      emit(state.copyWith(status: PersonStateStatus.failure, message: e.message));
+    }
+  }
+
+  Future<void> _sendLogs() async {
+    try {
+      List<Log> logs = await FLog.getAllLogsByFilter(filterType: FilterType.TODAY);
+
+      await Api(storage: app.storage).saveLogs(logs: logs);
+      await FLog.clearLogs();
+    } on ApiException catch(e) {
+      throw AppError(e.errorMsg);
+    } catch(e, trace) {
+      await app.reportError(e, trace);
+      throw AppError(Strings.genericErrorMsg);
+    }
+  }
+
+  Future<void> _apiLogout() async {
+    try {
+      await Api(storage: app.storage).logout();
+      await app.storage.clearData();
+    } on ApiException catch(e) {
+      throw AppError(e.errorMsg);
+    } catch(e, trace) {
+      await app.reportError(e, trace);
+      throw AppError(Strings.genericErrorMsg);
     }
   }
 }

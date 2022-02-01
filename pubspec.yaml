@@ -25,7 +25,7 @@ dependencies:
   sqflite: ^2.0.0
   path_provider: ^2.0.2
   package_info: ^2.0.2
-  sentry_flutter: ^5.0.0
+  sentry_flutter: ^6.2.2
   url_launcher: ^6.0.6
   location: ^4.1.1
   flutter_bloc: ^8.0.0
@@ -39,13 +39,16 @@ dependencies:
   quiver: ^3.0.1
   qr_code_scanner: ^0.5.2
   permission_handler: ^8.1.4
+  drift: ^1.1.1
+  sqlite3_flutter_libs: ^0.5.0
+  path: ^1.8.0
 
 dev_dependencies:
+  drift_dev: ^1.1.1
+  build_runner: ^2.1.7
   flutter_lints: ^1.0.4
   flutter_test:
     sdk: flutter
 
 flutter:
   uses-material-design: true
-  assets:
-    - lib/app/data/schema.sql

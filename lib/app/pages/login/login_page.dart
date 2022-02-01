@@ -1,13 +1,12 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:delman/app/pages/app/app_page.dart';
-import 'package:delman/app/constants/strings.dart';
-import 'package:delman/app/pages/shared/page_view_model.dart';
+import '/app/entities/entities.dart';
+import '/app/constants/strings.dart';
+import '/app/pages/shared/page_view_model.dart';
+import '/app/services/api.dart';
 
 part 'login_state.dart';
 part 'login_view_model.dart';
@@ -33,6 +32,9 @@ class _LoginView extends StatefulWidget {
 
 class _LoginViewState extends State<_LoginView> {
   Completer<void> _dialogCompleter = Completer();
+  final TextEditingController _loginController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _urlController = TextEditingController();
 
   Future<void> openDialog() async {
     showDialog(
@@ -71,7 +73,11 @@ class _LoginViewState extends State<_LoginView> {
       ),
       body: BlocConsumer<LoginViewModel, LoginState>(
         builder: (context, state) {
-          LoginViewModel vm = context.read<LoginViewModel>();
+          if (state.status.isInitial || state.status.isUrlFieldActivated) {
+            _loginController.text = state.login;
+            _passwordController.text = state.password;
+            _urlController.text = state.url;
+          }
 
           return Column(
             mainAxisSize: MainAxisSize.max,
@@ -81,22 +87,25 @@ class _LoginViewState extends State<_LoginView> {
               Expanded(child: Container()),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-                child: Text('Версия ${vm.fullVersion}')
+                child: Text('Версия ${state.fullVersion}')
               )
             ]
           );
         },
         listener: (context, state) {
-          if (state is LoginInProgress) {
-            openDialog();
-          } else if (state is LoginFailure) {
-            showMessage(state.message);
-            closeDialog();
-          } else if (state is LoginPasswordSent) {
-            showMessage(state.message);
-            closeDialog();
-          } else if (state is LoginLoggedIn) {
-            closeDialog();
+          switch (state.status) {
+            case LoginStateStatus.passwordSent:
+            case LoginStateStatus.failure:
+              showMessage(state.message);
+              closeDialog();
+              break;
+            case LoginStateStatus.loggedIn:
+              closeDialog();
+              break;
+            case LoginStateStatus.inProgress:
+              openDialog();
+              break;
+            default:
           }
         },
       )
@@ -112,25 +121,22 @@ class _LoginViewState extends State<_LoginView> {
         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
         children: <Widget>[
           TextField(
-            controller: TextEditingController(text: vm.login),
-            onChanged: vm.setLogin,
+            controller: _loginController,
             keyboardType: TextInputType.url,
             decoration: const InputDecoration(
               labelText: 'Телефон или e-mail или login',
             ),
           ),
           TextField(
-            controller: TextEditingController(text: vm.password),
-            onChanged: vm.setPassword,
+            controller: _passwordController,
             keyboardType: TextInputType.number,
             obscureText: true,
             decoration: const InputDecoration(
               labelText: 'Пароль'
             ),
           ),
-          vm.showUrl ? TextField(
-            controller: TextEditingController(text: vm.url),
-            onChanged: vm.setUrl,
+          vm.state.showUrl ? TextField(
+            controller: _urlController,
             keyboardType: TextInputType.url,
             decoration: const InputDecoration(
               labelText: 'Url'
@@ -150,7 +156,7 @@ class _LoginViewState extends State<_LoginView> {
                     ),
                     onPressed: () {
                       unfocus();
-                      vm.apiLogin();
+                      vm.apiLogin(_urlController.text, _loginController.text, _passwordController.text);
                     },
                     child: const Text('Войти'),
                   ),
@@ -167,7 +173,7 @@ class _LoginViewState extends State<_LoginView> {
                     ),
                     onPressed: () {
                       unfocus();
-                      vm.getNewPassword();
+                      vm.getNewPassword(_urlController.text, _loginController.text);
                     },
                     child: const Text('Получить пароль', textAlign: TextAlign.center,),
                   ),

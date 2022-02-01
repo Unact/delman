@@ -1,16 +1,17 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
+import 'package:drift/drift.dart' show TableUpdateQuery, Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import 'package:delman/app/constants/strings.dart';
-import 'package:delman/app/entities/entities.dart';
-import 'package:delman/app/pages/app/app_page.dart';
-import 'package:delman/app/pages/order/order_page.dart';
-import 'package:delman/app/pages/shared/page_view_model.dart';
-import 'package:delman/app/pages/order_qr_scan/order_qr_scan_page.dart';
+import '/app/constants/strings.dart';
+import '/app/entities/entities.dart';
+import '/app/data/database.dart';
+import '/app/pages/order/order_page.dart';
+import '/app/pages/order_qr_scan/order_qr_scan_page.dart';
+import '/app/pages/shared/page_view_model.dart';
+import '/app/services/api.dart';
 
 part 'order_storage_state.dart';
 part 'order_storage_view_model.dart';
@@ -59,8 +60,8 @@ class _OrderStorageViewState extends State<_OrderStorageView> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  Future<bool> showConfirmationDialog(String message) async {
-    return await showDialog<bool>(
+  Future<void> showConfirmationDialog(String message, Function callback) async {
+    bool result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
@@ -74,12 +75,14 @@ class _OrderStorageViewState extends State<_OrderStorageView> {
         );
       }
     ) ?? false;
+
+    await callback(result);
   }
 
   Future<void> showQRPage() async {
     OrderStorageViewModel vm = context.read<OrderStorageViewModel>();
 
-     Order? order = await Navigator.push(
+    Order? order = await Navigator.push(
       context,
       MaterialPageRoute(fullscreenDialog: true, builder: (BuildContext context) => OrderQRScanPage())
     );
@@ -115,8 +118,8 @@ class _OrderStorageViewState extends State<_OrderStorageView> {
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Order? order = vm.orderFromManualInput(trackingNumberController.text, packagesController.text);
+              onPressed: () async {
+                Order? order = await vm.orderFromManualInput(trackingNumberController.text, packagesController.text);
 
                 Navigator.of(context).pop(order);
               },
@@ -139,7 +142,7 @@ class _OrderStorageViewState extends State<_OrderStorageView> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<OrderStorageViewModel, OrderStorageState>(
-      builder: (context, vm) {
+      builder: (context, state) {
         OrderStorageViewModel vm = context.read<OrderStorageViewModel>();
 
         return Scaffold(
@@ -163,37 +166,39 @@ class _OrderStorageViewState extends State<_OrderStorageView> {
             padding: const EdgeInsets.only(top: 24, left: 8, right: 8, bottom: 24),
             children: [
               ExpansionTile(
-                title: Text(vm.orderStorage.name),
+                title: Text(state.orderStorage.name),
                 initiallyExpanded: true,
                 tilePadding: const EdgeInsets.symmetric(horizontal: 8),
-                children: vm.ordersInOrderStorage.map((e) => _buildOrderNotInOwnStorageTile(context, e)).toList()
+                children: state.ordersInOrderStorage.map((e) => _buildOrderNotInOwnStorageTile(context, e)).toList()
               ),
               ExpansionTile(
                 title: const Text('Принятые'),
                 initiallyExpanded: true,
                 tilePadding: const EdgeInsets.symmetric(horizontal: 8),
-                children: vm.ordersInOwnStorage.map((e) => _buildOrderInOwnStorageTile(context, e)).toList()
+                children: state.ordersInOwnStorage.map((e) => _buildOrderInOwnStorageTile(context, e)).toList()
               )
             ]
           )
         );
       },
       listener: (context, state) async {
-        if (state is OrderStorageInProgress) {
-          openDialog();
-        } else if (state is OrderStorageStartedQRScan) {
-          await showQRPage();
-        } else if (state is OrderStorageNeedUserConfirmation) {
-          state.confirmationCallback(await showConfirmationDialog(state.message));
-        } else if (state is OrderStorageFailure) {
-          showMessage(state.message);
-          closeDialog();
-        } else if (state is OrderStorageAccepted) {
-          showMessage(state.message);
-          closeDialog();
-        } else if (state is OrderStorageTransferred) {
-          showMessage(state.message);
-          closeDialog();
+        switch (state.status) {
+          case OrderStorageStateStatus.inProgress:
+            await openDialog();
+            break;
+          case OrderStorageStateStatus.startedQrScan:
+            await showQRPage();
+            break;
+          case OrderStorageStateStatus.needUserConfirmation:
+            await showConfirmationDialog(state.message, state.confirmationCallback);
+            break;
+          case OrderStorageStateStatus.accepted:
+          case OrderStorageStateStatus.failure:
+          case OrderStorageStateStatus.trasferred:
+            showMessage(state.message);
+            closeDialog();
+            break;
+          default:
         }
       }
     );

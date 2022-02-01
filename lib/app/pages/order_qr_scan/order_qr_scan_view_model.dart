@@ -1,51 +1,56 @@
 part of 'order_qr_scan_page.dart';
 
-class OrderQRScanViewModel extends PageViewModel<OrderQRScanState> {
-  Order? currentOrder;
-  List<bool>? orderPackageScanned;
+class OrderQRScanViewModel extends PageViewModel<OrderQRScanState, OrderQRScanStateStatus> {
+  OrderQRScanViewModel(BuildContext context) : super(context, OrderQRScanState());
 
-  OrderQRScanViewModel(BuildContext context) : super(context, OrderQRScanInitial());
+  @override
+  OrderQRScanStateStatus get status => state.status;
+
+  @override
+  Future<void> loadData() async {}
 
   Future<void> readQRCode(String? qrCode) async {
     if (qrCode == null) return;
 
     List<String> qrCodeData = qrCode.split(' ');
+    OrderQRScanState newState = state;
+    List<bool> newOrderPackageScanned = state.orderPackageScanned;
 
     if (qrCodeData.length < 3 || qrCodeData[0] != Strings.qrCodeVersion) {
-      emit(OrderQRScanFailure('Считан не поддерживаемый QR код'));
+      emit(state.copyWith(status: OrderQRScanStateStatus.failure, message: 'Считан не поддерживаемый QR код'));
       return;
     }
 
     String qrTrackingNumber = qrCodeData[1];
     int packageNumber = int.tryParse(qrCodeData[2]) ?? 1;
 
-    if (currentOrder != null) {
-      if (qrTrackingNumber != currentOrder!.trackingNumber) {
-        emit(OrderQRScanFailure('Считан QR код другого заказа'));
+    if (state.order != null) {
+      if (qrTrackingNumber != state.order!.trackingNumber) {
+        emit(state.copyWith(status: OrderQRScanStateStatus.failure, message: 'Считан QR код другого заказа'));
         return;
       }
 
-      if (orderPackageScanned![packageNumber - 1]) {
-        emit(OrderQRScanFailure('QR код уже был считан'));
+      if (state.orderPackageScanned[packageNumber - 1]) {
+        emit(state.copyWith(status: OrderQRScanStateStatus.failure, message: 'QR код уже был считан'));
         return;
       }
     } else {
-      currentOrder = appViewModel.orders.firstWhereOrNull((e) => e.trackingNumber == qrTrackingNumber);
+      Order? order = await app.storage.ordersDao.getOrderByTrackingNumber(qrTrackingNumber);
 
-      if (currentOrder == null) {
-        emit(OrderQRScanFailure('Не удалось найти заказ'));
+      if (order == null) {
+        emit(state.copyWith(status: OrderQRScanStateStatus.failure, message: 'Не удалось найти заказ'));
         return;
       }
 
-      orderPackageScanned = List.filled(currentOrder!.packages, false);
+      newState = state.copyWith(order: order);
+      newOrderPackageScanned = List.filled(order.packages, false);
     }
 
-    orderPackageScanned![packageNumber - 1] = true;
+    newOrderPackageScanned[packageNumber - 1] = true;
+    OrderQRScanStateStatus newStatus = newOrderPackageScanned.contains(false) ?
+      OrderQRScanStateStatus.scanReadFinished :
+      OrderQRScanStateStatus.finished;
 
-    if (orderPackageScanned!.contains(false)) {
-      emit(OrderQRScanReadFinished());
-    } else {
-      emit(OrderQRScanFinished());
-    }
+    emit(newState.copyWith(orderPackageScanned: newOrderPackageScanned, status: newStatus));
   }
 }

@@ -1,6 +1,4 @@
-import 'package:equatable/equatable.dart';
-
-import 'package:delman/app/utils/nullify.dart';
+part of 'entities.dart';
 
 class Location extends Equatable {
   final double? latitude;

@@ -1,23 +1,46 @@
 part of 'person_page.dart';
 
-abstract class PersonState {
-  PersonState();
+enum PersonStateStatus {
+  initial,
+  dataLoaded,
+  inProgress,
+  loggedOut,
+  logsSend,
+  failure
 }
 
-class PersonInitial extends PersonState {}
+class PersonState {
+  PersonState({
+    this.status = PersonStateStatus.initial,
+    this.user,
+    this.lastSyncTime,
+    this.fullVersion = '',
+    this.newVersionAvailable = false,
+    this.message = '',
+  });
 
-class PersonInProgress extends PersonState {}
-
-class PersonLoggedOut extends PersonState {}
-
-class PersonLogsSent extends PersonState {
   final String message;
+  final DateTime? lastSyncTime;
+  final User? user;
+  final String fullVersion;
+  final bool newVersionAvailable;
+  final PersonStateStatus status;
 
-  PersonLogsSent(this.message);
-}
-
-class PersonFailure extends PersonState {
-  final String message;
-
-  PersonFailure(this.message);
+  PersonState copyWith({
+    PersonStateStatus? status,
+    User? user,
+    DateTime? lastSyncTime,
+    String? fullVersion,
+    bool? newVersionAvailable,
+    String? message
+  }) {
+    return PersonState(
+      status: status ?? this.status,
+      user: user ?? this.user,
+      lastSyncTime: lastSyncTime ?? this.lastSyncTime,
+      fullVersion: fullVersion ?? this.fullVersion,
+      newVersionAvailable: newVersionAvailable ?? this.newVersionAvailable,
+      message: message ?? this.message,
+    );
+  }
 }

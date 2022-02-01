@@ -1,14 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
-import 'package:delman/app/constants/strings.dart';
-import 'package:delman/app/entities/entities.dart';
-import 'package:delman/app/pages/shared/page_view_model.dart';
+import '/app/data/database.dart';
+import '/app/constants/strings.dart';
+import '/app/pages/shared/page_view_model.dart';
 
 part 'order_qr_scan_state.dart';
 part 'order_qr_scan_view_model.dart';
@@ -119,20 +118,20 @@ class _OrderQRScanViewState extends State<_OrderQRScanView> {
               ),
               Container(
                 padding: const EdgeInsets.only(top: 128),
-                child: vm.currentOrder == null ? Container() : Align(
+                child: state.order == null ? Container() : Align(
                   alignment: Alignment.topCenter,
                   child: Column(children: [
                     Container(
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Text(
-                        'Заказ ${vm.currentOrder!.trackingNumber}',
+                        'Заказ ${state.order!.trackingNumber}',
                         style: const TextStyle(color: Colors.white, fontSize: 20)
                       )
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Text(
-                        'Мест ${vm.orderPackageScanned!.where((el) => el).length}/${vm.currentOrder!.packages}',
+                        'Мест ${state.orderPackageScanned.where((el) => el).length}/${state.order!.packages}',
                         style: const TextStyle(color: Colors.white, fontSize: 20)
                       )
                     )
@@ -144,12 +143,14 @@ class _OrderQRScanViewState extends State<_OrderQRScanView> {
         );
       },
       listener: (context, state) {
-        OrderQRScanViewModel vm = context.read<OrderQRScanViewModel>();
-
-        if (state is OrderQRScanFailure) {
-          showMessage(state.message);
-        } else if (state is OrderQRScanFinished) {
-          Navigator.of(context).pop(vm.currentOrder!);
+        switch (state.status) {
+          case OrderQRScanStateStatus.failure:
+            showMessage(state.message);
+            break;
+          case OrderQRScanStateStatus.finished:
+            Navigator.of(context).pop(state.order!);
+            break;
+          default:
         }
       }
     );

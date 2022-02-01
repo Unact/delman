@@ -1,9 +1,22 @@
 part of 'order_storages_page.dart';
 
-class OrderStoragesViewModel extends PageViewModel<OrderStoragesState> {
-  OrderStoragesViewModel(BuildContext context) : super(context, OrderStoragesInitial());
+class OrderStoragesViewModel extends PageViewModel<OrderStoragesState, OrderStoragesStateStatus> {
+  OrderStoragesViewModel(BuildContext context) : super(context, OrderStoragesState());
 
-  List<OrderStorage> get orderStorages {
-    return appViewModel.orderStorages.where((e) => e.id != appViewModel.user.storageId).toList();
+  @override
+  OrderStoragesStateStatus get status => state.status;
+
+  @override
+  TableUpdateQuery get listenForTables => TableUpdateQuery.onAllTables([
+    app.storage.users,
+    app.storage.orderStorages
+  ]);
+
+  @override
+  Future<void> loadData() async {
+    emit(state.copyWith(
+      status: OrderStoragesStateStatus.dataLoaded,
+      orderStorages: await app.storage.orderStoragesDao.getForeignOrderStorages()
+    ));
   }
 }

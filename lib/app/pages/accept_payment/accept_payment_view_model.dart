@@ -1,127 +1,186 @@
 part of 'accept_payment_page.dart';
 
-class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState> {
-  late Order order;
-  DeliveryPointOrder deliveryPointOrder;
-  bool _canceled = false;
-  bool _isCancelable = false;
-  double total;
-  bool cardPayment;
-  bool _requiredSignature = false;
+class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState, AcceptPaymentStateStatus> {
   Iboxpro iboxpro = Iboxpro();
 
   AcceptPaymentViewModel(BuildContext context, {
-    required this.total,
-    required this.cardPayment,
-    required this.deliveryPointOrder
-  }) : super(context, AcceptPaymentInitial('Инициализация платежа')) {
-    order = appViewModel.orders.firstWhere((e) => e.id == deliveryPointOrder.orderId);
+    required double total,
+    required bool cardPayment,
+    required DeliveryPointOrderExResult deliveryPointOrderEx
+  }) : super(context, AcceptPaymentState(
+    message: 'Инициализация платежа',
+    total: total,
+    cardPayment: cardPayment,
+    deliveryPointOrderEx: deliveryPointOrderEx
+  ));
 
-    if (!cardPayment) {
+  @override
+  AcceptPaymentStateStatus get status => state.status;
+
+  @override
+  Future<void> loadData() async {}
+
+  @override
+  Future<void> initViewModel() async {
+    super.initViewModel();
+
+    if (!state.cardPayment) {
       _savePayment();
     } else {
       _connectToDevice();
     }
   }
 
-  bool get requiredSignature => _requiredSignature;
-  bool get isCancelable => _isCancelable;
-
   Future<void> cancelPayment() async {
-    _canceled = true;
     await iboxpro.cancelPayment();
 
-    emit(AcceptPaymentFailure('Платеж отменен'));
+    emit(state.copyWith(message: 'Платеж отменен', canceled: true));
   }
 
   Future<void> _connectToDevice() async {
-    _isCancelable = true;
-
-    emit(AcceptPaymentSearchingForDevice('Установление связи с терминалом'));
+    emit(state.copyWith(
+      message: 'Установление связи с терминалом',
+      status: AcceptPaymentStateStatus.searchingForDevice
+    ));
 
     iboxpro.connectToDevice(
-      onError: (String error) => emit(AcceptPaymentFailure(error)),
+      onError: (String error) => emit(state.copyWith(message: error, status: AcceptPaymentStateStatus.failure)),
       onConnected: _getPaymentCredentials
     );
   }
 
   Future<void> _getPaymentCredentials() async {
-    if (_canceled) return;
+    if (state.canceled) return;
 
-    emit(AcceptPaymentGettingCredentials('Установление связи с сервером'));
+    emit(state.copyWith(message: 'Установление связи с сервером', status: AcceptPaymentStateStatus.gettingCredentials));
 
     try {
-      PaymentCredentials credentials = await appViewModel.getPaymentCredentials();
+      ApiPaymentCredentials credentials = await _getApiPaymentCredentials();
 
       await _apiLogin(credentials.login, credentials.password);
     } on AppError catch(e) {
-      emit(AcceptPaymentFailure(e.message));
+      emit(state.copyWith(message: e.message, status: AcceptPaymentStateStatus.failure));
     }
   }
 
   Future<void> _apiLogin(String login, String password) async {
-    if (_canceled) return;
+    if (state.canceled) return;
 
-    emit(AcceptPaymentPaymentAuthorization('Авторизация оплаты'));
+    emit(state.copyWith(message: 'Авторизация оплаты', status: AcceptPaymentStateStatus.paymentAuthorization));
 
     await iboxpro.apiLogin(
       login: login,
       password: password,
-      onError: (String error) => emit(AcceptPaymentFailure(error)),
+      onError: (String error) => emit(state.copyWith(message: error, status: AcceptPaymentStateStatus.failure)),
       onLogin: _startPayment
     );
   }
 
   Future<void> _startPayment() async {
-    if (_canceled) return;
+    if (state.canceled) return;
 
-    emit(AcceptPaymentWaitingForPayment('Ожидание ответа от терминала'));
+    emit(state.copyWith(message: 'Ожидание ответа от терминала', status: AcceptPaymentStateStatus.waitingForPayment));
 
     await iboxpro.startPayment(
-      amount: total,
-      description: 'Оплата за заказ ${order.trackingNumber}',
-      onError: (String error) => emit(AcceptPaymentFailure(error)),
+      amount: state.total,
+      description: 'Оплата за заказ ${state.deliveryPointOrderEx.o.trackingNumber}',
+      onError: (String error) => emit(state.copyWith(message: error, status: AcceptPaymentStateStatus.failure)),
       onPaymentStart: (_) {
-        _isCancelable = false;
-        emit(AcceptPaymentPaymentStarted('Обработка оплаты'));
+        emit(state.copyWith(
+          message: 'Обработка оплаты',
+          status: AcceptPaymentStateStatus.waitingForPayment,
+          isCancelable: false
+        ));
       },
       onPaymentComplete: (Map<dynamic, dynamic> transaction, bool requiredSignature) {
-        _requiredSignature = requiredSignature;
-        emit(AcceptPaymentPaymentFinished('Подтверждение оплаты'));
+        emit(state.copyWith(
+          message: 'Подтверждение оплаты',
+          status: AcceptPaymentStateStatus.paymentFinished,
+          isRequiredSignature: requiredSignature
+        ));
 
-        if (!_requiredSignature) {
+        if (!requiredSignature) {
           _savePayment(transaction);
         } else {
-          emit(AcceptPaymentRequiredSignature('Для завершения оплаты\nнеобходимо указать подпись'));
+          emit(state.copyWith(
+            message: 'Для завершения оплаты\nнеобходимо указать подпись',
+            status: AcceptPaymentStateStatus.requiredSignature
+          ));
         }
       }
     );
   }
 
   Future<void> adjustPayment(Uint8List signature) async {
-    _requiredSignature = false;
-    emit(AcceptPaymentSavingSignature('Сохранение подписи клиента'));
+    emit(state.copyWith(
+      message: 'Сохранение подписи клиента',
+      status: AcceptPaymentStateStatus.savingSignature,
+      isRequiredSignature: false
+    ));
 
     await iboxpro.adjustPayment(
       signature: signature,
-      onError: (String error) => emit(AcceptPaymentFailure(error)),
+      onError: (String error) => emit(state.copyWith(message: error, status: AcceptPaymentStateStatus.failure)),
       onPaymentAdjust: _savePayment
     );
   }
 
   Future<void> _savePayment([Map<dynamic, dynamic>? transaction]) async {
-    emit(AcceptPaymentSavingPayment('Сохранение информации об оплате'));
+    emit(state.copyWith(message: 'Сохранение информации об оплате', status: AcceptPaymentStateStatus.savingPayment));
 
-    Payment payment = Payment(
-      deliveryPointOrderId: deliveryPointOrder.id,
-      summ: total,
-      transactionId: transaction != null ? transaction['id'] : null
-    );
     try {
-      await appViewModel.acceptPayment(payment, transaction);
-      emit(AcceptPaymentFinished('Оплата успешно сохранена'));
+      await _acceptPayment(transaction);
+
+      emit(state.copyWith(message: 'Оплата успешно сохранена', status: AcceptPaymentStateStatus.finished));
     } on AppError catch(e) {
-      emit(AcceptPaymentFailure('Ошибка при сохранении оплаты ${e.message}'));
+      emit(state.copyWith(
+        message: 'Ошибка при сохранении оплаты ${e.message}',
+        status: AcceptPaymentStateStatus.failure
+      ));
+    }
+  }
+
+  Future<void> _acceptPayment(Map<dynamic, dynamic>? transaction) async {
+    Location? location = await GeoLoc.getCurrentLocation();
+
+    if (location == null) {
+      throw AppError('Для работы с приложением необходимо разрешить определение местоположения');
+    }
+
+    try {
+      await Api(storage: app.storage).acceptPayment(
+        deliveryPointOrderId: state.deliveryPointOrderEx.dpo.id,
+        summ: state.total,
+        transaction: transaction,
+        location: location
+      );
+    } on ApiException catch(e) {
+      throw AppError(e.errorMsg);
+    } catch(e, trace) {
+      await app.reportError(e, trace);
+      throw AppError(Strings.genericErrorMsg);
+    }
+
+    await app.storage.paymentsDao.insertPayment(PaymentsCompanion(
+      summ: Value(state.total),
+      transactionId: Value(transaction?['id']),
+      deliveryPointOrderId: Value(state.deliveryPointOrderEx.dpo.id)
+    ));
+
+    await app.storage.ordersDao.updateOrder(
+      state.deliveryPointOrderEx.o.id,
+      const OrdersCompanion(needPayment: Value(false))
+    );
+  }
+
+  Future<ApiPaymentCredentials> _getApiPaymentCredentials() async {
+    try {
+      return await Api(storage: app.storage).getPaymentCredentials();
+    } on ApiException catch(e) {
+      throw AppError(e.errorMsg);
+    } catch(e, trace) {
+      await app.reportError(e, trace);
+      throw AppError(Strings.genericErrorMsg);
     }
   }
 }

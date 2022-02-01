@@ -1,14 +1,15 @@
 part of 'home_page.dart';
 
-class HomeViewModel extends PageViewModel<HomeState> {
-  int _currentIndex = 0;
+class HomeViewModel extends PageViewModel<HomeState, HomeStateStatus> {
+  HomeViewModel(BuildContext context) : super(context, HomeState());
 
-  HomeViewModel(BuildContext context) : super(context, HomeInitial());
+  @override
+  HomeStateStatus get status => state.status;
 
-  int get currentIndex => _currentIndex;
+  @override
+  Future<void> loadData() async {}
 
   void setCurrentIndex(int currentIndex) {
-    _currentIndex = currentIndex;
-    emit(HomePageChanged());
+    emit(state.copyWith(currentIndex: currentIndex));
   }
 }

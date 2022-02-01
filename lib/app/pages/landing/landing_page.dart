@@ -1,10 +1,13 @@
+import 'dart:async';
+
+import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:delman/app/entities/user.dart';
-import 'package:delman/app/pages/home/home_page.dart';
-import 'package:delman/app/pages/login/login_page.dart';
-import 'package:delman/app/pages/shared/page_view_model.dart';
+import '/app/data/database.dart';
+import '/app/pages/home/home_page.dart';
+import '/app/pages/login/login_page.dart';
+import '/app/pages/shared/page_view_model.dart';
 
 part 'landing_state.dart';
 part 'landing_view_model.dart';
@@ -28,9 +31,7 @@ class _LandingView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<LandingViewModel, LandingState>(
       builder: (context, state) {
-        LandingViewModel vm = context.read<LandingViewModel>();
-
-        return vm.isLogged ? HomePage() : LoginPage();
+        return state.isLogged ? HomePage() : LoginPage();
       }
     );
   }

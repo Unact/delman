@@ -1,29 +1,31 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
+
+import 'package:drift/drift.dart' show Value, TableUpdateQuery;
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:quiver/core.dart';
 
-import 'package:delman/app/constants/strings.dart';
-import 'package:delman/app/entities/entities.dart';
-import 'package:delman/app/pages/accept_payment/accept_payment_page.dart';
-import 'package:delman/app/utils/format.dart';
-import 'package:delman/app/utils/misc.dart';
-import 'package:delman/app/pages/app/app_page.dart';
-import 'package:delman/app/pages/shared/page_view_model.dart';
-import 'package:delman/app/widgets/widgets.dart';
+import '/app/constants/strings.dart';
+import '/app/data/database.dart';
+import '/app/entities/entities.dart';
+import '/app/pages/accept_payment/accept_payment_page.dart';
+import '/app/pages/shared/page_view_model.dart';
+import '/app/utils/format.dart';
+import '/app/utils/geo_loc.dart';
+import '/app/utils/misc.dart';
+import '/app/services/api.dart';
+import '/app/widgets/widgets.dart';
 
 part 'delivery_point_order_state.dart';
 part 'delivery_point_order_view_model.dart';
 
 class DeliveryPointOrderPage extends StatelessWidget {
-  final DeliveryPointOrder deliveryPointOrder;
+  final DeliveryPointOrderExResult deliveryPointOrderEx;
 
   DeliveryPointOrderPage({
     Key? key,
-    required this.deliveryPointOrder
+    required this.deliveryPointOrderEx
   }) : super(key: key);
 
   @override
@@ -31,7 +33,7 @@ class DeliveryPointOrderPage extends StatelessWidget {
     return BlocProvider<DeliveryPointOrderViewModel>(
       create: (context) => DeliveryPointOrderViewModel(
         context,
-        deliveryPointOrder: deliveryPointOrder
+        deliveryPointOrderEx: deliveryPointOrderEx
       ),
       child: _DeliveryPointOrderView(),
     );
@@ -110,22 +112,25 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
     );
   }
 
-  Future<String> showAcceptPaymentDialog() async {
+  Future<void> showAcceptPaymentDialog() async {
     DeliveryPointOrderViewModel vm = context.read<DeliveryPointOrderViewModel>();
+    DeliveryPointOrderState state = vm.state;
 
-    return await showDialog(
+    String result = await showDialog(
       context: context,
       builder: (_) => AcceptPaymentPage(
-        deliveryPointOrder: vm.deliveryPointOrder,
-        total: vm.total,
-        cardPayment: vm.cardPayment
+        deliveryPointOrderEx: vm.state.deliveryPointOrderEx,
+        total: state.total,
+        cardPayment: state.cardPayment
       ),
       barrierDismissible: false
     );
+
+    vm.finishPayment(result);
   }
 
-  Future<bool> showConfirmationDialog(String message) async {
-    return await showDialog<bool>(
+  Future<void> showConfirmationDialog(String message, Function callback) async {
+    bool result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
@@ -139,6 +144,66 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
         );
       }
     ) ?? false;
+
+    await callback(result);
+  }
+
+  Future<void> showAskPaymentDialog() async {
+    Size size = MediaQuery.of(context).size;
+    DeliveryPointOrderViewModel vm = context.read<DeliveryPointOrderViewModel>();
+    DeliveryPointOrderState state = vm.state;
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          titlePadding: const EdgeInsets.only(top: 0, left: 24, bottom: 12),
+          title: Stack(
+            children: [
+              Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  icon: const Icon(Icons.close),
+                  color: Colors.red,
+                  iconSize: 24,
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+              Column(
+                children: const [
+                  SizedBox(height: 24),
+                  Text('Внимание'),
+                ],
+              )
+            ]
+          ),
+          content: SizedBox(
+            child: const Text('Хотите ли принять оплату?'),
+            width: size.width
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                vm.tryStartPayment(false);
+              },
+              child: const Icon(Icons.account_balance_wallet),
+              style: TextButton.styleFrom(primary: Colors.redAccent),
+            ),
+            !state.deliveryPointOrderEx.o.cardPaymentAllowed ? Container() : TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                vm.tryStartPayment(true);
+              },
+              child: const Icon(Icons.credit_card),
+              style: TextButton.styleFrom(primary: Colors.redAccent),
+            ),
+          ]
+        );
+      }
+    );
   }
 
   void unfocus() {
@@ -153,12 +218,12 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
   Widget build(BuildContext context) {
     return BlocConsumer<DeliveryPointOrderViewModel, DeliveryPointOrderState>(
       builder: (context, state) {
-        DeliveryPointOrderViewModel vm = context.read<DeliveryPointOrderViewModel>();
-        bool isPickup = vm.deliveryPointOrder.isPickup;
+        bool isPickup = state.deliveryPointOrderEx.dpo.pickup;
+        Order order = state.deliveryPointOrderEx.o;
 
         return Scaffold(
           appBar: AppBar(
-            title: Text('Заказ ${vm.order.trackingNumber}'),
+            title: Text('Заказ ${order.trackingNumber}'),
             centerTitle: true
           ),
           persistentFooterButtons: isPickup ? _buildPickupFooterButtons(context) : _buildDeliveryFooterButtons(context),
@@ -171,27 +236,27 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
                 InfoRow(
                   title: const Text('Статус'),
                   trailing: Text(
-                    vm.deliveryPointOrder.isCanceled ?
+                    state.deliveryPointOrderEx.dpo.canceled ?
                       'Отменен' :
-                      (vm.deliveryPointOrder.isFinished ? 'Завершен' : 'Не завершен')
+                      (state.deliveryPointOrderEx.dpo.finished ? 'Завершен' : 'Не завершен')
                   )
                 ),
                 InfoRow(
                   title: const Text('Посылка'),
-                  trailing: Text(vm.withCourier ? 'На борту' : 'Не на борту')
+                  trailing: Text(state.withCourier ? 'На борту' : 'Не на борту')
                 ),
                 InfoRow(
                   title: const Text('Возврат документов'),
-                  trailing: Text(vm.order.needDocumentsReturn ? 'Да' : 'Нет')
+                  trailing: Text(order.documentsReturn ? 'Да' : 'Нет')
                 ),
-                InfoRow(title: const Text('ИМ'), trailing: Text(vm.order.sellerName)),
-                InfoRow(title: const Text('Номер в ИМ'), trailing: Text(vm.order.number)),
+                InfoRow(title: const Text('ИМ'), trailing: Text(order.sellerName)),
+                InfoRow(title: const Text('Номер в ИМ'), trailing: Text(order.number)),
                 ...(isPickup ? _buildPickupRows(context) : _buildDeliveryRows(context)),
                 ExpansionTile(
                   title: const Text('Служебная информация'),
                   initiallyExpanded: false,
                   tilePadding: const EdgeInsets.symmetric(horizontal: 8),
-                  children: vm.sortedOrderInfoList.
+                  children: state.orderInfoLines.
                     map<Widget>((e) => _buildOrderInfoTile(context, e)).toList()..
                     add(
                       Padding(
@@ -214,26 +279,31 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
         );
       },
       listener: (context, state) async {
-        DeliveryPointOrderViewModel vm = context.read<DeliveryPointOrderViewModel>();
-
-        if (state is DeliveryPointOrderInProgress) {
-          openDialog();
-        } else if (state is DeliveryPointOrderPaymentStarted) {
-          WidgetsBinding.instance!.addPostFrameCallback((_) async {
-            vm.finishPayment(await showAcceptPaymentDialog());
-          });
-        } else if (state is DeliveryPointOrderFailure) {
-          showMessageAndCloseDialog(state.message);
-        } else if (state is DeliveryPointOrderCanceled) {
-          showMessageAndCloseDialog(state.message);
-        } else if (state is DeliveryPointOrderConfirmed) {
-          showMessageAndCloseDialog(state.message);
-        } else if (state is DeliveryPointOrderPaymentFinished) {
-          showMessageAndCloseDialog(state.message);
-        } else if (state is DeliveryPointOrderCommentAdded) {
-          showMessageAndCloseDialog(state.message);
-        } else if (state is DeliveryPointOrderNeedUserConfirmation) {
-          state.confirmationCallback(await showConfirmationDialog(state.message));
+        switch (state.status) {
+          case DeliveryPointOrderStateStatus.paymentFinished:
+          case DeliveryPointOrderStateStatus.commentAdded:
+          case DeliveryPointOrderStateStatus.failure:
+          case DeliveryPointOrderStateStatus.confirmed:
+          case DeliveryPointOrderStateStatus.canceled:
+            showMessageAndCloseDialog(state.message);
+            break;
+          case DeliveryPointOrderStateStatus.inProgress:
+            await openDialog();
+            break;
+          case DeliveryPointOrderStateStatus.paymentStarted:
+            WidgetsBinding.instance!.addPostFrameCallback((_) async {
+              await showAcceptPaymentDialog();
+            });
+            break;
+          case DeliveryPointOrderStateStatus.askPaymentCollection:
+            WidgetsBinding.instance!.addPostFrameCallback((_) async {
+              await showAskPaymentDialog();
+            });
+            break;
+          case DeliveryPointOrderStateStatus.needUserConfirmation:
+            await showConfirmationDialog(state.message, state.confirmationCallback);
+            break;
+          default:
         }
       },
     );
@@ -241,9 +311,11 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
 
   List<Widget> _buildPickupFooterButtons(BuildContext context) {
     DeliveryPointOrderViewModel vm = context.read<DeliveryPointOrderViewModel>();
+    DeliveryPointOrderState state = vm.state;
+    DeliveryPointOrder deliveryPointOrder = state.deliveryPointOrderEx.dpo;
 
     return [
-      vm.deliveryPointOrder.isFinished ? null : TextButton(
+      deliveryPointOrder.finished ? null : TextButton(
         style: TextButton.styleFrom(primary: Colors.redAccent),
         child: const Text('Отменить'),
         onPressed: () {
@@ -251,7 +323,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
           vm.tryCancelOrder();
         }
       ),
-      vm.deliveryPointOrder.isFinished || !vm.deliveryPoint.inProgress ? null : TextButton(
+      !state.isFinishable ? null : TextButton(
         style: TextButton.styleFrom(primary: Colors.redAccent),
         child: const Text('Завершить'),
         onPressed: () {
@@ -264,36 +336,36 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
 
   List<Widget> _buildPickupRows(BuildContext context) {
     DeliveryPointOrderViewModel vm = context.read<DeliveryPointOrderViewModel>();
+    DeliveryPointOrderState state = vm.state;
+    Order order = state.deliveryPointOrderEx.o;
 
     return [
-      InfoRow(title: const Text('Отправитель'), trailing: Text(vm.order.senderName ?? '')),
+      InfoRow(title: const Text('Отправитель'), trailing: Text(order.senderName ?? '')),
       InfoRow(
         title: const Text('Телефон'),
         trailing: GestureDetector(
-          onTap: () => vm.callPhone(vm.order.senderPhone),
-          child: Text(vm.order.senderPhone ?? '', style: const TextStyle(color: Colors.blue))
+          onTap: () => vm.callPhone(order.senderPhone),
+          child: Text(order.senderPhone ?? '', style: const TextStyle(color: Colors.blue))
         )
       ),
       InfoRow(
         title: const Text('Погрузка'),
-        trailing: Text(Format.timeStrFromInt(vm.order.pickupLoadDuration))
+        trailing: Text(Format.timeStrFromInt(order.pickupLoadDuration))
       ),
-      vm.order.pickupDateTimeFrom == null ? Container() : InfoRow(
+      order.pickupDateTimeFrom == null ? Container() : InfoRow(
         title: const Text('Время забора'),
         trailing: Text(
-          Format.timeStrFromDateTime(vm.order.pickupDateTimeTo) +
-          ' - ' +
-          Format.timeStrFromDateTime(vm.order.pickupDateTimeTo)
+          Format.timeStr(order.pickupDateTimeTo) + ' - ' + Format.timeStr(order.pickupDateTimeTo)
         )
       ),
       InfoRow(
         title: const Text('Забор'),
         trailing: ExpandingText(
           _formatTypeText(
-            vm.order.deliveryTypeName,
-            vm.order.hasSenderElevator,
-            vm.order.senderFloor,
-            vm.order.senderFlat
+            order.deliveryTypeName,
+            order.senderElevator,
+            order.senderFloor,
+            order.senderFlat
           )
         )
       ),
@@ -301,20 +373,18 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
         title: const Text('Позиции'),
         initiallyExpanded: true,
         tilePadding: const EdgeInsets.symmetric(horizontal: 8),
-        children: vm.sortedOrderLines.map<Widget>((e) => _buildOrderLineTile(context, e, false)).toList()
+        children: state.orderLines.map<Widget>((e) => _buildOrderLineTile(context, e, false)).toList()
       )
     ];
   }
 
   List<Widget> _buildDeliveryFooterButtons(BuildContext context) {
     DeliveryPointOrderViewModel vm = context.read<DeliveryPointOrderViewModel>();
-    bool totalEditable = vm.deliveryPointOrder.isFinished &&
-      !vm.deliveryPointOrder.isCanceled &&
-      vm.payment == null &&
-      vm.total != 0;
+    DeliveryPointOrderState state = vm.state;
+    DeliveryPointOrder deliveryPointOrder = state.deliveryPointOrderEx.dpo;
 
     return [
-      !totalEditable ? null : TextButton(
+      !state.needPayment ? null : TextButton(
         onPressed: () {
           unfocus();
           vm.tryStartPayment(false);
@@ -322,7 +392,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
         child: const Icon(Icons.account_balance_wallet),
         style: TextButton.styleFrom(primary: Colors.redAccent),
       ),
-      !totalEditable || !vm.order.isCardPaymentAllowed ? null : TextButton(
+      !state.needPayment || !state.deliveryPointOrderEx.o.cardPaymentAllowed ? null : TextButton(
         onPressed: () {
           unfocus();
           vm.tryStartPayment(true);
@@ -330,7 +400,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
         child: const Icon(Icons.credit_card),
         style: TextButton.styleFrom(primary: Colors.redAccent),
       ),
-      vm.deliveryPointOrder.isFinished ? null : TextButton(
+      deliveryPointOrder.finished ? null : TextButton(
         style: TextButton.styleFrom(primary: Colors.redAccent),
         child: const Text('Отменить'),
         onPressed: () {
@@ -338,7 +408,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
           vm.tryCancelOrder();
         }
       ),
-      vm.deliveryPointOrder.isFinished || !vm.deliveryPoint.inProgress ? null : TextButton(
+      !state.isFinishable ? null : TextButton(
         style: TextButton.styleFrom(primary: Colors.redAccent),
         child: const Text('Завершить'),
         onPressed: () {
@@ -351,57 +421,57 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
 
   List<Widget> _buildDeliveryRows(BuildContext context) {
     DeliveryPointOrderViewModel vm = context.read<DeliveryPointOrderViewModel>();
+    DeliveryPointOrderState state = vm.state;
+    Order order = state.deliveryPointOrderEx.o;
 
     return [
       InfoRow(
         title: const Text('Покупатель'),
-        trailing: Text(vm.order.buyerName ?? '')
+        trailing: Text(order.buyerName ?? '')
       ),
       InfoRow(
         title: const Text('Телефон'),
         trailing: GestureDetector(
-          onTap: () => vm.callPhone(vm.order.buyerPhone),
-          child: Text(vm.order.buyerPhone ?? '', style: const TextStyle(color: Colors.blue))
+          onTap: () => vm.callPhone(order.buyerPhone),
+          child: Text(order.buyerPhone ?? '', style: const TextStyle(color: Colors.blue))
         )
       ),
       InfoRow(
         title: const Text('Разгрузка'),
-        trailing: Text(Format.timeStrFromInt(vm.order.pickupLoadDuration))
+        trailing: Text(Format.timeStrFromInt(order.pickupLoadDuration))
       ),
-      vm.order.deliveryDateTimeFrom == null ? Container() : InfoRow(
+      order.deliveryDateTimeFrom == null ? Container() : InfoRow(
         title: const Text('Время доставки'),
         trailing: Text(
-          Format.timeStrFromDateTime(vm.order.deliveryDateTimeFrom) +
-          ' - ' +
-          Format.timeStrFromDateTime(vm.order.deliveryDateTimeTo)
+          Format.timeStr(order.deliveryDateTimeFrom) + ' - ' + Format.timeStr(order.deliveryDateTimeTo)
         )
       ),
       InfoRow(
         title: const Text('Доставка'),
         trailing: ExpandingText(
           _formatTypeText(
-            vm.order.deliveryTypeName,
-            vm.order.hasBuyerElevator,
-            vm.order.buyerFloor,
-            vm.order.buyerFlat
+            order.deliveryTypeName,
+            order.buyerElevator,
+            order.buyerFloor,
+            order.buyerFlat
           )
         )
       ),
-      InfoRow(title: const Text('Оплата'), trailing: Text(vm.order.paymentTypeName)),
-      InfoRow(title: const Text('Примечание'), trailing: ExpandingText(vm.order.comment ?? '')),
-      InfoRow(title: const Text('К оплате'), trailing: Text(Format.numberStr(vm.total))),
+      InfoRow(title: const Text('Оплата'), trailing: Text(order.paymentTypeName)),
+      InfoRow(title: const Text('Примечание'), trailing: ExpandingText(order.comment ?? '')),
+      InfoRow(title: const Text('К оплате'), trailing: Text(Format.numberStr(state.total))),
       ExpansionTile(
         title: const Text('Позиции'),
         initiallyExpanded: true,
         tilePadding: const EdgeInsets.symmetric(horizontal: 8),
-        children: vm.sortedOrderLines.map<Widget>(
-          (e) => _buildOrderLineTile(context, e, !vm.deliveryPointOrder.isFinished)
+        children: state.orderLines.map<Widget>(
+          (e) => _buildOrderLineTile(context, e, state.isFinishable)
         ).toList()
       )
     ];
   }
 
-  Widget _buildOrderInfoTile(BuildContext context, OrderInfo orderInfo) {
+  Widget _buildOrderInfoTile(BuildContext context, OrderInfoLine orderInfoLine) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -412,7 +482,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
               height: 20,
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: ExpandingText(orderInfo.comment,
+                child: ExpandingText(orderInfoLine.comment,
                   textAlign: TextAlign.left, style: const TextStyle(fontSize: 12)
                 ),
               )
@@ -448,7 +518,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
                 child: TextFormField(
                   initialValue: orderLine.factAmount?.toString(),
                   textAlign: TextAlign.center,
-                  onChanged: (newValue) => vm.updateOrderLineAmount(orderLine, newValue),
+                  onChanged: (newValue) async => await vm.updateOrderLineAmount(orderLine, newValue),
                   keyboardType: const TextInputType.numberWithOptions(signed: true),
                   decoration: const InputDecoration(
                     contentPadding: EdgeInsets.only(bottom: 12)

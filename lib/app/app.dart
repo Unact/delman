@@ -1,46 +1,39 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fk_user_agent/fk_user_agent.dart';
 import 'package:package_info/package_info.dart';
+import 'package:pub_semver/pub_semver.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:stack_trace/stack_trace.dart';
 
-import 'package:delman/app/entities/entities.dart';
-import 'package:delman/app/repositories/repositories.dart';
-import 'package:delman/app/services/api.dart';
-import 'package:delman/app/services/storage.dart';
+import 'constants/strings.dart';
+import 'entities/entities.dart';
+import 'services/api.dart';
+import 'data/database.dart';
 
 class App {
   final bool isDebug;
   final String version;
   final String buildNumber;
-  final String osVersion;
-  final String deviceModel;
+  final AppStorage storage;
 
   App._({
     required this.isDebug,
     required this.version,
     required this.buildNumber,
-    required this.osVersion,
-    required this.deviceModel,
+    required this.storage
   }) {
     _instance = this;
   }
 
   static App? _instance;
-  static App? get instance => _instance;
 
   static Future<App> init() async {
     if (_instance != null) return _instance!;
 
-    AndroidDeviceInfo androidDeviceInfo;
-    IosDeviceInfo iosDeviceInfo;
-    String osVersion;
-    String deviceModel;
     bool isDebug = false;
     assert(isDebug = true);
 
@@ -49,19 +42,8 @@ class App {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     await FkUserAgent.init();
 
-    if (Platform.isIOS) {
-      iosDeviceInfo = await DeviceInfoPlugin().iosInfo;
-      osVersion = iosDeviceInfo.systemVersion ?? '';
-      deviceModel = iosDeviceInfo.utsname.machine ?? '';
-    } else {
-      androidDeviceInfo = await DeviceInfoPlugin().androidInfo;
-      osVersion = androidDeviceInfo.version.release ?? '';
-      deviceModel = (androidDeviceInfo.brand ?? '') + ' - ' + (androidDeviceInfo.model ?? '');
-    }
-
-    await Storage.init();
-    await Api.init();
-    await _initSentry(dsn: const String.fromEnvironment('DELMAN_SENTRY_DSN'), capture: !isDebug);
+    AppStorage storage = AppStorage(logStatements: isDebug);
+    await _initSentry(dsn: const String.fromEnvironment('DELMAN_SENTRY_DSN'), capture: !isDebug, storage: storage);
     _intFlogs(isDebug: isDebug);
 
     FLog.info(text: 'App Initialized');
@@ -70,15 +52,44 @@ class App {
       isDebug: isDebug,
       version: packageInfo.version,
       buildNumber: packageInfo.buildNumber,
-      osVersion: osVersion,
-      deviceModel: deviceModel,
+      storage: storage
     );
   }
 
+  Future<bool> get newVersionAvailable async {
+    String remoteVersion = (await storage.usersDao.getUser()).version;
+
+    return Version.parse(remoteVersion) > Version.parse(version);
+  }
+
+  String get fullVersion => version + '+' + buildNumber;
+
   Future<void> reportError(dynamic error, dynamic stackTrace) async {
+    Frame methodFrame = Trace.current().frames.length > 1 ? Trace.current().frames[1] : Trace.current().frames[0];
+
+    FLog.error(
+      methodName: methodFrame.member!.split('.')[1],
+      text: error.toString(),
+      exception: error,
+      stacktrace: stackTrace
+    );
+
     debugPrint(error.toString());
     debugPrint(stackTrace.toString());
     await Sentry.captureException(error, stackTrace: stackTrace);
+  }
+
+  Future<void> loadUserData() async {
+    try {
+      ApiUserData userData = await Api(storage: storage).getUserData();
+
+      await storage.usersDao.loadUser(userData.toDatabaseEnt());
+    } on ApiException catch(e) {
+      throw AppError(e.errorMsg);
+    } catch(e, trace) {
+      await reportError(e, trace);
+      throw AppError(Strings.genericErrorMsg);
+    }
   }
 
   static void _intFlogs({
@@ -96,15 +107,16 @@ class App {
 
   static Future<void> _initSentry({
     required String dsn,
-    required bool capture
+    required bool capture,
+    required AppStorage storage
   }) async {
     if (!capture) return;
 
     await SentryFlutter.init(
       (options) {
         options.dsn = dsn;
-        options.beforeSend = (SentryEvent event, {dynamic hint}) {
-          User user = UserRepository(storage: Storage.instance!).getUser();
+        options.beforeSend = (SentryEvent event, {dynamic hint}) async {
+          User user = await storage.usersDao.getUser();
 
           return event.copyWith(user: SentryUser(
             id: user.id.toString(),

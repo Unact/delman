@@ -1,15 +1,18 @@
 import 'dart:async';
 
+import 'package:drift/drift.dart' show TableUpdateQuery;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:delman/app/constants/strings.dart';
-import 'package:delman/app/entities/entities.dart';
-import 'package:delman/app/pages/home/home_page.dart';
-import 'package:delman/app/pages/person/person_page.dart';
-import 'package:delman/app/utils/format.dart';
-import 'package:delman/app/pages/app/app_page.dart';
-import 'package:delman/app/pages/shared/page_view_model.dart';
+import '/app/constants/strings.dart';
+import '/app/data/database.dart';
+import '/app/entities/entities.dart';
+import '/app/pages/home/home_page.dart';
+import '/app/pages/person/person_page.dart';
+import '/app/pages/shared/page_view_model.dart';
+import '/app/services/api.dart';
+import '/app/utils/format.dart';
+import '/app/utils/geo_loc.dart';
 
 part 'info_state.dart';
 part 'info_view_model.dart';
@@ -93,8 +96,6 @@ class _InfoViewState extends State<_InfoView> {
         builder: (context, state) {
           InfoViewModel vm = context.read<InfoViewModel>();
 
-          if (state is InfoInitial && vm.needRefresh) openRefresher();
-
           return RefreshIndicator(
             key: _refreshIndicatorKey,
             onRefresh: () async {
@@ -115,20 +116,25 @@ class _InfoViewState extends State<_InfoView> {
           );
         },
         listener: (context, state) {
-          if (state is InfoInCloseProgress) {
-            openDialog();
-          } else if (state is InfoCloseFailure) {
-            showMessage(state.message);
-            closeDialog();
-          } else if (state is InfoCloseSuccess) {
-            showMessage(state.message);
-            closeDialog();
-          } else if (state is InfoLoadFailure) {
-            showMessage(state.message);
-            closeRefresher();
-          } else if (state is InfoLoadSuccess) {
-            showMessage(state.message);
-            closeRefresher();
+          switch (state.status) {
+            case InfoStateStatus.inCloseProgress:
+              openDialog();
+              break;
+            case InfoStateStatus.startLoad:
+              openRefresher();
+              break;
+            case InfoStateStatus.closeFailure:
+            case InfoStateStatus.closeSuccess:
+              showMessage(state.message);
+              closeDialog();
+              break;
+            case InfoStateStatus.loadFailure:
+            case InfoStateStatus.loadSuccess:
+              showMessage(state.message);
+              closeRefresher();
+              break;
+            default:
+              break;
           }
         },
       )
@@ -147,6 +153,7 @@ class _InfoViewState extends State<_InfoView> {
 
   Widget _buildOrderStoragesCard(BuildContext context) {
     InfoViewModel vm = context.read<InfoViewModel>();
+    InfoState state = vm.state;
 
     return Card(
       child: ListTile(
@@ -157,8 +164,11 @@ class _InfoViewState extends State<_InfoView> {
           text: TextSpan(
             style: const TextStyle(color: Colors.grey),
             children: <TextSpan>[
-              TextSpan(text: 'Забрать со склада: ${vm.ordersNotInOwnStorageCnt}\n', style: const TextStyle(fontSize: 12.0)),
-              TextSpan(text: 'У меня: ${vm.ordersInOwnStorageCnt}\n', style: const TextStyle(fontSize: 12.0))
+              TextSpan(
+                text: 'Забрать со склада: ${state.ordersNotInOwnStorageCnt}\n',
+                style: const TextStyle(fontSize: 12.0)
+              ),
+              TextSpan(text: 'У меня: ${state.ordersInOwnStorageCnt}\n', style: const TextStyle(fontSize: 12.0))
             ]
           )
         )
@@ -168,6 +178,7 @@ class _InfoViewState extends State<_InfoView> {
 
   Widget _buildDeliveriesCard(BuildContext context) {
     InfoViewModel vm = context.read<InfoViewModel>();
+    InfoState state = vm.state;
 
     return Card(
       child: ListTile(
@@ -179,11 +190,11 @@ class _InfoViewState extends State<_InfoView> {
             style: const TextStyle(color: Colors.grey),
             children: <TextSpan>[
               TextSpan(
-                text: vm.deliveries.map((e) => Format.dateStr(e.deliveryDate)).join('\n') + '\n',
+                text: state.deliveries.map((e) => Format.dateStr(e.delivery.deliveryDate)).join('\n') + '\n',
                 style: const TextStyle(fontSize: 12.0)
               ),
-              TextSpan(text: 'Точек: ${vm.deliveryPointsCnt}\n', style: const TextStyle(fontSize: 12.0)),
-              TextSpan(text: 'Осталось: ${vm.deliveryPointsLeftCnt}\n', style: const TextStyle(fontSize: 12.0))
+              TextSpan(text: 'Точек: ${state.deliveryPointsCnt}\n', style: const TextStyle(fontSize: 12.0)),
+              TextSpan(text: 'Осталось: ${state.deliveryPointsLeftCnt}\n', style: const TextStyle(fontSize: 12.0))
             ]
           )
         ),
@@ -193,7 +204,7 @@ class _InfoViewState extends State<_InfoView> {
             primary: Colors.blue,
           ),
           child: const Text('Завершить день'),
-          onPressed: vm.deliveryPointsCnt == 0 ? null : vm.closeDelivery
+          onPressed: state.deliveryPointsCnt == 0 ? null : vm.closeDelivery
         ),
       ),
     );
@@ -201,6 +212,7 @@ class _InfoViewState extends State<_InfoView> {
 
   Widget _buildPaymentsCard(BuildContext context) {
     InfoViewModel vm = context.read<InfoViewModel>();
+    InfoState state = vm.state;
 
     return Card(
       child: ListTile(
@@ -212,15 +224,15 @@ class _InfoViewState extends State<_InfoView> {
             style: const TextStyle(color: Colors.grey),
             children: <TextSpan>[
               TextSpan(
-                text: 'Всего: ${vm.paymentsCnt} на сумму ${Format.numberStr(vm.paymentsSum)}\n',
+                text: 'Всего: ${state.paymentsCnt} на сумму ${Format.numberStr(state.paymentsSum)}\n',
                 style: const TextStyle(fontSize: 12.0)
               ),
               TextSpan(
-                text: 'Наличными: ${vm.cashPaymentsCnt} на сумму ${Format.numberStr(vm.cashPaymentsSum)}\n',
+                text: 'Наличными: ${state.cashPaymentsCnt} на сумму ${Format.numberStr(state.cashPaymentsSum)}\n',
                 style: const TextStyle(fontSize: 12.0)
               ),
               TextSpan(
-                text: 'Картой: ${vm.cardPaymentsCnt} на сумму ${Format.numberStr(vm.cardPaymentsSum)}\n',
+                text: 'Картой: ${state.cardPaymentsCnt} на сумму ${Format.numberStr(state.cardPaymentsSum)}\n',
                 style: const TextStyle(fontSize: 12.0)
               )
             ]
@@ -234,7 +246,7 @@ class _InfoViewState extends State<_InfoView> {
     InfoViewModel vm = context.read<InfoViewModel>();
     InfoState state = vm.state;
 
-    if (state is InfoTimerLoadFailure) {
+    if (state.status == InfoStateStatus.loadFailure) {
       return Card(
         child: ListTile(
           isThreeLine: true,
@@ -249,8 +261,9 @@ class _InfoViewState extends State<_InfoView> {
 
   Widget _buildInfoCard(BuildContext context) {
     InfoViewModel vm = context.read<InfoViewModel>();
+    InfoState state = vm.state;
 
-    if (vm.newVersionAvailable) {
+    if (state.newVersionAvailable) {
       return const Card(
         child: ListTile(
           isThreeLine: true,

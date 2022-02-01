@@ -1,13 +1,18 @@
-export 'package:delman/app/entities/api_data.dart';
-export 'package:delman/app/entities/app_data.dart';
-export 'package:delman/app/entities/delivery.dart';
-export 'package:delman/app/entities/delivery_point_order.dart';
-export 'package:delman/app/entities/delivery_point.dart';
-export 'package:delman/app/entities/location.dart';
-export 'package:delman/app/entities/order_info.dart';
-export 'package:delman/app/entities/order_line.dart';
-export 'package:delman/app/entities/order_storage.dart';
-export 'package:delman/app/entities/order.dart';
-export 'package:delman/app/entities/payment_credentials.dart';
-export 'package:delman/app/entities/payment.dart';
-export 'package:delman/app/entities/user.dart';
+import 'package:equatable/equatable.dart';
+
+import '/app/data/database.dart';
+import '/app/utils/nullify.dart';
+
+part 'api_data.dart';
+part 'api_delivery.dart';
+part 'api_delivery_point_order.dart';
+part 'api_delivery_point.dart';
+part 'location.dart';
+part 'api_order_info_line.dart';
+part 'api_order_line.dart';
+part 'api_order_storage.dart';
+part 'api_order.dart';
+part 'api_payment_credentials.dart';
+part 'api_payment.dart';
+part 'api_user_data.dart';
+part 'app_error.dart';

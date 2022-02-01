@@ -1,17 +1,36 @@
 part of 'order_qr_scan_page.dart';
 
-abstract class OrderQRScanState {
-  OrderQRScanState();
+enum OrderQRScanStateStatus {
+  initial,
+  scanReadFinished,
+  failure,
+  finished
 }
 
-class OrderQRScanInitial extends OrderQRScanState {}
+class OrderQRScanState {
+  OrderQRScanState({
+    this.status = OrderQRScanStateStatus.initial,
+    this.order,
+    this.orderPackageScanned = const [],
+    this.message = ''
+  });
 
-class OrderQRScanReadFinished extends OrderQRScanState {}
-
-class OrderQRScanFailure extends OrderQRScanState {
+  final OrderQRScanStateStatus status;
   final String message;
+  final Order? order;
+  final List<bool> orderPackageScanned;
 
-  OrderQRScanFailure(this.message);
+  OrderQRScanState copyWith({
+    OrderQRScanStateStatus? status,
+    Order? order,
+    List<bool>? orderPackageScanned,
+    String? message
+  }) {
+    return OrderQRScanState(
+      status: status ?? this.status,
+      order: order ?? this.order,
+      orderPackageScanned: orderPackageScanned ?? this.orderPackageScanned,
+      message: message ?? this.message
+    );
+  }
 }
-
-class OrderQRScanFinished extends OrderQRScanState {}

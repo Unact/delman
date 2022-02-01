@@ -1,9 +1,26 @@
 part of 'home_page.dart';
 
-abstract class HomeState {
-  HomeState();
+enum HomeStateStatus {
+  initial,
+  pageChanged,
 }
 
-class HomeInitial extends HomeState {}
+class HomeState {
+  HomeState({
+    this.status = HomeStateStatus.initial,
+    this.currentIndex = 0
+  });
 
-class HomePageChanged extends HomeState {}
+  final int currentIndex;
+  final HomeStateStatus status;
+
+  HomeState copyWith({
+    HomeStateStatus? status,
+    int? currentIndex
+  }) {
+    return HomeState(
+      status: status ?? this.status,
+      currentIndex: currentIndex ?? this.currentIndex,
+    );
+  }
+}

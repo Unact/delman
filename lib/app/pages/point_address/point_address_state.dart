@@ -1,15 +1,36 @@
 part of 'point_address_page.dart';
 
-abstract class PointAddressState {
-  PointAddressState();
+enum PointAddressStateStatus {
+  initial,
+  dataLoaded,
+  failure,
+  selectionChange,
 }
 
-class PointAddressInitial extends PointAddressState {}
+class PointAddressState {
+  PointAddressState({
+    this.status = PointAddressStateStatus.initial,
+    required this.deliveryPointEx,
+    this.allPoints = const [],
+    this.message = ''
+  });
 
-class PointAddressSelectionChange extends PointAddressState {}
-
-class PointAddressFailure extends PointAddressState {
+  final PointAddressStateStatus status;
+  final DeliveryPointExResult deliveryPointEx;
+  final List<DeliveryPointExResult> allPoints;
   final String message;
 
-  PointAddressFailure(this.message);
+  PointAddressState copyWith({
+    PointAddressStateStatus? status,
+    DeliveryPointExResult? deliveryPointEx,
+    List<DeliveryPointExResult>? allPoints,
+    String? message
+  }) {
+    return PointAddressState(
+      status: status ?? this.status,
+      deliveryPointEx: deliveryPointEx ?? this.deliveryPointEx,
+      allPoints: allPoints ?? this.allPoints,
+      message: message ?? this.message,
+    );
+  }
 }

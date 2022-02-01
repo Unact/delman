@@ -1,27 +1,50 @@
 part of 'delivery_point_page.dart';
 
-abstract class DeliveryPointState {
-  DeliveryPointState();
+enum DeliveryPointStateStatus {
+  initial,
+  dataLoaded,
+  orderDataCopied,
+  inProgress,
+  arrivalSaved,
+  failure
 }
 
-class DeliveryPointInitial extends DeliveryPointState {}
-
-class DeliveryPointOrderDataCopied extends DeliveryPointState {
-  final String message;
-
-  DeliveryPointOrderDataCopied(this.message);
+extension DeliveryPointStateStatusX on DeliveryPointStateStatus {
+  bool get isInitial => this == DeliveryPointStateStatus.initial;
+  bool get isDataLoaded => this == DeliveryPointStateStatus.dataLoaded;
+  bool get isOrderDataCopied => this == DeliveryPointStateStatus.orderDataCopied;
+  bool get isInProgress => this == DeliveryPointStateStatus.inProgress;
+  bool get isArrivalSaved => this == DeliveryPointStateStatus.arrivalSaved;
+  bool get isFailure => this == DeliveryPointStateStatus.failure;
 }
 
-class DeliveryPointInProgress extends DeliveryPointState {}
+class DeliveryPointState {
+  DeliveryPointState({
+    this.status = DeliveryPointStateStatus.initial,
+    required this.deliveryPointEx,
+    this.deliveryPointOrdersEx = const [],
+    this.message = ''
+  });
 
-class DeliveryPointArrivalSaved extends DeliveryPointState {
+  final DeliveryPointStateStatus status;
+  final DeliveryPointExResult deliveryPointEx;
+  final List<DeliveryPointOrderExResult> deliveryPointOrdersEx;
   final String message;
 
-  DeliveryPointArrivalSaved(this.message);
-}
+  List<DeliveryPointOrderExResult> get deliveryOrders => deliveryPointOrdersEx.where((el) => !el.dpo.pickup).toList();
+  List<DeliveryPointOrderExResult> get pickupPointOrders => deliveryPointOrdersEx.where((el) => el.dpo.pickup).toList();
 
-class DeliveryPointFailure extends DeliveryPointState {
-  final String message;
-
-  DeliveryPointFailure(this.message);
+  DeliveryPointState copyWith({
+    DeliveryPointStateStatus? status,
+    DeliveryPointExResult? deliveryPointEx,
+    List<DeliveryPointOrderExResult>? deliveryPointOrdersEx,
+    String? message
+  }) {
+    return DeliveryPointState(
+      status: status ?? this.status,
+      deliveryPointEx: deliveryPointEx ?? this.deliveryPointEx,
+      deliveryPointOrdersEx: deliveryPointOrdersEx ?? this.deliveryPointOrdersEx,
+      message: message ?? this.message
+    );
+  }
 }

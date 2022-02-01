@@ -1,11 +1,15 @@
+import 'dart:async';
+
+import 'package:drift/drift.dart' show TableUpdateQuery;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:delman/app/constants/strings.dart';
-import 'package:delman/app/entities/entities.dart';
-import 'package:delman/app/pages/delivery_point/delivery_point_page.dart';
-import 'package:delman/app/utils/format.dart';
-import 'package:delman/app/pages/shared/page_view_model.dart';
+import '/app/constants/strings.dart';
+import '/app/data/database.dart';
+import '/app/pages/delivery_point/delivery_point_page.dart';
+import '/app/pages/shared/page_view_model.dart';
+import '/app/utils/format.dart';
+import '/app/utils/styling.dart';
 
 part 'delivery_state.dart';
 part 'delivery_view_model.dart';
@@ -33,54 +37,46 @@ class _DeliveryView extends StatelessWidget {
       ),
       body: BlocBuilder<DeliveryViewModel, DeliveryState>(
         builder: (context, state) {
-          DeliveryViewModel vm = context.read<DeliveryViewModel>();
-
           return ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.only(top: 8, left: 8, right: 8, bottom: 24),
-            children: vm.deliveries.map((e) => _deliveryTile(context, e)).expand((i) => i).toList()
+            children: state.deliveries.map((e) => _deliveryTile(context, e)).expand((i) => i).toList()
           );
         }
       )
     );
   }
 
-  List<Widget> _deliveryTile(BuildContext context, Delivery delivery) {
-    DeliveryViewModel vm = context.read<DeliveryViewModel>();
-
+  List<Widget> _deliveryTile(BuildContext context, ExDelivery extendedDelivery) {
     return [
       ListTile(
         dense: true,
-        leading: Text('Маршрут от ${Format.dateStr(delivery.deliveryDate)}'),
+        leading: Text('Маршрут от ${Format.dateStr(extendedDelivery.delivery.deliveryDate)}'),
       ),
-      ...vm.getDeliveryPointsForDelivery(delivery).map((e) => _deliveryPointTile(context, e)).toList()
+      ...extendedDelivery.deliveryPoints.map((e) => _deliveryPointTile(context, e)).toList()
     ];
   }
 
-  Widget _deliveryPointTile(BuildContext context, DeliveryPoint deliveryPoint) {
-    Color color = deliveryPoint.isFinished ?
-      Colors.green[400]! :
-      (deliveryPoint.inProgress ? Colors.yellow[400]! : Colors.blue[400]!);
-
+  Widget _deliveryPointTile(BuildContext context, DeliveryPointExResult deliveryPointEx) {
     return ListTile(
       leading: CircleAvatar(
-        child: Text(deliveryPoint.seq.toString(), style: const TextStyle(color: Colors.black)),
-        backgroundColor: color
+        child: Text(deliveryPointEx.dp.seq.toString(), style: const TextStyle(color: Colors.black)),
+        backgroundColor: Styling.deliveryPointColor(deliveryPointEx)
       ),
-      title: Text(deliveryPoint.addressName, style: const TextStyle(fontSize: 14.0)),
+      title: Text(deliveryPointEx.dp.addressName, style: const TextStyle(fontSize: 14.0)),
       subtitle: RichText(
         text: TextSpan(
           children: <TextSpan>[
             TextSpan(
-              text: '${Strings.planArrival}: ${Format.timeStrFromDateTime(deliveryPoint.planArrival)}\n',
+              text: '${Strings.planArrival}: ${Format.timeStr(deliveryPointEx.dp.planArrival)}\n',
               style: const TextStyle(color: Colors.grey, fontSize: 12.0)
             ),
             TextSpan(
-              text: '${Strings.factArrival}: ${Format.timeStrFromDateTime(deliveryPoint.factArrival)}\n',
+              text: '${Strings.factArrival}: ${Format.timeStr(deliveryPointEx.dp.factArrival)}\n',
               style: const TextStyle(color: Colors.grey, fontSize: 12.0)
             ),
             TextSpan(
-              text: '${Strings.factDeparture}: ${Format.timeStrFromDateTime(deliveryPoint.factDeparture)}\n',
+              text: '${Strings.factDeparture}: ${Format.timeStr(deliveryPointEx.dp.factDeparture)}\n',
               style: const TextStyle(color: Colors.grey, fontSize: 12.0)
             ),
           ]
@@ -90,7 +86,7 @@ class _DeliveryView extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (BuildContext context) => DeliveryPointPage(deliveryPoint: deliveryPoint)
+            builder: (BuildContext context) => DeliveryPointPage(deliveryPointEx: deliveryPointEx)
           )
         );
       },

@@ -1,48 +1,36 @@
 part of 'point_address_page.dart';
 
-class PointAddressViewModel extends PageViewModel<PointAddressState> {
-  DeliveryPoint deliveryPoint;
+class PointAddressViewModel extends PageViewModel<PointAddressState, PointAddressStateStatus> {
+  PointAddressViewModel(
+    BuildContext context,
+    {
+      required DeliveryPointExResult deliveryPointEx
+    }
+  ) : super(context, PointAddressState(deliveryPointEx: deliveryPointEx));
 
-  PointAddressViewModel(BuildContext context, {required this.deliveryPoint}) : super(context, PointAddressInitial());
+  @override
+  PointAddressStateStatus get status => state.status;
 
-  List<DeliveryPoint> get deliveryPoints => appViewModel.deliveryPoints..sort((a, b) => a.seq.compareTo(b.seq));
+  @override
+  TableUpdateQuery get listenForTables => TableUpdateQuery.onAllTables([
+    app.storage.deliveryPointOrders,
+    app.storage.deliveryPoints,
+  ]);
 
-  DateTime? getPointTimeTo(DeliveryPoint deliveryPoint) {
-    List<DeliveryPointOrder> deliveryPointOrders = _getDeliveryPointOrders(deliveryPoint);
-
-    return deliveryPointOrders.fold(null, (prevVal, deliveryPointOrder) {
-      Order order = _getOrder(deliveryPointOrder);
-      DateTime? timeTo = deliveryPointOrder.isPickup ? order.pickupDateTimeTo : order.deliveryDateTimeTo;
-      DateTime? newVal = prevVal ?? timeTo;
-
-      if (timeTo != null && newVal != null) {
-        newVal = timeTo.isAfter(newVal) ? timeTo : newVal;
-      }
-
-      return newVal;
-    });
+  @override
+  Future<void> loadData() async {
+    emit(state.copyWith(
+      status: PointAddressStateStatus.dataLoaded,
+      deliveryPointEx: await app.storage.deliveriesDao.getExDeliveryPoint(state.deliveryPointEx.dp.id),
+      allPoints: (await app.storage.deliveriesDao.getExDeliveryPoints(state.deliveryPointEx.dp.deliveryId))
+    ));
   }
 
-  DateTime? getPointTimeFrom(DeliveryPoint deliveryPoint) {
-    List<DeliveryPointOrder> deliveryPointOrders = _getDeliveryPointOrders(deliveryPoint);
-
-    return deliveryPointOrders.fold(null, (prevVal, deliveryPointOrder) {
-      Order order = _getOrder(deliveryPointOrder);
-      DateTime? timeFrom = deliveryPointOrder.isPickup ? order.pickupDateTimeFrom : order.deliveryDateTimeFrom;
-      DateTime? newVal = prevVal ?? timeFrom;
-
-      if (timeFrom != null && newVal != null) {
-        newVal = timeFrom.isBefore(newVal) ? timeFrom : newVal;
-      }
-
-      return newVal;
-    });
-  }
-
-  void changeDeliveryPoint(DeliveryPoint newDeliveryPoint) {
-    deliveryPoint = newDeliveryPoint;
-
-    emit(PointAddressSelectionChange());
+  Future<void> changeDeliveryPoint(DeliveryPointExResult newDeliveryPointEx) async {
+    emit(state.copyWith(
+      status: PointAddressStateStatus.selectionChange,
+      deliveryPointEx: await app.storage.deliveriesDao.getExDeliveryPoint(newDeliveryPointEx.dp.id),
+    ));
   }
 
   void routeTo() async {
@@ -50,23 +38,13 @@ class PointAddressViewModel extends PageViewModel<PointAddressState> {
     String params = 'rtext='
       '${location?.latitude},${location?.longitude}'
       '~'
-      '${deliveryPoint.latitude},${deliveryPoint.longitude}';
+      '${state.deliveryPointEx.dp.latitude},${state.deliveryPointEx.dp.longitude}';
     String url = 'yandexmaps://maps.yandex.ru?$params';
 
     if (await canLaunch(url)) {
       await launch(url);
     } else {
-      emit(PointAddressFailure(Strings.genericErrorMsg));
+      emit(state.copyWith(status: PointAddressStateStatus.failure, message: Strings.genericErrorMsg));
     }
-  }
-
-  List<DeliveryPointOrder> _getDeliveryPointOrders(DeliveryPoint deliveryPoint) {
-    return appViewModel.deliveryPointOrders.where(
-      (e) => e.deliveryPointId == deliveryPoint.id
-    ).toList();
-  }
-
-  Order _getOrder(DeliveryPointOrder deliveryPointOrder) {
-    return appViewModel.orders.firstWhere((e) => e.id == deliveryPointOrder.orderId);
   }
 }

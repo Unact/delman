@@ -1,63 +1,76 @@
 part of 'info_page.dart';
 
-class InfoViewModel extends PageViewModel<InfoState> {
+class InfoViewModel extends PageViewModel<InfoState, InfoStateStatus> {
   final HomeViewModel _homeViewModel;
-  Timer? fetchDataTimer;
+  late final Timer _fetchDataTimer;
 
   InfoViewModel(BuildContext context) :
     _homeViewModel = context.read<HomeViewModel>(),
-    super(context, InfoInitial()) {
-      _startRefreshTimer();
+    super(context, InfoState()) {
+      _fetchDataTimer = Timer.periodic(
+        const Duration(minutes: 10),
+        (_) => emit(state.copyWith(status: InfoStateStatus.startLoad))
+      );
     }
 
-  bool get isBusy => [
-    InfoInLoadProgress,
-    InfoTimerInLoadProgress,
-    InfoInCloseProgress
-  ].contains(state.runtimeType);
+  @override
+  InfoStateStatus get status => state.status;
 
-  bool get needRefresh {
-    if (isBusy) return false;
-    if (appViewModel.appData.lastSyncTime == null) return true;
+  @override
+  TableUpdateQuery get listenForTables => const TableUpdateQuery.any();
 
-    DateTime lastAttempt = appViewModel.appData.lastSyncTime!;
-    DateTime time = DateTime.now();
-
-    return lastAttempt.year != time.year || lastAttempt.month != time.month || lastAttempt.day != time.day;
+  @override
+  Future<void> initViewModel() async {
+    await super.initViewModel();
+    await _checkNeedRefresh();
   }
 
-  bool get newVersionAvailable => appViewModel.newVersionAvailable;
-  List<Delivery> get deliveries => appViewModel.deliveries..sort((a, b) => b.deliveryDate.compareTo(a.deliveryDate));
-  int get deliveryPointsCnt => appViewModel.deliveryPoints.length;
-  int get deliveryPointsLeftCnt => appViewModel.deliveryPoints.where((e) => !e.isFinished).length;
-  int get ordersInOwnStorageCnt => appViewModel.orders.where((e) => e.storageId == appViewModel.user.storageId).length;
-  int get ordersNotInOwnStorageCnt {
-    List<int> orderIds = appViewModel.deliveryPointOrders
-      .where((e) => !e.isPickup && !e.isFinished)
-      .map((e) => e.orderId).toList();
-
-    return appViewModel.orders.where((e) => e.storageId != appViewModel.user.storageId && orderIds.contains(e.id)).length;
+  @override
+  Future<void> loadData() async {
+    emit(state.copyWith(
+      status: InfoStateStatus.dataLoaded,
+      newVersionAvailable: await app.newVersionAvailable,
+      cashPayments: await app.storage.paymentsDao.getCashPayments(),
+      cardPayments: await app.storage.paymentsDao.getCardPayments(),
+      orders: await app.storage.ordersDao.getOrdersWithTransfer(),
+      deliveries: await app.storage.deliveriesDao.getExDeliveries(),
+    ));
   }
-  int get paymentsCnt => appViewModel.payments.length;
-  int get cashPaymentsCnt => appViewModel.payments.where((e) => !e.isCard).toList().length;
-  int get cardPaymentsCnt => appViewModel.payments.where((e) => e.isCard).toList().length;
-  double get paymentsSum =>
-    appViewModel.payments.fold(0, (prev, el) => prev + el.summ);
-  double get cashPaymentsSum =>
-    appViewModel.payments.where((e) => !e.isCard).toList().fold(0, (prev, el) => prev + el.summ);
-  double get cardPaymentsSum =>
-    appViewModel.payments.where((e) => e.isCard).toList().fold(0, (prev, el) => prev + el.summ);
 
-  Future<void> refresh([bool timerCallback = false]) async {
-    if (isBusy) return;
+  @override
+  Future<void> close() async {
+    _fetchDataTimer.cancel();
+    await super.close();
+  }
+
+  Future<void> refresh([bool timer = false]) async {
+    if (state.isBusy) return;
 
     try {
-      emit(timerCallback ? InfoTimerInLoadProgress() : InfoInLoadProgress());
-      await appViewModel.getData();
+      emit(state.copyWith(status: InfoStateStatus.inLoadProgress));
+      await _getData();
 
-      emit(timerCallback ? InfoTimerLoadSuccess() : InfoLoadSuccess('Данные успешно обновлены'));
+      emit(state.copyWith(status: InfoStateStatus.loadSuccess, message: 'Данные успешно обновлены'));
     } on AppError catch(e) {
-      emit(timerCallback ? InfoTimerLoadFailure(e.message) : InfoLoadFailure(e.message));
+      emit(state.copyWith(status: InfoStateStatus.loadFailure, message: e.message));
+    }
+  }
+
+  Future<void> _checkNeedRefresh() async {
+    if (state.isBusy) return;
+
+    Setting setting = await app.storage.getSetting();
+
+    if (setting.lastSync == null) {
+      emit(state.copyWith(status: InfoStateStatus.startLoad));
+      return;
+    }
+
+    DateTime lastAttempt = setting.lastSync!;
+    DateTime time = DateTime.now();
+
+    if (lastAttempt.year != time.year || lastAttempt.month != time.month || lastAttempt.day != time.day) {
+      emit(state.copyWith(status: InfoStateStatus.startLoad));
     }
   }
 
@@ -65,33 +78,62 @@ class InfoViewModel extends PageViewModel<InfoState> {
     _homeViewModel.setCurrentIndex(index);
   }
 
-  void _startRefreshTimer() {
-    if (fetchDataTimer == null || !fetchDataTimer!.isActive) {
-      fetchDataTimer = Timer.periodic(const Duration(minutes: 10), (_) => refresh(true));
+  Future<void> _closeDelivery() async {
+    try {
+      await Api(storage: app.storage).closeDelivery();
+    } on ApiException catch(e) {
+      throw AppError(e.errorMsg);
+    } catch(e, trace) {
+      await app.reportError(e, trace);
+      throw AppError(Strings.genericErrorMsg);
     }
+
+    await _getData();
   }
 
-  void _stopRefreshTimer() {
-    if (fetchDataTimer != null && fetchDataTimer!.isActive) {
-      fetchDataTimer!.cancel();
+  Future<void> _getData() async {
+    Location? location = await GeoLoc.getCurrentLocation();
+
+    if (location == null) {
+      throw AppError('Для работы с приложением необходимо разрешить определение местоположения');
+    }
+
+    await app.loadUserData();
+
+    try {
+      ApiData data = await Api(storage: app.storage).getData();
+      AppStorage storage = app.storage;
+      Setting setting = await storage.getSetting();
+
+      await storage.transaction(() async {
+        await storage.deliveriesDao.loadDeliveries(data.deliveries.map((e) => e.toDatabaseEnt()).toList());
+        await storage.deliveriesDao.loadDeliveryPoints(data.deliveryPoints.map((e) => e.toDatabaseEnt()).toList());
+        await storage.ordersDao.loadOrders(data.orders.map((e) => e.toDatabaseEnt()).toList());
+        await storage.ordersDao.loadOrderLines(data.orderLines.map((e) => e.toDatabaseEnt()).toList());
+        await storage.ordersDao.loadOrderInfoLines(data.orderInfoList.map((e) => e.toDatabaseEnt()).toList());
+        await storage.deliveriesDao.loadDeliveryPointOrders(
+          data.deliveryPointOrders.map((e) => e.toDatabaseEnt()).toList()
+        );
+        await storage.paymentsDao.loadPayments(data.payments.map((e) => e.toDatabaseEnt()).toList());
+        await storage.orderStoragesDao.loadOrderStorages(data.orderStorages.map((e) => e.toDatabaseEnt()).toList());
+        await storage.updateSetting(setting.copyWith(lastSync: DateTime.now()));
+      });
+    } on ApiException catch(e) {
+      throw AppError(e.errorMsg);
+    } catch(e, trace) {
+      await app.reportError(e, trace);
+      throw AppError(Strings.genericErrorMsg);
     }
   }
 
   Future<void> closeDelivery() async {
     try {
-      emit(InfoInCloseProgress());
-      await appViewModel.closeDelivery();
+      emit(state.copyWith(status: InfoStateStatus.inCloseProgress));
+      await _closeDelivery();
 
-      emit(InfoCloseSuccess('День успешно завершен'));
+      emit(state.copyWith(status: InfoStateStatus.closeSuccess, message: 'День успешно завершен'));
     } on AppError catch(e) {
-      emit(InfoCloseFailure(e.message));
+      emit(state.copyWith(status: InfoStateStatus.closeFailure, message: e.message));
     }
-  }
-
-  @override
-  Future<void> close() async {
-    _stopRefreshTimer();
-
-    await super.close();
   }
 }

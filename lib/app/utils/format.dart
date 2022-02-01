@@ -15,7 +15,7 @@ class Format {
     return dateTime != null ? DateFormat.Hm('ru').format(dateTime) : '';
   }
 
-  static String timeStrFromDateTime(DateTime? dateTime) {
+  static String timeStr(DateTime? dateTime) {
     return dateTime != null ? DateFormat.Hm('ru').format(dateTime) : '';
   }
 

@@ -1,45 +1,44 @@
-import 'package:equatable/equatable.dart';
+part of 'entities.dart';
 
-class ApiData extends Equatable {
-  final String? login;
-  final String? url;
-  final String? password;
-  final String? token;
+class ApiData {
+  List<ApiDeliveryPoint> deliveryPoints;
+  List<ApiDelivery> deliveries;
+  List<ApiOrderInfoLine> orderInfoList;
+  List<ApiOrderLine> orderLines;
+  List<ApiOrder> orders;
+  List<ApiDeliveryPointOrder> deliveryPointOrders;
+  List<ApiOrderStorage> orderStorages;
+  List<ApiPayment> payments;
 
-  const ApiData({
-    this.login,
-    this.password,
-    this.url,
-
-    this.token
+  ApiData({
+    required this.deliveryPoints,
+    required this.deliveries,
+    required this.orderInfoList,
+    required this.orderLines,
+    required this.orders,
+    required this.deliveryPointOrders,
+    required this.orderStorages,
+    required this.payments,
   });
 
-  @override
-  List<Object?> get props => [
-    login,
-    url,
-    password,
-    token
-  ];
-
-  factory ApiData.fromJson(dynamic json) {
+  factory ApiData.fromJson(Map<String, dynamic> json) {
     return ApiData(
-      login: json['login'],
-      password: json['password'],
-      token: json['token'],
-      url: json['url']
+      deliveryPoints: json['deliveryPoints']
+        .map<ApiDeliveryPoint>((e) => ApiDeliveryPoint.fromJson(e)).toList(),
+      deliveryPointOrders: json['deliveryPointOrders']
+        .map<ApiDeliveryPointOrder>((e) => ApiDeliveryPointOrder.fromJson(e)).toList(),
+      deliveries: json['deliveries']
+        .map<ApiDelivery>((e) => ApiDelivery.fromJson(e)).toList(),
+      orderInfoList: json['orderInfoList']
+        .map<ApiOrderInfoLine>((e) => ApiOrderInfoLine.fromJson(e)).toList(),
+      orderLines: json['orderLines']
+        .map<ApiOrderLine>((e) => ApiOrderLine.fromJson(e)).toList(),
+      orders: json['orders']
+        .map<ApiOrder>((e) => ApiOrder.fromJson(e)).toList(),
+      orderStorages: json['orderStorages']
+        .map<ApiOrderStorage>((e) => ApiOrderStorage.fromJson(e)).toList(),
+      payments: json['payments']
+        .map<ApiPayment>((e) => ApiPayment.fromJson(e)).toList(),
     );
   }
-
-  Map<String, dynamic> toJson(){
-    return {
-      'login': login,
-      'password': password,
-      'token': token,
-      'url': url
-    };
-  }
-
-  @override
-  String toString() => 'AuthData { login: $login }';
 }

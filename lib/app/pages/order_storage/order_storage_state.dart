@@ -1,36 +1,52 @@
 part of 'order_storage_page.dart';
 
-abstract class OrderStorageState {
-  OrderStorageState();
+enum OrderStorageStateStatus {
+  initial,
+  dataLoaded,
+  inProgress,
+  startedQrScan,
+  accepted,
+  failure,
+  needUserConfirmation,
+  trasferred
 }
 
-class OrderStorageInitial extends OrderStorageState {}
+class OrderStorageState {
+  OrderStorageState({
+    this.status = OrderStorageStateStatus.initial,
+    required this.orderStorage,
+    this.user,
+    this.message = '',
+    required this.confirmationCallback,
+    this.ordersInOwnStorage = const [],
+    this.ordersInOrderStorage = const [],
+  });
 
-class OrderStorageInProgress extends OrderStorageState {}
-
-class OrderStorageStartedQRScan extends OrderStorageState {}
-
-class OrderStorageAccepted extends OrderStorageState {
-  final String message;
-
-  OrderStorageAccepted(this.message);
-}
-
-class OrderStorageFailure extends OrderStorageState {
-  final String message;
-
-  OrderStorageFailure(this.message);
-}
-
-class OrderStorageNeedUserConfirmation extends OrderStorageState {
+  final OrderStorage orderStorage;
+  final OrderStorageStateStatus status;
   final String message;
   final Function confirmationCallback;
+  final List<Order> ordersInOwnStorage;
+  final List<Order> ordersInOrderStorage;
+  final User? user;
 
-  OrderStorageNeedUserConfirmation(this.message, this.confirmationCallback);
-}
-
-class OrderStorageTransferred extends OrderStorageState {
-  final String message;
-
-  OrderStorageTransferred(this.message);
+  OrderStorageState copyWith({
+    OrderStorageStateStatus? status,
+    User? user,
+    OrderStorage? orderStorage,
+    List<Order>? ordersInOwnStorage,
+    List<Order>? ordersInOrderStorage,
+    String? message,
+    Function? confirmationCallback
+  }) {
+    return OrderStorageState(
+      status: status ?? this.status,
+      user: user ?? this.user,
+      orderStorage: orderStorage ?? this.orderStorage,
+      ordersInOwnStorage: ordersInOwnStorage ?? this.ordersInOwnStorage,
+      ordersInOrderStorage: ordersInOrderStorage ?? this.ordersInOrderStorage,
+      message: message ?? this.message,
+      confirmationCallback: confirmationCallback ?? this.confirmationCallback
+    );
+  }
 }

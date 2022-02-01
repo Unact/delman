@@ -1,6 +1,6 @@
 import 'package:location/location.dart' as geo_loc;
 
-import 'package:delman/app/entities/entities.dart';
+import '/app/entities/entities.dart';
 
 class GeoLoc {
   static Future<Location?> getCurrentLocation() async {

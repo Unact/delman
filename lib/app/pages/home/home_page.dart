@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:delman/app/constants/strings.dart';
-import 'package:delman/app/pages/delivery/delivery_page.dart';
-import 'package:delman/app/pages/info/info_page.dart';
-import 'package:delman/app/pages/order_storages/order_storages_page.dart';
-import 'package:delman/app/pages/payments/payments_page.dart';
-import 'package:delman/app/pages/shared/page_view_model.dart';
+import '/app/constants/strings.dart';
+import '/app/pages/delivery/delivery_page.dart';
+import '/app/pages/info/info_page.dart';
+import '/app/pages/order_storages/order_storages_page.dart';
+import '/app/pages/payments/payments_page.dart';
+import '/app/pages/shared/page_view_model.dart';
 
 part 'home_state.dart';
 part 'home_view_model.dart';
@@ -30,16 +30,17 @@ class _HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<HomeViewModel, HomeState>(
       builder: (context, state) {
-        HomeViewModel vm = context.read<HomeViewModel>();
-
         return Scaffold(
           bottomNavigationBar: _buildBottomNavigationBar(context),
-          body: [
-            InfoPage(),
-            DeliveryPage(),
-            PaymentsPage(),
-            OrderStoragesPage()
-          ][vm.currentIndex]
+          body: IndexedStack(
+            children: <Widget>[
+              InfoPage(),
+              DeliveryPage(),
+              PaymentsPage(),
+              OrderStoragesPage()
+            ],
+            index: state.currentIndex,
+          ),
         );
       }
     );
@@ -49,7 +50,7 @@ class _HomeView extends StatelessWidget {
     HomeViewModel vm = context.read<HomeViewModel>();
 
     return BottomNavigationBar(
-      currentIndex: vm.currentIndex,
+      currentIndex: vm.state.currentIndex,
       onTap: vm.setCurrentIndex,
       type: BottomNavigationBarType.fixed,
       items: const [

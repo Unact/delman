@@ -1,55 +1,60 @@
 part of 'accept_payment_page.dart';
 
-abstract class AcceptPaymentState {
+enum AcceptPaymentStateStatus {
+  initial,
+  searchingForDevice,
+  gettingCredentials,
+  paymentAuthorization,
+  waitingForPayment,
+  paymentStarted,
+  paymentFinished,
+  requiredSignature,
+  savingSignature,
+  savingPayment,
+  finished,
+  failure
+}
+
+class AcceptPaymentState {
+  AcceptPaymentState({
+    this.status = AcceptPaymentStateStatus.initial,
+    required this.deliveryPointOrderEx,
+    required this.total,
+    required this.cardPayment,
+    this.canceled = false,
+    this.isCancelable = true,
+    this.isRequiredSignature = false,
+    this.message = ''
+  });
+
+  final AcceptPaymentStateStatus status;
+  final DeliveryPointOrderExResult deliveryPointOrderEx;
+  final bool cardPayment;
+  final double total;
+  final bool canceled;
+  final bool isCancelable;
+  final bool isRequiredSignature;
   final String message;
 
-  AcceptPaymentState(this.message);
-}
-
-class AcceptPaymentInitial extends AcceptPaymentState {
-  AcceptPaymentInitial(String message) : super(message);
-}
-
-class AcceptPaymentSearchingForDevice extends AcceptPaymentState {
-  AcceptPaymentSearchingForDevice(String message) : super(message);
-}
-
-class AcceptPaymentGettingCredentials extends AcceptPaymentState {
-  AcceptPaymentGettingCredentials(String message) : super(message);
-}
-
-class AcceptPaymentPaymentAuthorization extends AcceptPaymentState {
-  AcceptPaymentPaymentAuthorization(String message) : super(message);
-}
-
-class AcceptPaymentWaitingForPayment extends AcceptPaymentState {
-  AcceptPaymentWaitingForPayment(String message) : super(message);
-}
-
-class AcceptPaymentPaymentStarted extends AcceptPaymentState {
-  AcceptPaymentPaymentStarted(String message) : super(message);
-}
-
-class AcceptPaymentPaymentFinished extends AcceptPaymentState {
-  AcceptPaymentPaymentFinished(String message) : super(message);
-}
-
-class AcceptPaymentRequiredSignature extends AcceptPaymentState {
-  AcceptPaymentRequiredSignature(String message) : super(message);
-}
-
-class AcceptPaymentSavingSignature extends AcceptPaymentState {
-  AcceptPaymentSavingSignature(String message) : super(message);
-}
-
-class AcceptPaymentSavingPayment extends AcceptPaymentState {
-  AcceptPaymentSavingPayment(String message) : super(message);
-}
-
-class AcceptPaymentFinished extends AcceptPaymentState {
-  AcceptPaymentFinished(String message) : super(message);
-}
-
-class AcceptPaymentFailure extends AcceptPaymentState {
-  AcceptPaymentFailure(String message) : super(message);
+  AcceptPaymentState copyWith({
+    AcceptPaymentStateStatus? status,
+    DeliveryPointOrderExResult? deliveryPointOrderEx,
+    bool? cardPayment,
+    double? total,
+    bool? canceled,
+    bool? isCancelable,
+    bool? isRequiredSignature,
+    String? message
+  }) {
+    return AcceptPaymentState(
+      status: status ?? this.status,
+      deliveryPointOrderEx: deliveryPointOrderEx ?? this.deliveryPointOrderEx,
+      cardPayment: cardPayment ?? this.cardPayment,
+      total: total ?? this.total,
+      canceled: canceled ?? this.canceled,
+      isCancelable: isCancelable ?? this.isCancelable,
+      isRequiredSignature: isRequiredSignature ?? this.isRequiredSignature,
+      message: message ?? this.message
+    );
+  }
 }

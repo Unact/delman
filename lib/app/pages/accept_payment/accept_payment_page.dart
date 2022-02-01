@@ -2,26 +2,30 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_signature_pad/flutter_signature_pad.dart';
 
-import 'package:delman/app/entities/entities.dart';
-import 'package:delman/app/services/iboxpro.dart';
-import 'package:delman/app/pages/app/app_page.dart';
-import 'package:delman/app/pages/shared/page_view_model.dart';
+import '/app/data/database.dart';
+import '/app/constants/strings.dart';
+import '/app/entities/entities.dart';
+import '/app/pages/shared/page_view_model.dart';
+import '/app/services/api.dart';
+import '/app/services/iboxpro.dart';
+import '/app/utils/geo_loc.dart';
 
 part 'accept_payment_state.dart';
 part 'accept_payment_view_model.dart';
 
 class AcceptPaymentPage extends StatelessWidget {
-  final DeliveryPointOrder deliveryPointOrder;
+  final DeliveryPointOrderExResult deliveryPointOrderEx;
   final double total;
   final bool cardPayment;
 
   AcceptPaymentPage({
     Key? key,
-    required this.deliveryPointOrder,
+    required this.deliveryPointOrderEx,
     required this.total,
     required this.cardPayment
   }) : super(key: key);
@@ -31,7 +35,7 @@ class AcceptPaymentPage extends StatelessWidget {
     return BlocProvider<AcceptPaymentViewModel>(
       create: (context) => AcceptPaymentViewModel(
         context,
-        deliveryPointOrder: deliveryPointOrder,
+        deliveryPointOrderEx: deliveryPointOrderEx,
         total: total,
         cardPayment: cardPayment
       ),
@@ -69,14 +73,14 @@ class _AcceptPaymentViewState extends State<_AcceptPaymentView> {
         );
       },
       listener: (context, state) {
-        if (state is AcceptPaymentFinished) {
-          WidgetsBinding.instance!.addPostFrameCallback((_) {
-            Navigator.pop(context, state.message);
-          });
-        } else if (state is AcceptPaymentFailure) {
-          WidgetsBinding.instance!.addPostFrameCallback((_) {
-            Navigator.pop(context, state.message);
-          });
+        switch (state.status) {
+          case AcceptPaymentStateStatus.failure:
+          case AcceptPaymentStateStatus.finished:
+            WidgetsBinding.instance!.addPostFrameCallback((_) {
+              Navigator.pop(context, state.message);
+            });
+            break;
+          default:
         }
       },
     );
@@ -95,7 +99,7 @@ class _AcceptPaymentViewState extends State<_AcceptPaymentView> {
       const SizedBox(height: 40),
       SizedBox(
         height: 32,
-        child: vm.isCancelable ? ElevatedButton(
+        child: vm.state.isCancelable ? ElevatedButton(
           child: const Text('Отмена', style: TextStyle(color: Colors.black)),
           style: ElevatedButton.styleFrom(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
@@ -111,7 +115,7 @@ class _AcceptPaymentViewState extends State<_AcceptPaymentView> {
   List<Widget> _buildInfoPart(BuildContext context) {
     AcceptPaymentViewModel vm = context.read<AcceptPaymentViewModel>();
 
-    if (!vm.requiredSignature) return [const SizedBox(height: 272)];
+    if (!vm.state.isRequiredSignature) return [const SizedBox(height: 272)];
 
     return [
       Container(
