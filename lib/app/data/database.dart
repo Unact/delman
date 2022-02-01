@@ -105,8 +105,10 @@ class AppStorage extends _$AppStorage {
         await m.deleteTable(table.actualTableName);
         await m.createTable(table);
       }
-      await clearData();
-    }
+    },
+    beforeOpen: (details) async {
+      if (details.hadUpgrade || details.wasCreated) await _populateData();
+    },
   );
 }
 
