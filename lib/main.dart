@@ -22,6 +22,7 @@ void main() async {
       locale: const Locale('ru', 'RU'),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
       ],
       supportedLocales: const [

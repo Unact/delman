@@ -7,9 +7,9 @@ class ApiCredentialsDao extends DatabaseAccessor<AppStorage> with _$ApiCredentia
   Future<ApiCredential> getApiCredential() async {
     return await (select(apiCredentials).getSingleOrNull()) ?? ApiCredential(
       id: AppStorage.kSingleRecordId,
-      login: '',
+      refreshToken: '',
       url: '',
-      password: ''
+      accessToken: ''
     );
   }
 

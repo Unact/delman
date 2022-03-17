@@ -112,10 +112,9 @@ class Users extends Table {
 
 class ApiCredentials extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get login => text()();
+  TextColumn get accessToken => text()();
+  TextColumn get refreshToken => text()();
   TextColumn get url => text()();
-  TextColumn get password => text()();
-  TextColumn get token => text().nullable()();
 }
 
 class Settings extends Table {

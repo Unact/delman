@@ -31,19 +31,34 @@ class Api {
       Dio dio = await _createDio(url, null);
 
       return await dio.post(
-        'v1/authenticate',
+        'v2/authenticate',
         options: Options(headers: { 'Authorization': '$authSchema login=$login,password=$password' })
       );
     });
 
     ApiCredential apiCredential = (await _getApiCredentials()).copyWith(
-      login: login,
-      url: url,
-      password: password,
-      token: result['token']
+      accessToken: result['access_token'],
+      refreshToken: result['refresh_token'],
+      url: url
     );
 
     await storage.apiCredentialsDao.updateApiCredential(apiCredential);
+  }
+
+  Future<void> refresh() async {
+    ApiCredential apiCredential = await _getApiCredentials();
+    Map<String, dynamic> result = await _sendRawRequest(() async {
+      Dio dio = await _createDio(apiCredential.url, apiCredential.refreshToken);
+
+      return await dio.post('v2/refresh');
+    });
+
+    ApiCredential newApiCredential = apiCredential.copyWith(
+      accessToken: result['access_token'],
+      refreshToken: result['refresh_token']
+    );
+
+    await storage.apiCredentialsDao.updateApiCredential(newApiCredential);
   }
 
   Future<void> logout() async {
@@ -58,7 +73,7 @@ class Api {
       Dio dio = await _createDio(url, null);
 
       return await dio.post(
-        'v1/reset_password',
+        'v2/reset_password',
         options: Options(headers: { 'Authorization': '$authSchema login=$login' })
       );
     });
@@ -212,14 +227,14 @@ class Api {
 
     try {
       return await _sendRawRequest(() async {
-        Dio dio = await _createDio(apiCredential.url, apiCredential.token!);
+        Dio dio = await _createDio(apiCredential.url, apiCredential.accessToken);
 
         return await request.call(dio);
       });
     } on AuthException {
-      await login(url: apiCredential.url, login: apiCredential.login, password: apiCredential.password);
+      await refresh();
       ApiCredential newApiCredential = await _getApiCredentials();
-      Dio newDio = await _createDio(newApiCredential.url, newApiCredential.token!);
+      Dio newDio = await _createDio(newApiCredential.url, newApiCredential.accessToken);
 
       return await _sendRawRequest(() async {
         return await request.call(newDio);

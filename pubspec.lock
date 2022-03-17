@@ -315,7 +315,7 @@ packages:
       name: flutter_bluetooth_serial
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.2"
+    version: "0.4.0"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -400,7 +400,7 @@ packages:
       name: iboxpro_flutter
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.1"
+    version: "1.0.2"
   intl:
     dependency: transitive
     description:

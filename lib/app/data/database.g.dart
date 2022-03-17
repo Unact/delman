@@ -4072,52 +4072,43 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
 
 class ApiCredential extends DataClass implements Insertable<ApiCredential> {
   final int id;
-  final String login;
+  final String accessToken;
+  final String refreshToken;
   final String url;
-  final String password;
-  final String? token;
   ApiCredential(
       {required this.id,
-      required this.login,
-      required this.url,
-      required this.password,
-      this.token});
+      required this.accessToken,
+      required this.refreshToken,
+      required this.url});
   factory ApiCredential.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return ApiCredential(
       id: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      login: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}login'])!,
+      accessToken: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}access_token'])!,
+      refreshToken: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}refresh_token'])!,
       url: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}url'])!,
-      password: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}password'])!,
-      token: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}token']),
     );
   }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['login'] = Variable<String>(login);
+    map['access_token'] = Variable<String>(accessToken);
+    map['refresh_token'] = Variable<String>(refreshToken);
     map['url'] = Variable<String>(url);
-    map['password'] = Variable<String>(password);
-    if (!nullToAbsent || token != null) {
-      map['token'] = Variable<String?>(token);
-    }
     return map;
   }
 
   ApiCredentialsCompanion toCompanion(bool nullToAbsent) {
     return ApiCredentialsCompanion(
       id: Value(id),
-      login: Value(login),
+      accessToken: Value(accessToken),
+      refreshToken: Value(refreshToken),
       url: Value(url),
-      password: Value(password),
-      token:
-          token == null && nullToAbsent ? const Value.absent() : Value(token),
     );
   }
 
@@ -4126,10 +4117,9 @@ class ApiCredential extends DataClass implements Insertable<ApiCredential> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ApiCredential(
       id: serializer.fromJson<int>(json['id']),
-      login: serializer.fromJson<String>(json['login']),
+      accessToken: serializer.fromJson<String>(json['accessToken']),
+      refreshToken: serializer.fromJson<String>(json['refreshToken']),
       url: serializer.fromJson<String>(json['url']),
-      password: serializer.fromJson<String>(json['password']),
-      token: serializer.fromJson<String?>(json['token']),
     );
   }
   @override
@@ -4137,101 +4127,86 @@ class ApiCredential extends DataClass implements Insertable<ApiCredential> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'login': serializer.toJson<String>(login),
+      'accessToken': serializer.toJson<String>(accessToken),
+      'refreshToken': serializer.toJson<String>(refreshToken),
       'url': serializer.toJson<String>(url),
-      'password': serializer.toJson<String>(password),
-      'token': serializer.toJson<String?>(token),
     };
   }
 
   ApiCredential copyWith(
-          {int? id,
-          String? login,
-          String? url,
-          String? password,
-          String? token}) =>
+          {int? id, String? accessToken, String? refreshToken, String? url}) =>
       ApiCredential(
         id: id ?? this.id,
-        login: login ?? this.login,
+        accessToken: accessToken ?? this.accessToken,
+        refreshToken: refreshToken ?? this.refreshToken,
         url: url ?? this.url,
-        password: password ?? this.password,
-        token: token ?? this.token,
       );
   @override
   String toString() {
     return (StringBuffer('ApiCredential(')
           ..write('id: $id, ')
-          ..write('login: $login, ')
-          ..write('url: $url, ')
-          ..write('password: $password, ')
-          ..write('token: $token')
+          ..write('accessToken: $accessToken, ')
+          ..write('refreshToken: $refreshToken, ')
+          ..write('url: $url')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, login, url, password, token);
+  int get hashCode => Object.hash(id, accessToken, refreshToken, url);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ApiCredential &&
           other.id == this.id &&
-          other.login == this.login &&
-          other.url == this.url &&
-          other.password == this.password &&
-          other.token == this.token);
+          other.accessToken == this.accessToken &&
+          other.refreshToken == this.refreshToken &&
+          other.url == this.url);
 }
 
 class ApiCredentialsCompanion extends UpdateCompanion<ApiCredential> {
   final Value<int> id;
-  final Value<String> login;
+  final Value<String> accessToken;
+  final Value<String> refreshToken;
   final Value<String> url;
-  final Value<String> password;
-  final Value<String?> token;
   const ApiCredentialsCompanion({
     this.id = const Value.absent(),
-    this.login = const Value.absent(),
+    this.accessToken = const Value.absent(),
+    this.refreshToken = const Value.absent(),
     this.url = const Value.absent(),
-    this.password = const Value.absent(),
-    this.token = const Value.absent(),
   });
   ApiCredentialsCompanion.insert({
     this.id = const Value.absent(),
-    required String login,
+    required String accessToken,
+    required String refreshToken,
     required String url,
-    required String password,
-    this.token = const Value.absent(),
-  })  : login = Value(login),
-        url = Value(url),
-        password = Value(password);
+  })  : accessToken = Value(accessToken),
+        refreshToken = Value(refreshToken),
+        url = Value(url);
   static Insertable<ApiCredential> custom({
     Expression<int>? id,
-    Expression<String>? login,
+    Expression<String>? accessToken,
+    Expression<String>? refreshToken,
     Expression<String>? url,
-    Expression<String>? password,
-    Expression<String?>? token,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (login != null) 'login': login,
+      if (accessToken != null) 'access_token': accessToken,
+      if (refreshToken != null) 'refresh_token': refreshToken,
       if (url != null) 'url': url,
-      if (password != null) 'password': password,
-      if (token != null) 'token': token,
     });
   }
 
   ApiCredentialsCompanion copyWith(
       {Value<int>? id,
-      Value<String>? login,
-      Value<String>? url,
-      Value<String>? password,
-      Value<String?>? token}) {
+      Value<String>? accessToken,
+      Value<String>? refreshToken,
+      Value<String>? url}) {
     return ApiCredentialsCompanion(
       id: id ?? this.id,
-      login: login ?? this.login,
+      accessToken: accessToken ?? this.accessToken,
+      refreshToken: refreshToken ?? this.refreshToken,
       url: url ?? this.url,
-      password: password ?? this.password,
-      token: token ?? this.token,
     );
   }
 
@@ -4241,17 +4216,14 @@ class ApiCredentialsCompanion extends UpdateCompanion<ApiCredential> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
-    if (login.present) {
-      map['login'] = Variable<String>(login.value);
+    if (accessToken.present) {
+      map['access_token'] = Variable<String>(accessToken.value);
+    }
+    if (refreshToken.present) {
+      map['refresh_token'] = Variable<String>(refreshToken.value);
     }
     if (url.present) {
       map['url'] = Variable<String>(url.value);
-    }
-    if (password.present) {
-      map['password'] = Variable<String>(password.value);
-    }
-    if (token.present) {
-      map['token'] = Variable<String?>(token.value);
     }
     return map;
   }
@@ -4260,10 +4232,9 @@ class ApiCredentialsCompanion extends UpdateCompanion<ApiCredential> {
   String toString() {
     return (StringBuffer('ApiCredentialsCompanion(')
           ..write('id: $id, ')
-          ..write('login: $login, ')
-          ..write('url: $url, ')
-          ..write('password: $password, ')
-          ..write('token: $token')
+          ..write('accessToken: $accessToken, ')
+          ..write('refreshToken: $refreshToken, ')
+          ..write('url: $url')
           ..write(')'))
         .toString();
   }
@@ -4281,28 +4252,25 @@ class $ApiCredentialsTable extends ApiCredentials
       type: const IntType(),
       requiredDuringInsert: false,
       defaultConstraints: 'PRIMARY KEY AUTOINCREMENT');
-  final VerificationMeta _loginMeta = const VerificationMeta('login');
+  final VerificationMeta _accessTokenMeta =
+      const VerificationMeta('accessToken');
   @override
-  late final GeneratedColumn<String?> login = GeneratedColumn<String?>(
-      'login', aliasedName, false,
+  late final GeneratedColumn<String?> accessToken = GeneratedColumn<String?>(
+      'access_token', aliasedName, false,
+      type: const StringType(), requiredDuringInsert: true);
+  final VerificationMeta _refreshTokenMeta =
+      const VerificationMeta('refreshToken');
+  @override
+  late final GeneratedColumn<String?> refreshToken = GeneratedColumn<String?>(
+      'refresh_token', aliasedName, false,
       type: const StringType(), requiredDuringInsert: true);
   final VerificationMeta _urlMeta = const VerificationMeta('url');
   @override
   late final GeneratedColumn<String?> url = GeneratedColumn<String?>(
       'url', aliasedName, false,
       type: const StringType(), requiredDuringInsert: true);
-  final VerificationMeta _passwordMeta = const VerificationMeta('password');
   @override
-  late final GeneratedColumn<String?> password = GeneratedColumn<String?>(
-      'password', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
-  final VerificationMeta _tokenMeta = const VerificationMeta('token');
-  @override
-  late final GeneratedColumn<String?> token = GeneratedColumn<String?>(
-      'token', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
-  @override
-  List<GeneratedColumn> get $columns => [id, login, url, password, token];
+  List<GeneratedColumn> get $columns => [id, accessToken, refreshToken, url];
   @override
   String get aliasedName => _alias ?? 'api_credentials';
   @override
@@ -4315,27 +4283,27 @@ class $ApiCredentialsTable extends ApiCredentials
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('login')) {
+    if (data.containsKey('access_token')) {
       context.handle(
-          _loginMeta, login.isAcceptableOrUnknown(data['login']!, _loginMeta));
+          _accessTokenMeta,
+          accessToken.isAcceptableOrUnknown(
+              data['access_token']!, _accessTokenMeta));
     } else if (isInserting) {
-      context.missing(_loginMeta);
+      context.missing(_accessTokenMeta);
+    }
+    if (data.containsKey('refresh_token')) {
+      context.handle(
+          _refreshTokenMeta,
+          refreshToken.isAcceptableOrUnknown(
+              data['refresh_token']!, _refreshTokenMeta));
+    } else if (isInserting) {
+      context.missing(_refreshTokenMeta);
     }
     if (data.containsKey('url')) {
       context.handle(
           _urlMeta, url.isAcceptableOrUnknown(data['url']!, _urlMeta));
     } else if (isInserting) {
       context.missing(_urlMeta);
-    }
-    if (data.containsKey('password')) {
-      context.handle(_passwordMeta,
-          password.isAcceptableOrUnknown(data['password']!, _passwordMeta));
-    } else if (isInserting) {
-      context.missing(_passwordMeta);
-    }
-    if (data.containsKey('token')) {
-      context.handle(
-          _tokenMeta, token.isAcceptableOrUnknown(data['token']!, _tokenMeta));
     }
     return context;
   }
