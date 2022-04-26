@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:barcode_widget/barcode_widget.dart';
 import 'package:drift/drift.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
@@ -59,6 +60,28 @@ class _PersonViewState extends State<_PersonView> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  Future<void> showStorageBarcode() {
+    PersonViewModel vm = context.read<PersonViewModel>();
+
+    return showDialog<List<dynamic>>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Center(child:Container(
+          color: Colors.white,
+          child: BarcodeWidget(
+            barcode: Barcode.qrCode(errorCorrectLevel: BarcodeQRCorrectionLevel.high),
+            drawText: false,
+            padding: const EdgeInsets.all(8),
+            data: vm.state.user?.storageId.toString() ?? '',
+            width: 150,
+            height: 150,
+          ),
+        ));
+      }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<PersonViewModel, PersonState>(
@@ -108,7 +131,17 @@ class _PersonViewState extends State<_PersonView> {
       padding: const EdgeInsets.only(top: 24, bottom: 24),
       children: [
         InfoRow(title: const Text('Логин'), trailing: Text(state.user?.username ?? '')),
-        InfoRow(title: const Text('Курьер'), trailing: Text(state.user?.name ?? '')),
+        InfoRow(
+          title: const Text('Курьер'),
+          trailing: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+
+            children: [
+              IconButton(icon: const Icon(Icons.qr_code_2), onPressed: showStorageBarcode),
+              Text(state.user?.name ?? '')
+            ]
+          )
+        ),
         InfoRow(
           title: const Text('Обновление БД'),
           trailing: Text(state.lastSyncTime != null ? Format.dateTimeStr(state.lastSyncTime) : 'Не проводилось')
