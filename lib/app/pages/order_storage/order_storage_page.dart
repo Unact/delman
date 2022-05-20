@@ -12,6 +12,7 @@ import '/app/pages/order/order_page.dart';
 import '/app/pages/order_qr_scan/order_qr_scan_page.dart';
 import '/app/pages/shared/page_view_model.dart';
 import '/app/services/api.dart';
+import '/app/widgets/widgets.dart';
 
 part 'order_storage_state.dart';
 part 'order_storage_view_model.dart';
@@ -39,26 +40,7 @@ class _OrderStorageView extends StatefulWidget {
 }
 
 class _OrderStorageViewState extends State<_OrderStorageView> {
-  Completer<void> _dialogCompleter = Completer();
-
-  Future<void> openDialog() async {
-    showDialog(
-      context: context,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-      barrierDismissible: false
-    );
-    await _dialogCompleter.future;
-    Navigator.of(context).pop();
-  }
-
-  void closeDialog() {
-    _dialogCompleter.complete();
-    _dialogCompleter = Completer();
-  }
-
-  void showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-  }
+  late final ProgressDialog _progressDialog = ProgressDialog(context: context);
 
   Future<void> showConfirmationDialog(String message, Function callback) async {
     bool result = await showDialog<bool>(
@@ -184,7 +166,7 @@ class _OrderStorageViewState extends State<_OrderStorageView> {
       listener: (context, state) async {
         switch (state.status) {
           case OrderStorageStateStatus.inProgress:
-            await openDialog();
+            await _progressDialog.open();
             break;
           case OrderStorageStateStatus.startedQrScan:
             await showQRPage();
@@ -195,8 +177,8 @@ class _OrderStorageViewState extends State<_OrderStorageView> {
           case OrderStorageStateStatus.accepted:
           case OrderStorageStateStatus.failure:
           case OrderStorageStateStatus.trasferred:
-            showMessage(state.message);
-            closeDialog();
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+            _progressDialog.close();
             break;
           default:
         }

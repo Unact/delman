@@ -87,6 +87,17 @@ class Api {
     return ApiData.fromJson(await _sendRequest((dio) => dio.get('v1/delman')));
   }
 
+  Future<ApiFindOrderData?> findOrderData({
+    required String trackingNumber
+  }) async {
+    final orderData = await _sendRequest((dio) => dio.get(
+      'v1/delman/find_order',
+      queryParameters: { 'trackingNumber': trackingNumber }
+    ));
+
+    return orderData != null ? ApiFindOrderData.fromJson(orderData) : null;
+  }
+
   Future<void> arriveAtDeliveryPoint({
     required int deliveryPointId,
     required DateTime factArrival,
@@ -178,6 +189,17 @@ class Api {
         'osVersion': osVersion,
         'file': MultipartFile.fromBytes(file.readAsBytesSync(), filename: file.path.split('/').last)
       })
+    ));
+  }
+
+  Future<void> takeNewOrder({
+    required int orderId
+  }) async {
+    return await _sendRequest((rawApi) => rawApi.post(
+      'v1/delman/take_new_order',
+      data: {
+        'orderId': orderId
+      }
     ));
   }
 

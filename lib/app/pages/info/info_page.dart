@@ -13,6 +13,7 @@ import '/app/pages/shared/page_view_model.dart';
 import '/app/services/api.dart';
 import '/app/utils/format.dart';
 import '/app/utils/geo_loc.dart';
+import '/app/widgets/widgets.dart';
 
 part 'info_state.dart';
 part 'info_view_model.dart';
@@ -39,7 +40,7 @@ class _InfoView extends StatefulWidget {
 class _InfoViewState extends State<_InfoView> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   Completer<void> _refresherCompleter = Completer();
-  Completer<void> _dialogCompleter = Completer();
+  late final ProgressDialog _progressDialog = ProgressDialog(context: context);
 
   Future<void> openRefresher() async {
     WidgetsBinding.instance!.addPostFrameCallback((_) {
@@ -50,21 +51,6 @@ class _InfoViewState extends State<_InfoView> {
   void closeRefresher() {
     _refresherCompleter.complete();
     _refresherCompleter = Completer();
-  }
-
-  Future<void> openDialog() async {
-    showDialog(
-      context: context,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-      barrierDismissible: false
-    );
-    await _dialogCompleter.future;
-    Navigator.of(context).pop();
-  }
-
-  void closeDialog() {
-    _dialogCompleter.complete();
-    _dialogCompleter = Completer();
   }
 
   void showMessage(String message) {
@@ -115,18 +101,18 @@ class _InfoViewState extends State<_InfoView> {
             )
           );
         },
-        listener: (context, state) {
+        listener: (context, state) async {
           switch (state.status) {
             case InfoStateStatus.inCloseProgress:
-              openDialog();
+              await _progressDialog.open();
               break;
             case InfoStateStatus.startLoad:
-              openRefresher();
+              await openRefresher();
               break;
             case InfoStateStatus.closeFailure:
             case InfoStateStatus.closeSuccess:
               showMessage(state.message);
-              closeDialog();
+              _progressDialog.close();
               break;
             case InfoStateStatus.loadFailure:
             case InfoStateStatus.loadSuccess:

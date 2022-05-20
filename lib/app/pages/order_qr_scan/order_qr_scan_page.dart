@@ -4,10 +4,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '/app/data/database.dart';
 import '/app/constants/strings.dart';
+import '/app/entities/entities.dart';
 import '/app/pages/shared/page_view_model.dart';
+import '/app/services/api.dart';
 
 part 'order_qr_scan_state.dart';
 part 'order_qr_scan_view_model.dart';
@@ -36,6 +39,8 @@ class _OrderQRScanViewState extends State<_OrderQRScanView> {
   QRViewController? _controller;
   StreamSubscription? _subscription;
 
+  Duration kThrottle = const Duration(seconds: 2);
+
   @override
   void reassemble() {
     super.reassemble();
@@ -51,10 +56,6 @@ class _OrderQRScanViewState extends State<_OrderQRScanView> {
     _subscription?.cancel();
     _controller?.dispose();
     super.dispose();
-  }
-
-  void showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -100,15 +101,10 @@ class _OrderQRScanViewState extends State<_OrderQRScanView> {
                     cutOutSize: 200
                   ),
                   onPermissionSet: (QRViewController controller, bool permission) {
-                    DateTime? lastScan;
+                    _subscription = _controller!.scannedDataStream.throttleTime(kThrottle).listen((scanData) async {
+                      if (vm.state.status == OrderQRScanStateStatus.scanReadStarted) return;
 
-                    _subscription = _controller!.scannedDataStream.listen((scanData) async {
-                      final currentScan = DateTime.now();
-
-                      if (lastScan == null || currentScan.difference(lastScan!) > const Duration(seconds: 2)) {
-                        lastScan = currentScan;
-                        await vm.readQRCode(scanData.code);
-                      }
+                      await vm.readQRCode(scanData.code);
                     });
                   },
                   onQRViewCreated: (QRViewController controller) {
@@ -118,34 +114,17 @@ class _OrderQRScanViewState extends State<_OrderQRScanView> {
               ),
               Container(
                 padding: const EdgeInsets.only(top: 128),
-                child: state.order == null ? Container() : Align(
-                  alignment: Alignment.topCenter,
-                  child: Column(children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Text(
-                        'Заказ ${state.order!.trackingNumber}',
-                        style: const TextStyle(color: Colors.white, fontSize: 20)
-                      )
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Text(
-                        'Мест ${state.orderPackageScanned.where((el) => el).length}/${state.order!.packages}',
-                        style: const TextStyle(color: Colors.white, fontSize: 20)
-                      )
-                    )
-                  ])
-                )
+                child: Align(alignment: Alignment.topCenter, child: _buildOrderInfo(context))
               )
             ]
           )
         );
       },
-      listener: (context, state) {
+      listener: (context, state) async {
         switch (state.status) {
           case OrderQRScanStateStatus.failure:
-            showMessage(state.message);
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+            await _controller!.resumeCamera();
             break;
           case OrderQRScanStateStatus.finished:
             Navigator.of(context).pop(state.order!);
@@ -153,6 +132,35 @@ class _OrderQRScanViewState extends State<_OrderQRScanView> {
           default:
         }
       }
+    );
+  }
+
+  Widget _buildOrderInfo(BuildContext context) {
+    OrderQRScanViewModel vm = context.read<OrderQRScanViewModel>();
+
+    if (vm.state.status == OrderQRScanStateStatus.scanReadStarted) {
+      return const CircularProgressIndicator(color: Colors.white);
+    }
+
+    if (vm.state.order == null) return Container();
+
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Text(
+            'Заказ ${vm.state.order!.trackingNumber}',
+            style: const TextStyle(color: Colors.white, fontSize: 20)
+          )
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Text(
+            'Мест ${vm.state.orderPackageScanned.where((el) => el).length}/${vm.state.order!.packages}',
+            style: const TextStyle(color: Colors.white, fontSize: 20)
+          )
+        )
+      ]
     );
   }
 }

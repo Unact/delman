@@ -48,10 +48,6 @@ class _PointAddressViewState extends State<_PointAddressView> {
 
   final double _kImageFontSize = 30;
 
-  void showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-  }
-
   Color _deliveryPointColor(DeliveryPointExResult deliveryPointEx) {
     PointAddressViewModel vm = context.read<PointAddressViewModel>();
     if (deliveryPointEx.dp == vm.state.deliveryPointEx.dp) return Colors.red[700]!;
@@ -96,7 +92,7 @@ class _PointAddressViewState extends State<_PointAddressView> {
       listener: (context, state) async {
         switch (state.status) {
           case PointAddressStateStatus.failure:
-            showMessage(state.message);
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
             break;
           case PointAddressStateStatus.dataLoaded:
           case PointAddressStateStatus.selectionChange:

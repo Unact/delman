@@ -39,26 +39,7 @@ class _PersonView extends StatefulWidget {
 }
 
 class _PersonViewState extends State<_PersonView> {
-  Completer<void> _dialogCompleter = Completer();
-
-  Future<void> openDialog() async {
-    showDialog(
-      context: context,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-      barrierDismissible: false
-    );
-    await _dialogCompleter.future;
-    Navigator.of(context).pop();
-  }
-
-  void closeDialog() {
-    _dialogCompleter.complete();
-    _dialogCompleter = Completer();
-  }
-
-  void showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-  }
+  late final ProgressDialog _progressDialog = ProgressDialog(context: context);
 
   Future<void> showStorageBarcode() {
     PersonViewModel vm = context.read<PersonViewModel>();
@@ -102,17 +83,17 @@ class _PersonViewState extends State<_PersonView> {
           body: _buildBody(context)
         );
       },
-      listener: (context, state) {
+      listener: (context, state) async {
         switch (state.status) {
           case PersonStateStatus.inProgress:
-            openDialog();
+            await _progressDialog.open();
             break;
           case PersonStateStatus.failure:
           case PersonStateStatus.logsSend:
-            showMessage(state.message);
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
             break;
           case PersonStateStatus.loggedOut:
-            closeDialog();
+            _progressDialog.close();
             WidgetsBinding.instance!.addPostFrameCallback((_) {
               Navigator.of(context).pop();
             });

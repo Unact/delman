@@ -117,7 +117,7 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
         return;
       }
 
-      emit(state.copyWith(status: DeliveryPointOrderStateStatus.failure, message: ''));
+      emit(state.copyWith(status: DeliveryPointOrderStateStatus.failure, message: 'Заказ не подтвержден'));
       return;
     }
 

@@ -47,33 +47,7 @@ class _DeliveryPointOrderView extends StatefulWidget {
 
 class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  Completer<void> _dialogCompleter = Completer();
-
-  Future<void> openDialog() async {
-    showDialog(
-      context: context,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-      barrierDismissible: false
-    );
-    await _dialogCompleter.future;
-    Navigator.of(context).pop();
-  }
-
-  void closeDialog() {
-    _dialogCompleter.complete();
-    _dialogCompleter = Completer();
-  }
-
-  void showMessage(String message) {
-    if (message == '') return;
-
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  void showMessageAndCloseDialog(String message) {
-    showMessage(message);
-    closeDialog();
-  }
+  late final ProgressDialog _progressDialog = ProgressDialog(context: context);
 
   Future<void> showAddOrderInfoDialog(BuildContext context) async {
     DeliveryPointOrderViewModel vm = context.read<DeliveryPointOrderViewModel>();
@@ -285,10 +259,11 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
           case DeliveryPointOrderStateStatus.failure:
           case DeliveryPointOrderStateStatus.confirmed:
           case DeliveryPointOrderStateStatus.canceled:
-            showMessageAndCloseDialog(state.message);
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+            _progressDialog.close();
             break;
           case DeliveryPointOrderStateStatus.inProgress:
-            await openDialog();
+            await _progressDialog.open();
             break;
           case DeliveryPointOrderStateStatus.paymentStarted:
             WidgetsBinding.instance!.addPostFrameCallback((_) async {

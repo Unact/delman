@@ -46,10 +46,6 @@ class _DeliveryPointView extends StatefulWidget {
 }
 
 class _DeliveryPointViewState extends State<_DeliveryPointView> {
-  void showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<DeliveryPointViewModel, DeliveryPointState>(
@@ -139,7 +135,7 @@ class _DeliveryPointViewState extends State<_DeliveryPointView> {
           case DeliveryPointStateStatus.orderDataCopied:
           case DeliveryPointStateStatus.arrivalSaved:
           case DeliveryPointStateStatus.failure:
-            showMessage(state.message);
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
             break;
           default:
         }

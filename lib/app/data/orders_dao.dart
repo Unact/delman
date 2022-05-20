@@ -53,8 +53,16 @@ class OrdersDao extends DatabaseAccessor<AppStorage> with _$OrdersDaoMixin {
     });
   }
 
+  Future<void> insertOrder(OrdersCompanion order) async {
+    await into(orders).insert(order, mode: InsertMode.insertOrReplace);
+  }
+
   Future<void> updateOrder(int id, OrdersCompanion order) {
     return (update(orders)..where((t) => t.id.equals(id))).write(order);
+  }
+
+  Future<void> insertOrderLine(OrderLinesCompanion orderLine) async {
+    await into(orderLines).insert(orderLine, mode: InsertMode.insertOrReplace);
   }
 
   Future<void> updateOrderLine(int id, OrderLinesCompanion orderLine) {
@@ -86,6 +94,6 @@ class OrdersDao extends DatabaseAccessor<AppStorage> with _$OrdersDaoMixin {
   }
 
   Future<int> insertOrderInfoLine(OrderInfoLinesCompanion orderInfoLine) async {
-    return into(orderInfoLines).insert(orderInfoLine);
+    return into(orderInfoLines).insert(orderInfoLine, mode: InsertMode.insertOrReplace);
   }
 }
