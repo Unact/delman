@@ -34,10 +34,46 @@ class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState, AcceptPay
   Future<void> cancelPayment() async {
     await iboxpro.cancelPayment();
 
-    emit(state.copyWith(message: 'Платеж отменен', canceled: true));
+    emit(state.copyWith(message: 'Платеж отменен', canceled: true, status: AcceptPaymentStateStatus.failure));
+  }
+
+  Future<bool> _checkBluetoothPermissions() async {
+    if (Platform.isIOS) {
+      Map<Permission, PermissionStatus> statuses = await [
+        Permission.bluetooth,
+      ].request();
+
+      return statuses.values.every((element) => element.isGranted);
+    }
+
+    if (Platform.isAndroid) {
+      Map<Permission, PermissionStatus> statuses = await [
+        Permission.bluetoothConnect,
+        Permission.bluetooth,
+        Permission.bluetoothAdvertise,
+        Permission.bluetoothScan
+      ].request();
+
+      return statuses.values.every((element) => element.isGranted);
+    }
+
+    return false;
   }
 
   Future<void> _connectToDevice() async {
+    if (!await _checkBluetoothPermissions()) {
+      emit(state.copyWith(message: 'Не разрешено соединение по Bluetooth', status: AcceptPaymentStateStatus.failure));
+      return;
+    }
+
+    if (await GeoLoc.getCurrentLocation() == null) {
+      emit(state.copyWith(
+        message: 'Для работы с приложением необходимо разрешить определение местоположения',
+        status: AcceptPaymentStateStatus.failure
+      ));
+      return;
+    }
+
     emit(state.copyWith(
       message: 'Установление связи с терминалом',
       status: AcceptPaymentStateStatus.searchingForDevice

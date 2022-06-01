@@ -326,9 +326,11 @@ packages:
   flutter_bluetooth_serial:
     dependency: "direct main"
     description:
-      name: flutter_bluetooth_serial
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: android-12-fixes
+      resolved-ref: "4c0679a4a57355380207f4b5df8ac144987a46a1"
+      url: "git@github.com:rickcasson/flutter_bluetooth_serial.git"
+    source: git
     version: "0.4.0"
   flutter_lints:
     dependency: "direct dev"
@@ -1054,9 +1056,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
+      ref: "01ef7aeac3d9e5c26a783d43690f715737da22ab"
       resolved-ref: "01ef7aeac3d9e5c26a783d43690f715737da22ab"
-      url: "git://github.com/Unact/yandex_mapkit"
+      url: "git@github.com:Unact/yandex_mapkit.git"
     source: git
     version: "1.1.1"
 sdks:

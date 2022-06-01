@@ -31,11 +31,15 @@ dependencies:
   flutter_bloc: ^8.0.0
   yandex_mapkit:
     git:
-      url: git://github.com/Unact/yandex_mapkit
+      url: git@github.com:Unact/yandex_mapkit.git
+      ref: 01ef7aeac3d9e5c26a783d43690f715737da22ab
   flutter_blue: ^0.8.0
   flutter_signature_pad: ^3.0.0
   iboxpro_flutter: ^1.0.2
-  flutter_bluetooth_serial: ^0.4.0
+  flutter_bluetooth_serial:
+    git:
+      url: git@github.com:rickcasson/flutter_bluetooth_serial.git
+      ref: android-12-fixes
   quiver: ^3.0.1
   qr_code_scanner: ^0.5.2
   permission_handler: ^8.1.4
