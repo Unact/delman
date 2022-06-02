@@ -49,8 +49,6 @@ class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState, AcceptPay
     if (Platform.isAndroid) {
       Map<Permission, PermissionStatus> statuses = await [
         Permission.bluetoothConnect,
-        Permission.bluetooth,
-        Permission.bluetoothAdvertise,
         Permission.bluetoothScan
       ].request();
 
