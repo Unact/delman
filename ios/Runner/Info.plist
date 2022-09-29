@@ -75,5 +75,7 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Для сканирования QR кодов</string>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 </dict>
 </plist>

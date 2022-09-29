@@ -47,6 +47,7 @@ class _PointAddressViewState extends State<_PointAddressView> {
   late YandexMapController _controller;
 
   final double _kImageFontSize = 30;
+  List<MapObject> _mapObjects = [];
 
   Color _deliveryPointColor(DeliveryPointExResult deliveryPointEx) {
     PointAddressViewModel vm = context.read<PointAddressViewModel>();
@@ -108,16 +109,18 @@ class _PointAddressViewState extends State<_PointAddressView> {
     PointAddressViewModel vm = context.read<PointAddressViewModel>();
 
     return YandexMap(
+      mapObjects: _mapObjects,
       onMapCreated: (YandexMapController controller) async {
         _controller = controller;
-        await _rebuildPlacemarks();
-        await _controller.move(cameraPosition: CameraPosition(
+        CameraUpdate cameraUpdate = CameraUpdate.newCameraPosition(CameraPosition(
           target: Point(
             latitude: vm.state.deliveryPointEx.dp.latitude,
             longitude: vm.state.deliveryPointEx.dp.longitude
           ),
           zoom: 17.0
         ));
+        await _rebuildPlacemarks();
+        await _controller.moveCamera(cameraUpdate);
       }
     );
   }
@@ -170,37 +173,39 @@ class _PointAddressViewState extends State<_PointAddressView> {
   Future<void> _rebuildPlacemarks() async {
     PointAddressViewModel vm = context.read<PointAddressViewModel>();
     final futurePlacemarks = vm.state.allPoints.map((deliveryPoint) async {
-      return Placemark(
+      return PlacemarkMapObject(
         mapId: _deliveryPointMapId(deliveryPoint),
         point: Point(latitude: deliveryPoint.dp.latitude, longitude: deliveryPoint.dp.longitude),
         zIndex: deliveryPoint.dp == vm.state.deliveryPointEx.dp ? 1 : 0,
-        style: PlacemarkStyle(
-          opacity: 1,
-          rawImageData: await _buildPlacemarkAppearance(deliveryPoint)
+        icon: PlacemarkIcon.single(
+          PlacemarkIconStyle(image: BitmapDescriptor.fromBytes(await _buildPlacemarkAppearance(deliveryPoint)))
         ),
+        opacity: 1,
         onTap: (self, point) => vm.changeDeliveryPoint(deliveryPoint)
       );
     }).toList();
     final placemarks = await Future.wait(futurePlacemarks);
 
-    await _controller.updateMapObjects([
-      ClusterizedPlacemarkCollection(
-        mapId: const MapObjectId('delivery_points_cluster'),
-        placemarks: placemarks,
-        radius: 20,
-        minZoom: (await _controller.getMaxZoom()).toInt(),
-        onClusterAdded: (self, cluster) async {
-          return cluster.copyWith(
-            appearance: cluster.appearance.copyWith(
-              style: PlacemarkStyle(
-                opacity: 1,
-                rawImageData: await _buildClusterAppearance(cluster)
+    setState(() async {
+      _mapObjects = [
+        ClusterizedPlacemarkCollection(
+          mapId: const MapObjectId('delivery_points_cluster'),
+          placemarks: placemarks,
+          radius: 20,
+          minZoom: (await _controller.getMaxZoom()).toInt(),
+          onClusterAdded: (self, cluster) async {
+            return cluster.copyWith(
+              appearance: cluster.appearance.copyWith(
+                icon: PlacemarkIcon.single(
+                  PlacemarkIconStyle(image: BitmapDescriptor.fromBytes(await _buildClusterAppearance(cluster)))
+                ),
+                opacity: 1
               )
-            )
-          );
-        }
-      )
-    ]);
+            );
+          }
+        )
+      ];
+    });
   }
 
   void _drawTextRect(Size size, Canvas canvas, String text) {

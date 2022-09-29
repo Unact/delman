@@ -30,13 +30,13 @@ PODS:
   - qr_code_scanner (0.2.0):
     - Flutter
     - MTBBarcodeScanner
-  - Sentry (7.5.4):
-    - Sentry/Core (= 7.5.4)
-  - Sentry/Core (7.5.4)
+  - Sentry (7.26.0):
+    - Sentry/Core (= 7.26.0)
+  - Sentry/Core (7.26.0)
   - sentry_flutter (0.0.1):
     - Flutter
     - FlutterMacOS
-    - Sentry (~> 7.5.1)
+    - Sentry (~> 7.26.0)
   - shared_preferences_ios (0.0.1):
     - Flutter
   - sqflite (0.0.2):
@@ -64,8 +64,8 @@ PODS:
     - Flutter
   - yandex_mapkit (0.0.1):
     - Flutter
-    - YandexMapsMobile (= 4.0.0-full)
-  - YandexMapsMobile (4.0.0-full)
+    - YandexMapsMobile (= 4.2.0-full)
+  - YandexMapsMobile (4.2.0-full)
 
 DEPENDENCIES:
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
@@ -134,7 +134,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   device_info_plus: e5c5da33f982a436e103237c0c85f9031142abed
   fk_user_agent: 1f47ec39291e8372b1d692b50084b0d54103c545
-  Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_blue: eeb381dc4727a0954dede73515f683865494b370
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   iboxpro_flutter: fe944bd0a3f50fa4f18a7c633ead63603611016d
@@ -146,16 +146,16 @@ SPEC CHECKSUMS:
   permission_handler: ccb20a9fad0ee9b1314a52b70b76b473c5f8dab0
   Protobuf: 176220c526ad8bd09ab1fb40a978eac3fef665f7
   qr_code_scanner: bb67d64904c3b9658ada8c402e8b4d406d5d796e
-  Sentry: 5c5dd4005f3b7b9765d5a8871232cddbd0d888b7
-  sentry_flutter: 4cd99764f9fe01c9415790d1f3fb1c7fd3a5cbe9
+  Sentry: 6b8f4a4f93c2471b0d73819c52da0c0ce4f0323c
+  sentry_flutter: 6604b70e74bfb15522c23788295e1debdbc86676
   shared_preferences_ios: aef470a42dc4675a1cdd50e3158b42e3d1232b32
   sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
   sqlite3: c0ed2889f1853952214f34195c4a081a7a7a8015
   sqlite3_flutter_libs: b26eb56ee9f5d821e55739a0e3917301e5ed4628
   url_launcher_ios: 02f1989d4e14e998335b02b67a7590fa34f971af
-  yandex_mapkit: 0454ffe6e303a299e9a4414b53a006ab4e15bce7
-  YandexMapsMobile: 0f3d8c92fad685dc33d07f83eed4eb0166089743
+  yandex_mapkit: 18908ff708911af749f98d6ad63899fa8726fe70
+  YandexMapsMobile: 4ea6eb64194c1e810ed4265ec9f877ac3167958b
 
-PODFILE CHECKSUM: 3db7d4f359959e127fc8004934786ab51bffed92
+PODFILE CHECKSUM: b3a43848dd4aa52830f23de2d09d7a0f3237b2b3
 
 COCOAPODS: 1.11.3
