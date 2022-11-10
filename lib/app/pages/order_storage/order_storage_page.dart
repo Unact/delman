@@ -168,7 +168,7 @@ class _OrderStorageViewState extends State<_OrderStorageView> {
           case OrderStorageStateStatus.inProgress:
             await _progressDialog.open();
             break;
-          case OrderStorageStateStatus.startedQrScan:
+          case OrderStorageStateStatus.startedQRScan:
             await showQRPage();
             break;
           case OrderStorageStateStatus.needUserConfirmation:

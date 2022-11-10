@@ -43,7 +43,7 @@ class _InfoViewState extends State<_InfoView> {
   late final ProgressDialog _progressDialog = ProgressDialog(context: context);
 
   Future<void> openRefresher() async {
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _refreshIndicatorKey.currentState!.show();
     });
   }
@@ -187,7 +187,7 @@ class _InfoViewState extends State<_InfoView> {
         trailing: ElevatedButton(
           style: ElevatedButton.styleFrom(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
-            primary: Colors.blue,
+            backgroundColor: Colors.blue,
           ),
           child: const Text('Завершить день'),
           onPressed: state.deliveryPointsCnt == 0 ? null : vm.closeDelivery

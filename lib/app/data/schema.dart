@@ -107,6 +107,7 @@ class Users extends Table {
   TextColumn get name => text()();
   TextColumn get email => text()();
   IntColumn get storageId => integer().references(OrderStorages, #id)();
+  TextColumn get storageQRUrl => text()();
   TextColumn get version => text()();
 }
 

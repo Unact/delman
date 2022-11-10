@@ -64,7 +64,7 @@ class _OrderStoragesViewState extends State<_OrderStoragesView> {
               TextButton(
                 onPressed: vm.startQRScan,
                 child: Column(children: const [Icon(Icons.fact_check, color: Colors.black), Text('Приемка')]),
-                style: TextButton.styleFrom(primary: Colors.blue)
+                style: TextButton.styleFrom(backgroundColor: Colors.blue)
               )
             ],
             body: ListView(
@@ -79,7 +79,7 @@ class _OrderStoragesViewState extends State<_OrderStoragesView> {
             case OrderStoragesStateStatus.inProgress:
               await _progressDialog.open();
               break;
-            case OrderStoragesStateStatus.startedQrScan:
+            case OrderStoragesStateStatus.startedQRScan:
               await showQRPage();
               break;
             case OrderStoragesStateStatus.accepted:

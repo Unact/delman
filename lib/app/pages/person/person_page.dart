@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:barcode_widget/barcode_widget.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:drift/drift.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
@@ -41,24 +41,27 @@ class _PersonView extends StatefulWidget {
 class _PersonViewState extends State<_PersonView> {
   late final ProgressDialog _progressDialog = ProgressDialog(context: context);
 
-  Future<void> showStorageBarcode() {
+  Future<void> showStorageQRCode() {
     PersonViewModel vm = context.read<PersonViewModel>();
 
     return showDialog<List<dynamic>>(
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
-        return Center(child:Container(
-          color: Colors.white,
-          child: BarcodeWidget(
-            barcode: Barcode.qrCode(errorCorrectLevel: BarcodeQRCorrectionLevel.high),
-            drawText: false,
-            padding: const EdgeInsets.all(8),
-            data: vm.state.user?.storageId.toString() ?? '',
+        return Center(
+          child: Container(
             width: 150,
             height: 150,
-          ),
-        ));
+            color: Colors.white,
+            child: CachedNetworkImage(
+              imageUrl: vm.state.user?.storageQRUrl ?? '',
+              imageBuilder: (context, imageProvider) {
+                return Container(decoration: BoxDecoration(image: DecorationImage(image: imageProvider)));
+              },
+              placeholder: (context, url) => const Center(child: CircularProgressIndicator())
+            )
+          )
+        );
       }
     );
   }
@@ -94,7 +97,7 @@ class _PersonViewState extends State<_PersonView> {
             break;
           case PersonStateStatus.loggedOut:
             _progressDialog.close();
-            WidgetsBinding.instance!.addPostFrameCallback((_) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.of(context).pop();
             });
             break;
@@ -116,9 +119,8 @@ class _PersonViewState extends State<_PersonView> {
           title: const Text('Курьер'),
           trailing: Row(
             mainAxisAlignment: MainAxisAlignment.end,
-
             children: [
-              IconButton(icon: const Icon(Icons.qr_code_2), onPressed: showStorageBarcode),
+              IconButton(icon: const Icon(Icons.qr_code_2), onPressed: showStorageQRCode),
               Text(state.user?.name ?? '')
             ]
           )
@@ -139,7 +141,7 @@ class _PersonViewState extends State<_PersonView> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-                    primary: Colors.blue,
+                    backgroundColor: Colors.blue,
                   ),
                   child: const Text('Обновить приложение'),
                   onPressed: vm.launchAppUpdate
@@ -156,7 +158,7 @@ class _PersonViewState extends State<_PersonView> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-                  primary: Colors.blue,
+                  backgroundColor: Colors.blue,
                 ),
                 onPressed: vm.apiLogout,
                 child: const Text('Выйти'),

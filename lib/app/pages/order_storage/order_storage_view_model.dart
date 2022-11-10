@@ -42,7 +42,7 @@ class OrderStorageViewModel extends PageViewModel<OrderStorageState, OrderStorag
       return;
     }
 
-    emit(state.copyWith(status: OrderStorageStateStatus.startedQrScan));
+    emit(state.copyWith(status: OrderStorageStateStatus.startedQRScan));
   }
 
   Future<Order?> orderFromManualInput(String trackingNumber, String packageNumberStr) async {
