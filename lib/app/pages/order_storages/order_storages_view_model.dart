@@ -33,7 +33,7 @@ class OrderStoragesViewModel extends PageViewModel<OrderStoragesState, OrderStor
       return;
     }
 
-    emit(state.copyWith(status: OrderStoragesStateStatus.startedQrScan));
+    emit(state.copyWith(status: OrderStoragesStateStatus.startedQRScan));
   }
 
   Future<void> takeNewOrder(Order order) async {

@@ -3754,6 +3754,7 @@ class User extends DataClass implements Insertable<User> {
   final String name;
   final String email;
   final int storageId;
+  final String storageQRUrl;
   final String version;
   User(
       {required this.id,
@@ -3761,6 +3762,7 @@ class User extends DataClass implements Insertable<User> {
       required this.name,
       required this.email,
       required this.storageId,
+      required this.storageQRUrl,
       required this.version});
   factory User.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
@@ -3775,6 +3777,8 @@ class User extends DataClass implements Insertable<User> {
           .mapFromDatabaseResponse(data['${effectivePrefix}email'])!,
       storageId: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}storage_id'])!,
+      storageQRUrl: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}storage_q_r_url'])!,
       version: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}version'])!,
     );
@@ -3787,6 +3791,7 @@ class User extends DataClass implements Insertable<User> {
     map['name'] = Variable<String>(name);
     map['email'] = Variable<String>(email);
     map['storage_id'] = Variable<int>(storageId);
+    map['storage_q_r_url'] = Variable<String>(storageQRUrl);
     map['version'] = Variable<String>(version);
     return map;
   }
@@ -3798,6 +3803,7 @@ class User extends DataClass implements Insertable<User> {
       name: Value(name),
       email: Value(email),
       storageId: Value(storageId),
+      storageQRUrl: Value(storageQRUrl),
       version: Value(version),
     );
   }
@@ -3811,6 +3817,7 @@ class User extends DataClass implements Insertable<User> {
       name: serializer.fromJson<String>(json['name']),
       email: serializer.fromJson<String>(json['email']),
       storageId: serializer.fromJson<int>(json['storageId']),
+      storageQRUrl: serializer.fromJson<String>(json['storageQRUrl']),
       version: serializer.fromJson<String>(json['version']),
     );
   }
@@ -3823,6 +3830,7 @@ class User extends DataClass implements Insertable<User> {
       'name': serializer.toJson<String>(name),
       'email': serializer.toJson<String>(email),
       'storageId': serializer.toJson<int>(storageId),
+      'storageQRUrl': serializer.toJson<String>(storageQRUrl),
       'version': serializer.toJson<String>(version),
     };
   }
@@ -3833,6 +3841,7 @@ class User extends DataClass implements Insertable<User> {
           String? name,
           String? email,
           int? storageId,
+          String? storageQRUrl,
           String? version}) =>
       User(
         id: id ?? this.id,
@@ -3840,6 +3849,7 @@ class User extends DataClass implements Insertable<User> {
         name: name ?? this.name,
         email: email ?? this.email,
         storageId: storageId ?? this.storageId,
+        storageQRUrl: storageQRUrl ?? this.storageQRUrl,
         version: version ?? this.version,
       );
   @override
@@ -3850,6 +3860,7 @@ class User extends DataClass implements Insertable<User> {
           ..write('name: $name, ')
           ..write('email: $email, ')
           ..write('storageId: $storageId, ')
+          ..write('storageQRUrl: $storageQRUrl, ')
           ..write('version: $version')
           ..write(')'))
         .toString();
@@ -3857,7 +3868,7 @@ class User extends DataClass implements Insertable<User> {
 
   @override
   int get hashCode =>
-      Object.hash(id, username, name, email, storageId, version);
+      Object.hash(id, username, name, email, storageId, storageQRUrl, version);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3867,6 +3878,7 @@ class User extends DataClass implements Insertable<User> {
           other.name == this.name &&
           other.email == this.email &&
           other.storageId == this.storageId &&
+          other.storageQRUrl == this.storageQRUrl &&
           other.version == this.version);
 }
 
@@ -3876,6 +3888,7 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<String> name;
   final Value<String> email;
   final Value<int> storageId;
+  final Value<String> storageQRUrl;
   final Value<String> version;
   const UsersCompanion({
     this.id = const Value.absent(),
@@ -3883,6 +3896,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.name = const Value.absent(),
     this.email = const Value.absent(),
     this.storageId = const Value.absent(),
+    this.storageQRUrl = const Value.absent(),
     this.version = const Value.absent(),
   });
   UsersCompanion.insert({
@@ -3891,11 +3905,13 @@ class UsersCompanion extends UpdateCompanion<User> {
     required String name,
     required String email,
     required int storageId,
+    required String storageQRUrl,
     required String version,
   })  : username = Value(username),
         name = Value(name),
         email = Value(email),
         storageId = Value(storageId),
+        storageQRUrl = Value(storageQRUrl),
         version = Value(version);
   static Insertable<User> custom({
     Expression<int>? id,
@@ -3903,6 +3919,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<String>? name,
     Expression<String>? email,
     Expression<int>? storageId,
+    Expression<String>? storageQRUrl,
     Expression<String>? version,
   }) {
     return RawValuesInsertable({
@@ -3911,6 +3928,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       if (name != null) 'name': name,
       if (email != null) 'email': email,
       if (storageId != null) 'storage_id': storageId,
+      if (storageQRUrl != null) 'storage_q_r_url': storageQRUrl,
       if (version != null) 'version': version,
     });
   }
@@ -3921,6 +3939,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       Value<String>? name,
       Value<String>? email,
       Value<int>? storageId,
+      Value<String>? storageQRUrl,
       Value<String>? version}) {
     return UsersCompanion(
       id: id ?? this.id,
@@ -3928,6 +3947,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       name: name ?? this.name,
       email: email ?? this.email,
       storageId: storageId ?? this.storageId,
+      storageQRUrl: storageQRUrl ?? this.storageQRUrl,
       version: version ?? this.version,
     );
   }
@@ -3950,6 +3970,9 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (storageId.present) {
       map['storage_id'] = Variable<int>(storageId.value);
     }
+    if (storageQRUrl.present) {
+      map['storage_q_r_url'] = Variable<String>(storageQRUrl.value);
+    }
     if (version.present) {
       map['version'] = Variable<String>(version.value);
     }
@@ -3964,6 +3987,7 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('name: $name, ')
           ..write('email: $email, ')
           ..write('storageId: $storageId, ')
+          ..write('storageQRUrl: $storageQRUrl, ')
           ..write('version: $version')
           ..write(')'))
         .toString();
@@ -4003,6 +4027,12 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
       type: const IntType(),
       requiredDuringInsert: true,
       defaultConstraints: 'REFERENCES order_storages (id)');
+  final VerificationMeta _storageQRUrlMeta =
+      const VerificationMeta('storageQRUrl');
+  @override
+  late final GeneratedColumn<String?> storageQRUrl = GeneratedColumn<String?>(
+      'storage_q_r_url', aliasedName, false,
+      type: const StringType(), requiredDuringInsert: true);
   final VerificationMeta _versionMeta = const VerificationMeta('version');
   @override
   late final GeneratedColumn<String?> version = GeneratedColumn<String?>(
@@ -4010,7 +4040,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
       type: const StringType(), requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, username, name, email, storageId, version];
+      [id, username, name, email, storageId, storageQRUrl, version];
   @override
   String get aliasedName => _alias ?? 'users';
   @override
@@ -4046,6 +4076,14 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
           storageId.isAcceptableOrUnknown(data['storage_id']!, _storageIdMeta));
     } else if (isInserting) {
       context.missing(_storageIdMeta);
+    }
+    if (data.containsKey('storage_q_r_url')) {
+      context.handle(
+          _storageQRUrlMeta,
+          storageQRUrl.isAcceptableOrUnknown(
+              data['storage_q_r_url']!, _storageQRUrlMeta));
+    } else if (isInserting) {
+      context.missing(_storageQRUrlMeta);
     }
     if (data.containsKey('version')) {
       context.handle(_versionMeta,

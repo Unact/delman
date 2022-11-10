@@ -164,7 +164,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
                 vm.tryStartPayment(false);
               },
               child: const Icon(Icons.account_balance_wallet),
-              style: TextButton.styleFrom(primary: Colors.redAccent),
+              style: TextButton.styleFrom(backgroundColor: Colors.redAccent),
             ),
             !state.deliveryPointOrderEx.o.cardPaymentAllowed ? Container() : TextButton(
               onPressed: () {
@@ -172,7 +172,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
                 vm.tryStartPayment(true);
               },
               child: const Icon(Icons.credit_card),
-              style: TextButton.styleFrom(primary: Colors.redAccent),
+              style: TextButton.styleFrom(backgroundColor: Colors.redAccent),
             ),
           ]
         );
@@ -239,7 +239,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
                           alignment: Alignment.centerRight,
                           heightFactor: 0.75,
                           child: TextButton(
-                            style: TextButton.styleFrom(primary: Colors.green),
+                            style: TextButton.styleFrom(backgroundColor: Colors.green),
                             onPressed: () => showAddOrderInfoDialog(context),
                             child: const Text('Добавить')
                           )
@@ -266,12 +266,12 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
             await _progressDialog.open();
             break;
           case DeliveryPointOrderStateStatus.paymentStarted:
-            WidgetsBinding.instance!.addPostFrameCallback((_) async {
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
               await showAcceptPaymentDialog();
             });
             break;
           case DeliveryPointOrderStateStatus.askPaymentCollection:
-            WidgetsBinding.instance!.addPostFrameCallback((_) async {
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
               await showAskPaymentDialog();
             });
             break;
@@ -291,7 +291,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
 
     return [
       deliveryPointOrder.finished ? null : TextButton(
-        style: TextButton.styleFrom(primary: Colors.redAccent),
+        style: TextButton.styleFrom(backgroundColor: Colors.redAccent),
         child: const Text('Отменить'),
         onPressed: () {
           unfocus();
@@ -299,7 +299,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
         }
       ),
       !state.isFinishable ? null : TextButton(
-        style: TextButton.styleFrom(primary: Colors.redAccent),
+        style: TextButton.styleFrom(backgroundColor: Colors.redAccent),
         child: const Text('Завершить'),
         onPressed: () {
           unfocus();
@@ -365,7 +365,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
           vm.tryStartPayment(false);
         },
         child: const Icon(Icons.account_balance_wallet),
-        style: TextButton.styleFrom(primary: Colors.redAccent),
+        style: TextButton.styleFrom(backgroundColor: Colors.redAccent),
       ),
       !state.needPayment || !state.deliveryPointOrderEx.o.cardPaymentAllowed ? null : TextButton(
         onPressed: () {
@@ -373,10 +373,10 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
           vm.tryStartPayment(true);
         },
         child: const Icon(Icons.credit_card),
-        style: TextButton.styleFrom(primary: Colors.redAccent),
+        style: TextButton.styleFrom(backgroundColor: Colors.redAccent),
       ),
       deliveryPointOrder.finished ? null : TextButton(
-        style: TextButton.styleFrom(primary: Colors.redAccent),
+        style: TextButton.styleFrom(backgroundColor: Colors.redAccent),
         child: const Text('Отменить'),
         onPressed: () {
           unfocus();
@@ -384,7 +384,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
         }
       ),
       !state.isFinishable ? null : TextButton(
-        style: TextButton.styleFrom(primary: Colors.redAccent),
+        style: TextButton.styleFrom(backgroundColor: Colors.redAccent),
         child: const Text('Завершить'),
         onPressed: () {
           unfocus();

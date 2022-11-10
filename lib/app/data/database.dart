@@ -78,6 +78,7 @@ class AppStorage extends _$AppStorage {
         email: '',
         name: '',
         storageId: 0,
+        storageQRUrl: '',
         version: '0.0.0'
       ));
 
@@ -96,7 +97,7 @@ class AppStorage extends _$AppStorage {
   }
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(

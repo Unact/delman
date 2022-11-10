@@ -11,13 +11,14 @@ class ProgressDialog {
     _context = context;
 
   Future<void> open() async {
-    showDialog(
+    DialogRoute _route = DialogRoute(
       context: _context,
       builder: (_) => const Center(child: CircularProgressIndicator()),
       barrierDismissible: false
     );
+    Navigator.of(_context).push(_route);
     await _dialogCompleter.future;
-    Navigator.of(_context).pop();
+    Navigator.of(_context).removeRoute(_route);
   }
 
   void close() {

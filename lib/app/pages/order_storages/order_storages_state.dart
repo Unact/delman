@@ -4,7 +4,7 @@ enum OrderStoragesStateStatus {
   initial,
   dataLoaded,
   inProgress,
-  startedQrScan,
+  startedQRScan,
   accepted,
   failure,
 }

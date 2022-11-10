@@ -97,7 +97,7 @@ class _DeliveryPointViewState extends State<_DeliveryPointView> {
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-                              primary: Colors.blue
+                              backgroundColor: Colors.blue
                             ),
                             child: const Text('Отметить'),
                             onPressed: () => vm.arrive(),
