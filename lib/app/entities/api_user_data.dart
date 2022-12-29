@@ -6,7 +6,7 @@ class ApiUserData {
   final String email;
   final String name;
   final int storageId;
-  final String storageQRUrl;
+  final String storageQR;
   final String version;
 
   const ApiUserData({
@@ -15,7 +15,7 @@ class ApiUserData {
     required this.email,
     required this.name,
     required this.storageId,
-    required this.storageQRUrl,
+    required this.storageQR,
     required this.version
   });
 
@@ -26,7 +26,7 @@ class ApiUserData {
       email: json['email'],
       name: json['name'],
       storageId: json['storageId'],
-      storageQRUrl: json['storageQRUrl'],
+      storageQR: json['storageQR'],
       version: json['app']['version']
     );
   }
@@ -38,7 +38,7 @@ class ApiUserData {
       name: name,
       email: email,
       storageId: storageId,
-      storageQRUrl: storageQRUrl,
+      storageQR: storageQR,
       version: version
     );
   }
