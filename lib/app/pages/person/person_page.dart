@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:barcode_widget/barcode_widget.dart';
 import 'package:drift/drift.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
@@ -50,16 +50,15 @@ class _PersonViewState extends State<_PersonView> {
       builder: (BuildContext context) {
         return Center(
           child: Container(
-            width: 150,
-            height: 150,
             color: Colors.white,
-            child: CachedNetworkImage(
-              imageUrl: vm.state.user?.storageQRUrl ?? '',
-              imageBuilder: (context, imageProvider) {
-                return Container(decoration: BoxDecoration(image: DecorationImage(image: imageProvider)));
-              },
-              placeholder: (context, url) => const Center(child: CircularProgressIndicator())
-            )
+            child: BarcodeWidget(
+              barcode: Barcode.qrCode(errorCorrectLevel: BarcodeQRCorrectionLevel.quartile),
+              drawText: false,
+              padding: const EdgeInsets.all(8),
+              data: vm.state.user?.storageQR.toString() ?? '',
+              width: 150,
+              height: 150,
+            ),
           )
         );
       }
