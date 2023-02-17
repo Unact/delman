@@ -164,7 +164,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
                 vm.tryStartPayment(false);
               },
               child: const Icon(Icons.account_balance_wallet),
-              style: TextButton.styleFrom(backgroundColor: Colors.redAccent),
+              style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
             ),
             !state.deliveryPointOrderEx.o.cardPaymentAllowed ? Container() : TextButton(
               onPressed: () {
@@ -172,7 +172,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
                 vm.tryStartPayment(true);
               },
               child: const Icon(Icons.credit_card),
-              style: TextButton.styleFrom(backgroundColor: Colors.redAccent),
+              style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
             ),
           ]
         );
@@ -223,6 +223,21 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
                   title: const Text('Возврат документов'),
                   trailing: Text(order.documentsReturn ? 'Да' : 'Нет')
                 ),
+                InfoRow(
+                  title: const Text('Приемка'),
+                  trailing: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: order.productArrivalName == null ?
+                      [] :
+                      [
+                        IconButton(
+                          icon: const Icon(Icons.qr_code_2),
+                          onPressed: () => QRDialog(context: context, qr: order.productArrivalQR ?? '').open()
+                        ),
+                        Text(order.productArrivalName!)
+                      ]
+                  )
+                ),
                 InfoRow(title: const Text('ИМ'), trailing: Text(order.sellerName)),
                 InfoRow(title: const Text('Номер в ИМ'), trailing: Text(order.number)),
                 ...(isPickup ? _buildPickupRows(context) : _buildDeliveryRows(context)),
@@ -239,7 +254,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
                           alignment: Alignment.centerRight,
                           heightFactor: 0.75,
                           child: TextButton(
-                            style: TextButton.styleFrom(backgroundColor: Colors.green),
+                            style: TextButton.styleFrom(foregroundColor: Colors.green),
                             onPressed: () => showAddOrderInfoDialog(context),
                             child: const Text('Добавить')
                           )
@@ -291,7 +306,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
 
     return [
       deliveryPointOrder.finished ? null : TextButton(
-        style: TextButton.styleFrom(backgroundColor: Colors.redAccent),
+        style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
         child: const Text('Отменить'),
         onPressed: () {
           unfocus();
@@ -299,7 +314,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
         }
       ),
       !state.isFinishable ? null : TextButton(
-        style: TextButton.styleFrom(backgroundColor: Colors.redAccent),
+        style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
         child: const Text('Завершить'),
         onPressed: () {
           unfocus();
@@ -365,7 +380,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
           vm.tryStartPayment(false);
         },
         child: const Icon(Icons.account_balance_wallet),
-        style: TextButton.styleFrom(backgroundColor: Colors.redAccent),
+        style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
       ),
       !state.needPayment || !state.deliveryPointOrderEx.o.cardPaymentAllowed ? null : TextButton(
         onPressed: () {
@@ -373,10 +388,10 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
           vm.tryStartPayment(true);
         },
         child: const Icon(Icons.credit_card),
-        style: TextButton.styleFrom(backgroundColor: Colors.redAccent),
+        style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
       ),
       deliveryPointOrder.finished ? null : TextButton(
-        style: TextButton.styleFrom(backgroundColor: Colors.redAccent),
+        style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
         child: const Text('Отменить'),
         onPressed: () {
           unfocus();
@@ -384,7 +399,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
         }
       ),
       !state.isFinishable ? null : TextButton(
-        style: TextButton.styleFrom(backgroundColor: Colors.redAccent),
+        style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
         child: const Text('Завершить'),
         onPressed: () {
           unfocus();

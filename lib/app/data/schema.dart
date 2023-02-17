@@ -70,6 +70,8 @@ class Orders extends Table {
   IntColumn get storageId => integer().nullable().references(OrderStorages, #id)();
   IntColumn get deliveryLoadDuration => integer()();
   IntColumn get pickupLoadDuration => integer()();
+  TextColumn get productArrivalName => text().nullable()();
+  TextColumn get productArrivalQR => text().nullable()();
 }
 
 class OrderLines extends Table {
