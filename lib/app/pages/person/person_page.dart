@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:barcode_widget/barcode_widget.dart';
 import 'package:drift/drift.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
