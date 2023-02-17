@@ -56,6 +56,21 @@ class _OrderViewState extends State<_OrderView> {
                 title: const Text('Возврат документов'),
                 trailing: Text(order.documentsReturn ? 'Да' : 'Нет')
               ),
+              InfoRow(
+                title: const Text('Приемка'),
+                trailing: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: order.productArrivalName == null ?
+                    [] :
+                    [
+                      IconButton(
+                        icon: const Icon(Icons.qr_code_2),
+                        onPressed: () => QRDialog(context: context, qr: order.productArrivalQR ?? '').open()
+                      ),
+                      Text(order.productArrivalName!)
+                    ]
+                )
+              ),
               InfoRow(title: const Text('ИМ'), trailing: Text(order.sellerName)),
               InfoRow(title: const Text('Номер в ИМ'), trailing: Text(order.number)),
               InfoRow(

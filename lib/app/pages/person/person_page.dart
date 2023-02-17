@@ -41,30 +41,6 @@ class _PersonView extends StatefulWidget {
 class _PersonViewState extends State<_PersonView> {
   late final ProgressDialog _progressDialog = ProgressDialog(context: context);
 
-  Future<void> showStorageQRCode() {
-    PersonViewModel vm = context.read<PersonViewModel>();
-
-    return showDialog<List<dynamic>>(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return Center(
-          child: Container(
-            color: Colors.white,
-            child: BarcodeWidget(
-              barcode: Barcode.qrCode(errorCorrectLevel: BarcodeQRCorrectionLevel.quartile),
-              drawText: false,
-              padding: const EdgeInsets.all(8),
-              data: vm.state.user?.storageQR.toString() ?? '',
-              width: 150,
-              height: 150,
-            ),
-          )
-        );
-      }
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<PersonViewModel, PersonState>(
@@ -119,7 +95,10 @@ class _PersonViewState extends State<_PersonView> {
           trailing: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              IconButton(icon: const Icon(Icons.qr_code_2), onPressed: showStorageQRCode),
+              IconButton(
+                icon: const Icon(Icons.qr_code_2),
+                onPressed: () => QRDialog(context: context, qr: vm.state.user?.storageQR ?? '').open()
+              ),
               Text(state.user?.name ?? '')
             ]
           )

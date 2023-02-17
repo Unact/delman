@@ -32,6 +32,8 @@ class ApiOrder {
   final int needPayment;
   final int deliveryLoadDuration;
   final int pickupLoadDuration;
+  final String? productArrivalName;
+  final String? productArrivalQR;
 
   const ApiOrder({
     required this.id,
@@ -65,6 +67,8 @@ class ApiOrder {
     required this.needPayment,
     required this.deliveryLoadDuration,
     required this.pickupLoadDuration,
+    required this.productArrivalName,
+    required this.productArrivalQR
   });
 
   static ApiOrder fromJson(dynamic json) {
@@ -100,6 +104,8 @@ class ApiOrder {
       needPayment: json['needPayment'],
       deliveryLoadDuration: json['deliveryLoadDuration'],
       pickupLoadDuration: json['pickupLoadDuration'],
+      productArrivalName: json['productArrivalName'],
+      productArrivalQR: json['productArrivalQR']
     );
   }
 
@@ -136,6 +142,8 @@ class ApiOrder {
       needPayment: needPayment == 1,
       deliveryLoadDuration: deliveryLoadDuration,
       pickupLoadDuration: pickupLoadDuration,
+      productArrivalName: productArrivalName,
+      productArrivalQR: productArrivalQR
     );
   }
 }

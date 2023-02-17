@@ -64,7 +64,7 @@ class _OrderStoragesViewState extends State<_OrderStoragesView> {
               TextButton(
                 onPressed: vm.startQRScan,
                 child: Column(children: const [Icon(Icons.fact_check, color: Colors.black), Text('Приемка')]),
-                style: TextButton.styleFrom(backgroundColor: Colors.blue)
+                style: TextButton.styleFrom(foregroundColor: Colors.blue)
               )
             ],
             body: ListView(
