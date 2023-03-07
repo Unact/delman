@@ -143,26 +143,22 @@ class Iboxpro {
 
   Future<String?> _findBTDeviceNameAndroid() async {
     blue_serial.FlutterBluetoothSerial bluetooth = blue_serial.FlutterBluetoothSerial.instance;
-    List<blue_serial.BluetoothDevice> devices = await bluetooth.getBondedDevices();
 
-    if (!devices.any((device) => (device.name ?? '').contains(_terminalNamePrefix))) {
-      List<blue_serial.BluetoothDiscoveryResult> results = [];
-      StreamSubscription<blue_serial.BluetoothDiscoveryResult> subscription = bluetooth.startDiscovery().
-        listen((r) => results.add(r));
-      await Future.delayed(_searchTimeout);
-      await subscription.cancel();
+    List<blue_serial.BluetoothDiscoveryResult> results = [];
+    StreamSubscription<blue_serial.BluetoothDiscoveryResult> subscription = bluetooth.startDiscovery().
+      listen((r) => results.add(r));
+    await Future.delayed(_searchTimeout);
+    await subscription.cancel();
 
-      devices.addAll(results.map((result) => result.device));
-    }
+    List<blue_serial.BluetoothDevice> bondedDevices = await bluetooth.getBondedDevices();
+    List<blue_serial.BluetoothDevice> localDevices = results.map((result) => result.device).toList();
+    bool search(blue_serial.BluetoothDevice device) => (device.name ?? '').contains(_terminalNamePrefix);
 
-    blue_serial.BluetoothDevice? device = devices.firstWhereOrNull(
-      (device) => (device.name ?? '').contains(_terminalNamePrefix)
-    );
+    blue_serial.BluetoothDevice? bondedDevice = bondedDevices.firstWhereOrNull(search);
+    blue_serial.BluetoothDevice? localDevice = localDevices.firstWhereOrNull(search);
+    blue_serial.BluetoothDevice? device = bondedDevice == localDevice ? bondedDevice : localDevice;
 
-    if (device == null) {
-      return null;
-    }
-
+    if (device == null) return null;
     if (!device.isBonded) await bluetooth.bondDeviceAtAddress(device.address);
 
     return device.name;
