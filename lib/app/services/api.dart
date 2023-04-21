@@ -126,16 +126,27 @@ class Api {
     ));
   }
 
-  Future<void> confirmOrder({
+  Future<void> confirmOrderFacts({
     required int deliveryPointOrderId,
     required List<Map<String, dynamic>> orderLines,
+  }) async {
+    return await _sendRequest((dio) => dio.post(
+      'v1/delman/confirm_order_facts',
+      data: {
+        'deliveryPointOrderId': deliveryPointOrderId,
+        'orderLines': orderLines
+      }
+    ));
+  }
+
+  Future<void> confirmOrder({
+    required int deliveryPointOrderId,
     required Location location,
   }) async {
     return await _sendRequest((dio) => dio.post(
       'v1/delman/confirm_order',
       data: {
         'deliveryPointOrderId': deliveryPointOrderId,
-        'orderLines': orderLines,
         'location': location
       }
     ));
