@@ -30,6 +30,7 @@ class ApiOrder {
   final String pickupAddressName;
   final int packages;
   final int needPayment;
+  final int factsConfirmed;
   final int deliveryLoadDuration;
   final int pickupLoadDuration;
   final String? productArrivalName;
@@ -65,6 +66,7 @@ class ApiOrder {
     required this.pickupAddressName,
     required this.packages,
     required this.needPayment,
+    required this.factsConfirmed,
     required this.deliveryLoadDuration,
     required this.pickupLoadDuration,
     required this.productArrivalName,
@@ -102,6 +104,7 @@ class ApiOrder {
       pickupAddressName: json['pickupAddressName'],
       packages: json['packages'],
       needPayment: json['needPayment'],
+      factsConfirmed: json['factsConfirmed'],
       deliveryLoadDuration: json['deliveryLoadDuration'],
       pickupLoadDuration: json['pickupLoadDuration'],
       productArrivalName: json['productArrivalName'],
@@ -140,6 +143,7 @@ class ApiOrder {
       pickupAddressName: pickupAddressName,
       packages: packages,
       needPayment: needPayment == 1,
+      factsConfirmed: factsConfirmed == 1,
       deliveryLoadDuration: deliveryLoadDuration,
       pickupLoadDuration: pickupLoadDuration,
       productArrivalName: productArrivalName,

@@ -85,9 +85,9 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
 
   void tryConfirmOrder() {
     List<String> messages = [];
-    String typeMsgPart = state.deliveryPointOrderEx.dpo.pickup ? 'забор' : 'доставку';
+    String typeMsgPart = state.isPickup ? 'забор' : 'доставку';
 
-    if (state.orderLines.any((e) => e.factAmount == null || e.factAmount! < 0)) {
+    if (!state.factsConfirmed) {
       emit(state.copyWith(
         status: DeliveryPointOrderStateStatus.failure,
         message: 'Не для всех позиций указан факт'
@@ -104,6 +104,30 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
       confirmationCallback: confirmOrder,
       message: messages.join('\n')
     ));
+  }
+
+  Future<void> confirmOrderFacts() async {
+    emit(state.copyWith(status: DeliveryPointOrderStateStatus.inProgress));
+
+    try {
+      await _confirmOrderFacts();
+
+      await app.storage.ordersDao.updateOrder(
+        state.deliveryPointOrderEx.o.id,
+        const OrdersCompanion(factsConfirmed: Value(true))
+      );
+
+      emit(state.copyWith(
+        status: DeliveryPointOrderStateStatus.confirmed,
+        message: 'Факты позиций подтверждены'
+      ));
+
+      if (!state.isPickup && state.payment == null && state.total != 0) {
+        emit(state.copyWith(status: DeliveryPointOrderStateStatus.askPaymentCollection));
+      }
+    } on AppError catch(e) {
+      emit(state.copyWith(status: DeliveryPointOrderStateStatus.failure, message: e.message));
+    }
   }
 
   Future<void> confirmOrder(bool confirmed) async {
@@ -126,16 +150,10 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
     try {
       await _confirmOrder();
 
-      bool isPickup = state.deliveryPointOrderEx.dpo.pickup;
-
       emit(state.copyWith(
         status: DeliveryPointOrderStateStatus.confirmed,
-        message: isPickup ? 'Забор заказа завершен' : 'Доставка заказа завершена'
+        message: state.isPickup ? 'Забор заказа завершен' : 'Доставка заказа завершена'
       ));
-
-      if (!isPickup && state.payment == null && state.total != 0) {
-        emit(state.copyWith(status: DeliveryPointOrderStateStatus.askPaymentCollection));
-      }
     } on AppError catch(e) {
       emit(state.copyWith(status: DeliveryPointOrderStateStatus.failure, message: e.message));
     }
@@ -200,6 +218,20 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
     await _departFromDeliveryPoint();
   }
 
+  Future<void> _confirmOrderFacts() async {
+    try {
+      await Api(storage: app.storage).confirmOrderFacts(
+        deliveryPointOrderId: state.deliveryPointOrderEx.dpo.id,
+        orderLines: state.orderLines.map((e) => {'id': e.id, 'factAmount': e.factAmount}).toList(),
+      );
+    } on ApiException catch(e) {
+      throw AppError(e.errorMsg);
+    } catch(e, trace) {
+      await app.reportError(e, trace);
+      throw AppError(Strings.genericErrorMsg);
+    }
+  }
+
   Future<void> _confirmOrder() async {
     Location? location = await GeoLoc.getCurrentLocation();
 
@@ -210,7 +242,6 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
     try {
       await Api(storage: app.storage).confirmOrder(
         deliveryPointOrderId: state.deliveryPointOrderEx.dpo.id,
-        orderLines: state.orderLines.map((e) => {'id': e.id, 'factAmount': e.factAmount}).toList(),
         location: location
       );
     } on ApiException catch(e) {
@@ -222,7 +253,7 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
 
     await app.storage.ordersDao.updateOrder(
       state.deliveryPointOrderEx.o.id,
-      OrdersCompanion(storageId: Value(state.deliveryPointOrderEx.dpo.pickup ? state.user?.storageId : null))
+      OrdersCompanion(storageId: Value(state.isPickup ? state.user?.storageId : null))
     );
 
     await app.storage.deliveriesDao.updateDeliveryPointOrder(

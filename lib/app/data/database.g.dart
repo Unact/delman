@@ -1238,6 +1238,7 @@ class Order extends DataClass implements Insertable<Order> {
   final int packages;
   final bool cardPaymentAllowed;
   final bool needPayment;
+  final bool factsConfirmed;
   final int? storageId;
   final int deliveryLoadDuration;
   final int pickupLoadDuration;
@@ -1272,6 +1273,7 @@ class Order extends DataClass implements Insertable<Order> {
       required this.packages,
       required this.cardPaymentAllowed,
       required this.needPayment,
+      required this.factsConfirmed,
       this.storageId,
       required this.deliveryLoadDuration,
       required this.pickupLoadDuration,
@@ -1336,6 +1338,8 @@ class Order extends DataClass implements Insertable<Order> {
           data['${effectivePrefix}card_payment_allowed'])!,
       needPayment: const BoolType()
           .mapFromDatabaseResponse(data['${effectivePrefix}need_payment'])!,
+      factsConfirmed: const BoolType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}facts_confirmed'])!,
       storageId: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}storage_id']),
       deliveryLoadDuration: const IntType().mapFromDatabaseResponse(
@@ -1406,6 +1410,7 @@ class Order extends DataClass implements Insertable<Order> {
     map['packages'] = Variable<int>(packages);
     map['card_payment_allowed'] = Variable<bool>(cardPaymentAllowed);
     map['need_payment'] = Variable<bool>(needPayment);
+    map['facts_confirmed'] = Variable<bool>(factsConfirmed);
     if (!nullToAbsent || storageId != null) {
       map['storage_id'] = Variable<int?>(storageId);
     }
@@ -1476,6 +1481,7 @@ class Order extends DataClass implements Insertable<Order> {
       packages: Value(packages),
       cardPaymentAllowed: Value(cardPaymentAllowed),
       needPayment: Value(needPayment),
+      factsConfirmed: Value(factsConfirmed),
       storageId: storageId == null && nullToAbsent
           ? const Value.absent()
           : Value(storageId),
@@ -1527,6 +1533,7 @@ class Order extends DataClass implements Insertable<Order> {
       packages: serializer.fromJson<int>(json['packages']),
       cardPaymentAllowed: serializer.fromJson<bool>(json['cardPaymentAllowed']),
       needPayment: serializer.fromJson<bool>(json['needPayment']),
+      factsConfirmed: serializer.fromJson<bool>(json['factsConfirmed']),
       storageId: serializer.fromJson<int?>(json['storageId']),
       deliveryLoadDuration:
           serializer.fromJson<int>(json['deliveryLoadDuration']),
@@ -1569,6 +1576,7 @@ class Order extends DataClass implements Insertable<Order> {
       'packages': serializer.toJson<int>(packages),
       'cardPaymentAllowed': serializer.toJson<bool>(cardPaymentAllowed),
       'needPayment': serializer.toJson<bool>(needPayment),
+      'factsConfirmed': serializer.toJson<bool>(factsConfirmed),
       'storageId': serializer.toJson<int?>(storageId),
       'deliveryLoadDuration': serializer.toJson<int>(deliveryLoadDuration),
       'pickupLoadDuration': serializer.toJson<int>(pickupLoadDuration),
@@ -1606,6 +1614,7 @@ class Order extends DataClass implements Insertable<Order> {
           int? packages,
           bool? cardPaymentAllowed,
           bool? needPayment,
+          bool? factsConfirmed,
           int? storageId,
           int? deliveryLoadDuration,
           int? pickupLoadDuration,
@@ -1640,6 +1649,7 @@ class Order extends DataClass implements Insertable<Order> {
         packages: packages ?? this.packages,
         cardPaymentAllowed: cardPaymentAllowed ?? this.cardPaymentAllowed,
         needPayment: needPayment ?? this.needPayment,
+        factsConfirmed: factsConfirmed ?? this.factsConfirmed,
         storageId: storageId ?? this.storageId,
         deliveryLoadDuration: deliveryLoadDuration ?? this.deliveryLoadDuration,
         pickupLoadDuration: pickupLoadDuration ?? this.pickupLoadDuration,
@@ -1677,6 +1687,7 @@ class Order extends DataClass implements Insertable<Order> {
           ..write('packages: $packages, ')
           ..write('cardPaymentAllowed: $cardPaymentAllowed, ')
           ..write('needPayment: $needPayment, ')
+          ..write('factsConfirmed: $factsConfirmed, ')
           ..write('storageId: $storageId, ')
           ..write('deliveryLoadDuration: $deliveryLoadDuration, ')
           ..write('pickupLoadDuration: $pickupLoadDuration, ')
@@ -1716,6 +1727,7 @@ class Order extends DataClass implements Insertable<Order> {
         packages,
         cardPaymentAllowed,
         needPayment,
+        factsConfirmed,
         storageId,
         deliveryLoadDuration,
         pickupLoadDuration,
@@ -1754,6 +1766,7 @@ class Order extends DataClass implements Insertable<Order> {
           other.packages == this.packages &&
           other.cardPaymentAllowed == this.cardPaymentAllowed &&
           other.needPayment == this.needPayment &&
+          other.factsConfirmed == this.factsConfirmed &&
           other.storageId == this.storageId &&
           other.deliveryLoadDuration == this.deliveryLoadDuration &&
           other.pickupLoadDuration == this.pickupLoadDuration &&
@@ -1790,6 +1803,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
   final Value<int> packages;
   final Value<bool> cardPaymentAllowed;
   final Value<bool> needPayment;
+  final Value<bool> factsConfirmed;
   final Value<int?> storageId;
   final Value<int> deliveryLoadDuration;
   final Value<int> pickupLoadDuration;
@@ -1824,6 +1838,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     this.packages = const Value.absent(),
     this.cardPaymentAllowed = const Value.absent(),
     this.needPayment = const Value.absent(),
+    this.factsConfirmed = const Value.absent(),
     this.storageId = const Value.absent(),
     this.deliveryLoadDuration = const Value.absent(),
     this.pickupLoadDuration = const Value.absent(),
@@ -1859,6 +1874,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     required int packages,
     required bool cardPaymentAllowed,
     required bool needPayment,
+    required bool factsConfirmed,
     this.storageId = const Value.absent(),
     required int deliveryLoadDuration,
     required int pickupLoadDuration,
@@ -1878,6 +1894,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
         packages = Value(packages),
         cardPaymentAllowed = Value(cardPaymentAllowed),
         needPayment = Value(needPayment),
+        factsConfirmed = Value(factsConfirmed),
         deliveryLoadDuration = Value(deliveryLoadDuration),
         pickupLoadDuration = Value(pickupLoadDuration);
   static Insertable<Order> custom({
@@ -1909,6 +1926,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     Expression<int>? packages,
     Expression<bool>? cardPaymentAllowed,
     Expression<bool>? needPayment,
+    Expression<bool>? factsConfirmed,
     Expression<int?>? storageId,
     Expression<int>? deliveryLoadDuration,
     Expression<int>? pickupLoadDuration,
@@ -1949,6 +1967,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
       if (cardPaymentAllowed != null)
         'card_payment_allowed': cardPaymentAllowed,
       if (needPayment != null) 'need_payment': needPayment,
+      if (factsConfirmed != null) 'facts_confirmed': factsConfirmed,
       if (storageId != null) 'storage_id': storageId,
       if (deliveryLoadDuration != null)
         'delivery_load_duration': deliveryLoadDuration,
@@ -1989,6 +2008,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
       Value<int>? packages,
       Value<bool>? cardPaymentAllowed,
       Value<bool>? needPayment,
+      Value<bool>? factsConfirmed,
       Value<int?>? storageId,
       Value<int>? deliveryLoadDuration,
       Value<int>? pickupLoadDuration,
@@ -2023,6 +2043,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
       packages: packages ?? this.packages,
       cardPaymentAllowed: cardPaymentAllowed ?? this.cardPaymentAllowed,
       needPayment: needPayment ?? this.needPayment,
+      factsConfirmed: factsConfirmed ?? this.factsConfirmed,
       storageId: storageId ?? this.storageId,
       deliveryLoadDuration: deliveryLoadDuration ?? this.deliveryLoadDuration,
       pickupLoadDuration: pickupLoadDuration ?? this.pickupLoadDuration,
@@ -2122,6 +2143,9 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     if (needPayment.present) {
       map['need_payment'] = Variable<bool>(needPayment.value);
     }
+    if (factsConfirmed.present) {
+      map['facts_confirmed'] = Variable<bool>(factsConfirmed.value);
+    }
     if (storageId.present) {
       map['storage_id'] = Variable<int?>(storageId.value);
     }
@@ -2171,6 +2195,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
           ..write('packages: $packages, ')
           ..write('cardPaymentAllowed: $cardPaymentAllowed, ')
           ..write('needPayment: $needPayment, ')
+          ..write('factsConfirmed: $factsConfirmed, ')
           ..write('storageId: $storageId, ')
           ..write('deliveryLoadDuration: $deliveryLoadDuration, ')
           ..write('pickupLoadDuration: $pickupLoadDuration, ')
@@ -2354,6 +2379,14 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
       type: const BoolType(),
       requiredDuringInsert: true,
       defaultConstraints: 'CHECK (need_payment IN (0, 1))');
+  final VerificationMeta _factsConfirmedMeta =
+      const VerificationMeta('factsConfirmed');
+  @override
+  late final GeneratedColumn<bool?> factsConfirmed = GeneratedColumn<bool?>(
+      'facts_confirmed', aliasedName, false,
+      type: const BoolType(),
+      requiredDuringInsert: true,
+      defaultConstraints: 'CHECK (facts_confirmed IN (0, 1))');
   final VerificationMeta _storageIdMeta = const VerificationMeta('storageId');
   @override
   late final GeneratedColumn<int?> storageId = GeneratedColumn<int?>(
@@ -2415,6 +2448,7 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
         packages,
         cardPaymentAllowed,
         needPayment,
+        factsConfirmed,
         storageId,
         deliveryLoadDuration,
         pickupLoadDuration,
@@ -2612,6 +2646,14 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
               data['need_payment']!, _needPaymentMeta));
     } else if (isInserting) {
       context.missing(_needPaymentMeta);
+    }
+    if (data.containsKey('facts_confirmed')) {
+      context.handle(
+          _factsConfirmedMeta,
+          factsConfirmed.isAcceptableOrUnknown(
+              data['facts_confirmed']!, _factsConfirmedMeta));
+    } else if (isInserting) {
+      context.missing(_factsConfirmedMeta);
     }
     if (data.containsKey('storage_id')) {
       context.handle(_storageIdMeta,
@@ -4693,7 +4735,7 @@ mixin _$DeliveriesDaoMixin on DatabaseAccessor<AppStorage> {
 
   Selectable<DeliveryPointOrderExResult> deliveryPointOrderEx() {
     return customSelect(
-        'SELECT\n        "dpo"."id" AS "nested_0.id", "dpo"."delivery_point_id" AS "nested_0.delivery_point_id", "dpo"."order_id" AS "nested_0.order_id", "dpo"."canceled" AS "nested_0.canceled", "dpo"."finished" AS "nested_0.finished", "dpo"."pickup" AS "nested_0.pickup",\n        "o"."id" AS "nested_1.id", "o"."delivery_date_time_from" AS "nested_1.delivery_date_time_from", "o"."delivery_date_time_to" AS "nested_1.delivery_date_time_to", "o"."pickup_date_time_from" AS "nested_1.pickup_date_time_from", "o"."pickup_date_time_to" AS "nested_1.pickup_date_time_to", "o"."number" AS "nested_1.number", "o"."tracking_number" AS "nested_1.tracking_number", "o"."sender_name" AS "nested_1.sender_name", "o"."buyer_name" AS "nested_1.buyer_name", "o"."sender_phone" AS "nested_1.sender_phone", "o"."buyer_phone" AS "nested_1.buyer_phone", "o"."comment" AS "nested_1.comment", "o"."delivery_type_name" AS "nested_1.delivery_type_name", "o"."pickup_type_name" AS "nested_1.pickup_type_name", "o"."sender_floor" AS "nested_1.sender_floor", "o"."buyer_floor" AS "nested_1.buyer_floor", "o"."sender_flat" AS "nested_1.sender_flat", "o"."buyer_flat" AS "nested_1.buyer_flat", "o"."sender_elevator" AS "nested_1.sender_elevator", "o"."buyer_elevator" AS "nested_1.buyer_elevator", "o"."payment_type_name" AS "nested_1.payment_type_name", "o"."seller_name" AS "nested_1.seller_name", "o"."documents_return" AS "nested_1.documents_return", "o"."delivery_address_name" AS "nested_1.delivery_address_name", "o"."pickup_address_name" AS "nested_1.pickup_address_name", "o"."packages" AS "nested_1.packages", "o"."card_payment_allowed" AS "nested_1.card_payment_allowed", "o"."need_payment" AS "nested_1.need_payment", "o"."storage_id" AS "nested_1.storage_id", "o"."delivery_load_duration" AS "nested_1.delivery_load_duration", "o"."pickup_load_duration" AS "nested_1.pickup_load_duration", "o"."product_arrival_name" AS "nested_1.product_arrival_name", "o"."product_arrival_q_r" AS "nested_1.product_arrival_q_r"\n      FROM delivery_point_orders dpo\n      JOIN orders o ON o.id = dpo.order_id\n      ORDER BY o.tracking_number ASC',
+        'SELECT\n        "dpo"."id" AS "nested_0.id", "dpo"."delivery_point_id" AS "nested_0.delivery_point_id", "dpo"."order_id" AS "nested_0.order_id", "dpo"."canceled" AS "nested_0.canceled", "dpo"."finished" AS "nested_0.finished", "dpo"."pickup" AS "nested_0.pickup",\n        "o"."id" AS "nested_1.id", "o"."delivery_date_time_from" AS "nested_1.delivery_date_time_from", "o"."delivery_date_time_to" AS "nested_1.delivery_date_time_to", "o"."pickup_date_time_from" AS "nested_1.pickup_date_time_from", "o"."pickup_date_time_to" AS "nested_1.pickup_date_time_to", "o"."number" AS "nested_1.number", "o"."tracking_number" AS "nested_1.tracking_number", "o"."sender_name" AS "nested_1.sender_name", "o"."buyer_name" AS "nested_1.buyer_name", "o"."sender_phone" AS "nested_1.sender_phone", "o"."buyer_phone" AS "nested_1.buyer_phone", "o"."comment" AS "nested_1.comment", "o"."delivery_type_name" AS "nested_1.delivery_type_name", "o"."pickup_type_name" AS "nested_1.pickup_type_name", "o"."sender_floor" AS "nested_1.sender_floor", "o"."buyer_floor" AS "nested_1.buyer_floor", "o"."sender_flat" AS "nested_1.sender_flat", "o"."buyer_flat" AS "nested_1.buyer_flat", "o"."sender_elevator" AS "nested_1.sender_elevator", "o"."buyer_elevator" AS "nested_1.buyer_elevator", "o"."payment_type_name" AS "nested_1.payment_type_name", "o"."seller_name" AS "nested_1.seller_name", "o"."documents_return" AS "nested_1.documents_return", "o"."delivery_address_name" AS "nested_1.delivery_address_name", "o"."pickup_address_name" AS "nested_1.pickup_address_name", "o"."packages" AS "nested_1.packages", "o"."card_payment_allowed" AS "nested_1.card_payment_allowed", "o"."need_payment" AS "nested_1.need_payment", "o"."facts_confirmed" AS "nested_1.facts_confirmed", "o"."storage_id" AS "nested_1.storage_id", "o"."delivery_load_duration" AS "nested_1.delivery_load_duration", "o"."pickup_load_duration" AS "nested_1.pickup_load_duration", "o"."product_arrival_name" AS "nested_1.product_arrival_name", "o"."product_arrival_q_r" AS "nested_1.product_arrival_q_r"\n      FROM delivery_point_orders dpo\n      JOIN orders o ON o.id = dpo.order_id\n      ORDER BY o.tracking_number ASC',
         variables: [],
         readsFrom: {
           deliveryPointOrders,
@@ -4786,6 +4828,7 @@ mixin _$OrdersDaoMixin on DatabaseAccessor<AppStorage> {
         packages: row.read<int>('packages'),
         cardPaymentAllowed: row.read<bool>('card_payment_allowed'),
         needPayment: row.read<bool>('need_payment'),
+        factsConfirmed: row.read<bool>('facts_confirmed'),
         storageId: row.read<int?>('storage_id'),
         deliveryLoadDuration: row.read<int>('delivery_load_duration'),
         pickupLoadDuration: row.read<int>('pickup_load_duration'),
@@ -4827,6 +4870,7 @@ class OrderWithTransferResult {
   final int packages;
   final bool cardPaymentAllowed;
   final bool needPayment;
+  final bool factsConfirmed;
   final int? storageId;
   final int deliveryLoadDuration;
   final int pickupLoadDuration;
@@ -4863,6 +4907,7 @@ class OrderWithTransferResult {
     required this.packages,
     required this.cardPaymentAllowed,
     required this.needPayment,
+    required this.factsConfirmed,
     this.storageId,
     required this.deliveryLoadDuration,
     required this.pickupLoadDuration,
@@ -4883,7 +4928,7 @@ mixin _$PaymentsDaoMixin on DatabaseAccessor<AppStorage> {
   $PaymentsTable get payments => attachedDatabase.payments;
   Selectable<PaymentWithOrderResult> paymentWithOrder() {
     return customSelect(
-        'SELECT\n        "p"."id" AS "nested_0.id", "p"."delivery_point_order_id" AS "nested_0.delivery_point_order_id", "p"."summ" AS "nested_0.summ", "p"."transaction_id" AS "nested_0.transaction_id",\n        "dpo"."id" AS "nested_1.id", "dpo"."delivery_point_id" AS "nested_1.delivery_point_id", "dpo"."order_id" AS "nested_1.order_id", "dpo"."canceled" AS "nested_1.canceled", "dpo"."finished" AS "nested_1.finished", "dpo"."pickup" AS "nested_1.pickup",\n        "o"."id" AS "nested_2.id", "o"."delivery_date_time_from" AS "nested_2.delivery_date_time_from", "o"."delivery_date_time_to" AS "nested_2.delivery_date_time_to", "o"."pickup_date_time_from" AS "nested_2.pickup_date_time_from", "o"."pickup_date_time_to" AS "nested_2.pickup_date_time_to", "o"."number" AS "nested_2.number", "o"."tracking_number" AS "nested_2.tracking_number", "o"."sender_name" AS "nested_2.sender_name", "o"."buyer_name" AS "nested_2.buyer_name", "o"."sender_phone" AS "nested_2.sender_phone", "o"."buyer_phone" AS "nested_2.buyer_phone", "o"."comment" AS "nested_2.comment", "o"."delivery_type_name" AS "nested_2.delivery_type_name", "o"."pickup_type_name" AS "nested_2.pickup_type_name", "o"."sender_floor" AS "nested_2.sender_floor", "o"."buyer_floor" AS "nested_2.buyer_floor", "o"."sender_flat" AS "nested_2.sender_flat", "o"."buyer_flat" AS "nested_2.buyer_flat", "o"."sender_elevator" AS "nested_2.sender_elevator", "o"."buyer_elevator" AS "nested_2.buyer_elevator", "o"."payment_type_name" AS "nested_2.payment_type_name", "o"."seller_name" AS "nested_2.seller_name", "o"."documents_return" AS "nested_2.documents_return", "o"."delivery_address_name" AS "nested_2.delivery_address_name", "o"."pickup_address_name" AS "nested_2.pickup_address_name", "o"."packages" AS "nested_2.packages", "o"."card_payment_allowed" AS "nested_2.card_payment_allowed", "o"."need_payment" AS "nested_2.need_payment", "o"."storage_id" AS "nested_2.storage_id", "o"."delivery_load_duration" AS "nested_2.delivery_load_duration", "o"."pickup_load_duration" AS "nested_2.pickup_load_duration", "o"."product_arrival_name" AS "nested_2.product_arrival_name", "o"."product_arrival_q_r" AS "nested_2.product_arrival_q_r"\n      FROM payments AS p\n      JOIN delivery_point_orders dpo on dpo.id = p.delivery_point_order_id\n      JOIN orders o on o.id = dpo.order_id',
+        'SELECT\n        "p"."id" AS "nested_0.id", "p"."delivery_point_order_id" AS "nested_0.delivery_point_order_id", "p"."summ" AS "nested_0.summ", "p"."transaction_id" AS "nested_0.transaction_id",\n        "dpo"."id" AS "nested_1.id", "dpo"."delivery_point_id" AS "nested_1.delivery_point_id", "dpo"."order_id" AS "nested_1.order_id", "dpo"."canceled" AS "nested_1.canceled", "dpo"."finished" AS "nested_1.finished", "dpo"."pickup" AS "nested_1.pickup",\n        "o"."id" AS "nested_2.id", "o"."delivery_date_time_from" AS "nested_2.delivery_date_time_from", "o"."delivery_date_time_to" AS "nested_2.delivery_date_time_to", "o"."pickup_date_time_from" AS "nested_2.pickup_date_time_from", "o"."pickup_date_time_to" AS "nested_2.pickup_date_time_to", "o"."number" AS "nested_2.number", "o"."tracking_number" AS "nested_2.tracking_number", "o"."sender_name" AS "nested_2.sender_name", "o"."buyer_name" AS "nested_2.buyer_name", "o"."sender_phone" AS "nested_2.sender_phone", "o"."buyer_phone" AS "nested_2.buyer_phone", "o"."comment" AS "nested_2.comment", "o"."delivery_type_name" AS "nested_2.delivery_type_name", "o"."pickup_type_name" AS "nested_2.pickup_type_name", "o"."sender_floor" AS "nested_2.sender_floor", "o"."buyer_floor" AS "nested_2.buyer_floor", "o"."sender_flat" AS "nested_2.sender_flat", "o"."buyer_flat" AS "nested_2.buyer_flat", "o"."sender_elevator" AS "nested_2.sender_elevator", "o"."buyer_elevator" AS "nested_2.buyer_elevator", "o"."payment_type_name" AS "nested_2.payment_type_name", "o"."seller_name" AS "nested_2.seller_name", "o"."documents_return" AS "nested_2.documents_return", "o"."delivery_address_name" AS "nested_2.delivery_address_name", "o"."pickup_address_name" AS "nested_2.pickup_address_name", "o"."packages" AS "nested_2.packages", "o"."card_payment_allowed" AS "nested_2.card_payment_allowed", "o"."need_payment" AS "nested_2.need_payment", "o"."facts_confirmed" AS "nested_2.facts_confirmed", "o"."storage_id" AS "nested_2.storage_id", "o"."delivery_load_duration" AS "nested_2.delivery_load_duration", "o"."pickup_load_duration" AS "nested_2.pickup_load_duration", "o"."product_arrival_name" AS "nested_2.product_arrival_name", "o"."product_arrival_q_r" AS "nested_2.product_arrival_q_r"\n      FROM payments AS p\n      JOIN delivery_point_orders dpo on dpo.id = p.delivery_point_order_id\n      JOIN orders o on o.id = dpo.order_id',
         variables: [],
         readsFrom: {
           payments,

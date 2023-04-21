@@ -67,6 +67,7 @@ class Orders extends Table {
   IntColumn get packages => integer()();
   BoolColumn get cardPaymentAllowed => boolean()();
   BoolColumn get needPayment => boolean()();
+  BoolColumn get factsConfirmed => boolean()();
   IntColumn get storageId => integer().nullable().references(OrderStorages, #id)();
   IntColumn get deliveryLoadDuration => integer()();
   IntColumn get pickupLoadDuration => integer()();

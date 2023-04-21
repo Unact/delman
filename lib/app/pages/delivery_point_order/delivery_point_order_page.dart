@@ -192,7 +192,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
   Widget build(BuildContext context) {
     return BlocConsumer<DeliveryPointOrderViewModel, DeliveryPointOrderState>(
       builder: (context, state) {
-        bool isPickup = state.deliveryPointOrderEx.dpo.pickup;
+        bool isPickup = state.isPickup;
         Order order = state.deliveryPointOrderEx.o;
 
         return Scaffold(
@@ -373,6 +373,19 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
     DeliveryPointOrderState state = vm.state;
     DeliveryPointOrder deliveryPointOrder = state.deliveryPointOrderEx.dpo;
 
+    if (!state.factsConfirmed) {
+      return [
+        TextButton(
+          onPressed: () {
+            unfocus();
+            vm.confirmOrderFacts();
+          },
+          child: const Text('Подтвердить'),
+          style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+        )
+      ];
+    }
+
     return [
       !state.needPayment ? null : TextButton(
         onPressed: () {
@@ -455,7 +468,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
         initiallyExpanded: true,
         tilePadding: const EdgeInsets.symmetric(horizontal: 8),
         children: state.orderLines.map<Widget>(
-          (e) => _buildOrderLineTile(context, e, state.isFinishable)
+          (e) => _buildOrderLineTile(context, e, !state.factsConfirmed)
         ).toList()
       )
     ];
