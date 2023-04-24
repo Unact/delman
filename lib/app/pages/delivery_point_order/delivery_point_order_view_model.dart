@@ -87,7 +87,7 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
     List<String> messages = [];
     String typeMsgPart = state.isPickup ? 'забор' : 'доставку';
 
-    if (!state.factsConfirmed) {
+    if (!state.factsConfirmed && !state.isPickup) {
       emit(state.copyWith(
         status: DeliveryPointOrderStateStatus.failure,
         message: 'Не для всех позиций указан факт'
