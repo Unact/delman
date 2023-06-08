@@ -1,7 +1,8 @@
 part of 'person_page.dart';
 
 class PersonViewModel extends PageViewModel<PersonState, PersonStateStatus> {
-  static const String _kRepoUrl = 'https://unact.github.io/mobile_apps/delman/';
+  static const String _kManifestRepoUrl = 'https://unact.github.io/mobile_apps/delman';
+  static const String _kAppRepoUrl = 'https://github.com/Unact/delman';
 
   PersonViewModel(BuildContext context) : super(context, PersonState());
 
@@ -37,8 +38,8 @@ class PersonViewModel extends PageViewModel<PersonState, PersonStateStatus> {
 
   Future<void> launchAppUpdate() async {
     String version = state.user!.version;
-    String androidUpdateUrl = '$_kRepoUrl/releases/download/$version/app-release.apk';
-    String iosUpdateUrl = 'itms-services://?action=download-manifest&url=$_kRepoUrl/manifest.plist';
+    String androidUpdateUrl = '$_kAppRepoUrl/releases/download/$version/app-release.apk';
+    String iosUpdateUrl = 'itms-services://?action=download-manifest&url=$_kManifestRepoUrl/manifest.plist';
     String url = Platform.isIOS ? iosUpdateUrl : androidUpdateUrl;
 
     if (await canLaunch(url)) {
