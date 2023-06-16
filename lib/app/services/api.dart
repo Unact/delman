@@ -87,7 +87,7 @@ class Api {
     required String login
   }) async {
     await _sendRawRequest(() async {
-      _dio = _createDio(_url, _version, null);
+      _dio = _createDio(url, _version, null);
 
       return await _dio.post(
         'v2/reset_password',
