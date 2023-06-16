@@ -102,12 +102,12 @@ class _AcceptPaymentViewState extends State<_AcceptPaymentView> {
       SizedBox(
         height: 32,
         child: vm.state.isCancelable ? ElevatedButton(
-          child: const Text('Отмена', style: TextStyle(color: Colors.black)),
           style: ElevatedButton.styleFrom(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
             backgroundColor: Colors.white
           ),
-          onPressed: vm.cancelPayment
+          onPressed: vm.cancelPayment,
+          child: const Text('Отмена', style: TextStyle(color: Colors.black))
         ) : Container()
       ),
       const SizedBox(height: 40)

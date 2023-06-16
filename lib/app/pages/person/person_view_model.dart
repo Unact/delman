@@ -40,10 +40,10 @@ class PersonViewModel extends PageViewModel<PersonState, PersonStateStatus> {
     String version = state.user!.version;
     String androidUpdateUrl = '$_kAppRepoUrl/releases/download/$version/app-release.apk';
     String iosUpdateUrl = 'itms-services://?action=download-manifest&url=$_kManifestRepoUrl/manifest.plist';
-    String url = Platform.isIOS ? iosUpdateUrl : androidUpdateUrl;
+    Uri uri = Uri.parse(Platform.isIOS ? iosUpdateUrl : androidUpdateUrl);
 
-    if (await canLaunch(url)) {
-      await launch(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
     } else {
       emit(state.copyWith(status: PersonStateStatus.failure, message: Strings.genericErrorMsg));
     }

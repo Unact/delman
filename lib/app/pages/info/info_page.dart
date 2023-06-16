@@ -176,7 +176,7 @@ class _InfoViewState extends State<_InfoView> {
             style: const TextStyle(color: Colors.grey),
             children: <TextSpan>[
               TextSpan(
-                text: state.deliveries.map((e) => Format.dateStr(e.delivery.deliveryDate)).join('\n') + '\n',
+                text: '${state.deliveries.map((e) => Format.dateStr(e.delivery.deliveryDate)).join('\n')}\n',
                 style: const TextStyle(fontSize: 12.0)
               ),
               TextSpan(text: 'Точек: ${state.deliveryPointsCnt}\n', style: const TextStyle(fontSize: 12.0)),
@@ -189,8 +189,8 @@ class _InfoViewState extends State<_InfoView> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
             backgroundColor: Colors.blue,
           ),
-          child: const Text('Завершить день'),
-          onPressed: state.deliveryPointsCnt == 0 ? null : vm.closeDelivery
+          onPressed: state.deliveryPointsCnt == 0 ? null : vm.closeDelivery,
+          child: const Text('Завершить день')
         ),
       ),
     );

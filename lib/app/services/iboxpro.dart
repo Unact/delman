@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
-import 'package:flutter_blue/flutter_blue.dart' as blue;
+import 'package:flutter_blue_plus/flutter_blue_plus.dart' as blue;
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart' as blue_serial;
 import 'package:iboxpro_flutter/iboxpro_flutter.dart';
 
@@ -41,7 +41,7 @@ class Iboxpro {
     required Function(String) onError,
     required Function() onConnected
   }) async {
-    if (!(await blue.FlutterBlue.instance.isOn)) {
+    if (!(await blue.FlutterBluePlus.instance.isOn)) {
       onError.call('Не включен Bluetooth');
 
       return;
@@ -128,7 +128,7 @@ class Iboxpro {
   }
 
   Future<String?> _findBTDeviceNameIos() async {
-    blue.FlutterBlue flutterBlue = blue.FlutterBlue.instance;
+    blue.FlutterBluePlus flutterBlue = blue.FlutterBluePlus.instance;
     List<blue.ScanResult> results = await flutterBlue.startScan(timeout: _searchTimeout);
     blue.BluetoothDevice? device = results.firstWhereOrNull(
       (blue.ScanResult result) => result.device.name.contains(_terminalNamePrefix)

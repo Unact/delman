@@ -7,7 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fk_user_agent/fk_user_agent.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:package_info/package_info.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '/app/constants/strings.dart';
@@ -203,12 +203,12 @@ class Api {
 
     if (Platform.isIOS) {
       IosDeviceInfo iosDeviceInfo = await DeviceInfoPlugin().iosInfo;
-      osVersion = iosDeviceInfo.systemVersion ?? '';
-      deviceModel = iosDeviceInfo.utsname.machine ?? '';
+      osVersion = iosDeviceInfo.systemVersion;
+      deviceModel = iosDeviceInfo.utsname.machine;
     } else {
       AndroidDeviceInfo androidDeviceInfo = await DeviceInfoPlugin().androidInfo;
-      osVersion = androidDeviceInfo.version.release ?? '';
-      deviceModel = (androidDeviceInfo.brand ?? '') + ' - ' + (androidDeviceInfo.model ?? '');
+      osVersion = androidDeviceInfo.version.release;
+      deviceModel = '${androidDeviceInfo.brand} - ${androidDeviceInfo.model}';
     }
 
     return await _sendRequest(() => _dio.post('v1/delman/save_log',

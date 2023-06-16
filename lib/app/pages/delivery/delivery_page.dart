@@ -60,8 +60,8 @@ class _DeliveryView extends StatelessWidget {
   Widget _deliveryPointTile(BuildContext context, DeliveryPointExResult deliveryPointEx) {
     return ListTile(
       leading: CircleAvatar(
-        child: Text(deliveryPointEx.dp.seq.toString(), style: const TextStyle(color: Colors.black)),
-        backgroundColor: Styling.deliveryPointColor(deliveryPointEx)
+        backgroundColor: Styling.deliveryPointColor(deliveryPointEx),
+        child: Text(deliveryPointEx.dp.seq.toString(), style: const TextStyle(color: Colors.black))
       ),
       title: Text(deliveryPointEx.dp.addressName, style: const TextStyle(fontSize: 14.0)),
       subtitle: RichText(

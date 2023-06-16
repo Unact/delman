@@ -12,10 +12,10 @@ class ExpandingText extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ExpandingTextState createState() => _ExpandingTextState();
+  ExpandingTextState createState() => ExpandingTextState();
 }
 
-class _ExpandingTextState extends State<ExpandingText> {
+class ExpandingTextState extends State<ExpandingText> {
   static const int _kLimit = 40;
   bool _showAll = false;
 

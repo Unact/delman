@@ -3,10 +3,10 @@ import 'package:stack_trace/stack_trace.dart';
 
 class Misc {
   static Future<void> callPhone(phone, {Function? onFailure}) async {
-    String url = 'tel://${phone.replaceAll(RegExp(r'\s|\(|\)|\-'), '')}';
+    Uri uri = Uri.parse('tel://${phone.replaceAll(RegExp(r'\s|\(|\)|\-'), '')}');
 
-    if (await canLaunch(url)) {
-      await launch(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
     } else {
       onFailure?.call();
     }

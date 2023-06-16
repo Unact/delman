@@ -6,7 +6,7 @@ part of 'database.dart';
 // MoorGenerator
 // **************************************************************************
 
-// ignore_for_file: unnecessary_brace_in_string_interps, unnecessary_this
+// ignore_for_file: type=lint
 class Delivery extends DataClass implements Insertable<Delivery> {
   final int id;
   final bool active;
@@ -151,9 +151,10 @@ class DeliveriesCompanion extends UpdateCompanion<Delivery> {
 
 class $DeliveriesTable extends Deliveries
     with TableInfo<$DeliveriesTable, Delivery> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $DeliveriesTable(this._db, [this._alias]);
+  $DeliveriesTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
@@ -215,7 +216,7 @@ class $DeliveriesTable extends Deliveries
 
   @override
   $DeliveriesTable createAlias(String alias) {
-    return $DeliveriesTable(_db, alias);
+    return $DeliveriesTable(attachedDatabase, alias);
   }
 }
 
@@ -777,9 +778,10 @@ class DeliveryPointsCompanion extends UpdateCompanion<DeliveryPoint> {
 
 class $DeliveryPointsTable extends DeliveryPoints
     with TableInfo<$DeliveryPointsTable, DeliveryPoint> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $DeliveryPointsTable(this._db, [this._alias]);
+  $DeliveryPointsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
@@ -1035,7 +1037,7 @@ class $DeliveryPointsTable extends DeliveryPoints
 
   @override
   $DeliveryPointsTable createAlias(String alias) {
-    return $DeliveryPointsTable(_db, alias);
+    return $DeliveryPointsTable(attachedDatabase, alias);
   }
 }
 
@@ -1157,9 +1159,10 @@ class OrderStoragesCompanion extends UpdateCompanion<OrderStorage> {
 
 class $OrderStoragesTable extends OrderStorages
     with TableInfo<$OrderStoragesTable, OrderStorage> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $OrderStoragesTable(this._db, [this._alias]);
+  $OrderStoragesTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
@@ -1205,7 +1208,7 @@ class $OrderStoragesTable extends OrderStorages
 
   @override
   $OrderStoragesTable createAlias(String alias) {
-    return $OrderStoragesTable(_db, alias);
+    return $OrderStoragesTable(attachedDatabase, alias);
   }
 }
 
@@ -2207,9 +2210,10 @@ class OrdersCompanion extends UpdateCompanion<Order> {
 }
 
 class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $OrdersTable(this._db, [this._alias]);
+  $OrdersTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
@@ -2700,7 +2704,7 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
 
   @override
   $OrdersTable createAlias(String alias) {
-    return $OrdersTable(_db, alias);
+    return $OrdersTable(attachedDatabase, alias);
   }
 }
 
@@ -2930,9 +2934,10 @@ class DeliveryPointOrdersCompanion extends UpdateCompanion<DeliveryPointOrder> {
 
 class $DeliveryPointOrdersTable extends DeliveryPointOrders
     with TableInfo<$DeliveryPointOrdersTable, DeliveryPointOrder> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $DeliveryPointOrdersTable(this._db, [this._alias]);
+  $DeliveryPointOrdersTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
@@ -3036,7 +3041,7 @@ class $DeliveryPointOrdersTable extends DeliveryPointOrders
 
   @override
   $DeliveryPointOrdersTable createAlias(String alias) {
-    return $DeliveryPointOrdersTable(_db, alias);
+    return $DeliveryPointOrdersTable(attachedDatabase, alias);
   }
 }
 
@@ -3266,9 +3271,10 @@ class OrderLinesCompanion extends UpdateCompanion<OrderLine> {
 
 class $OrderLinesTable extends OrderLines
     with TableInfo<$OrderLinesTable, OrderLine> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $OrderLinesTable(this._db, [this._alias]);
+  $OrderLinesTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
@@ -3361,7 +3367,7 @@ class $OrderLinesTable extends OrderLines
 
   @override
   $OrderLinesTable createAlias(String alias) {
-    return $OrderLinesTable(_db, alias);
+    return $OrderLinesTable(attachedDatabase, alias);
   }
 }
 
@@ -3546,9 +3552,10 @@ class PaymentsCompanion extends UpdateCompanion<Payment> {
 }
 
 class $PaymentsTable extends Payments with TableInfo<$PaymentsTable, Payment> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $PaymentsTable(this._db, [this._alias]);
+  $PaymentsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
@@ -3623,7 +3630,7 @@ class $PaymentsTable extends Payments with TableInfo<$PaymentsTable, Payment> {
 
   @override
   $PaymentsTable createAlias(String alias) {
-    return $PaymentsTable(_db, alias);
+    return $PaymentsTable(attachedDatabase, alias);
   }
 }
 
@@ -3799,9 +3806,10 @@ class OrderInfoLinesCompanion extends UpdateCompanion<OrderInfoLine> {
 
 class $OrderInfoLinesTable extends OrderInfoLines
     with TableInfo<$OrderInfoLinesTable, OrderInfoLine> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $OrderInfoLinesTable(this._db, [this._alias]);
+  $OrderInfoLinesTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
@@ -3870,7 +3878,7 @@ class $OrderInfoLinesTable extends OrderInfoLines
 
   @override
   $OrderInfoLinesTable createAlias(String alias) {
-    return $OrderInfoLinesTable(_db, alias);
+    return $OrderInfoLinesTable(attachedDatabase, alias);
   }
 }
 
@@ -4121,9 +4129,10 @@ class UsersCompanion extends UpdateCompanion<User> {
 }
 
 class $UsersTable extends Users with TableInfo<$UsersTable, User> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $UsersTable(this._db, [this._alias]);
+  $UsersTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
@@ -4229,7 +4238,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
 
   @override
   $UsersTable createAlias(String alias) {
-    return $UsersTable(_db, alias);
+    return $UsersTable(attachedDatabase, alias);
   }
 }
 
@@ -4356,9 +4365,10 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
 }
 
 class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $SettingsTable(this._db, [this._alias]);
+  $SettingsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
@@ -4402,7 +4412,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
 
   @override
   $SettingsTable createAlias(String alias) {
-    return $SettingsTable(_db, alias);
+    return $SettingsTable(attachedDatabase, alias);
   }
 }
 

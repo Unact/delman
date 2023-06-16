@@ -33,13 +33,13 @@ class _HomeView extends StatelessWidget {
         return Scaffold(
           bottomNavigationBar: _buildBottomNavigationBar(context),
           body: IndexedStack(
+            index: state.currentIndex,
             children: <Widget>[
               InfoPage(),
               DeliveryPage(),
               PaymentsPage(),
               OrderStoragesPage()
             ],
-            index: state.currentIndex,
           ),
         );
       }

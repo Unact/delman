@@ -60,11 +60,11 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
         return AlertDialog(
           title: const Text('Комментарий'),
           content: SizedBox(
+            width: size.width,
             child: TextField(
               textCapitalization: TextCapitalization.words,
               controller: controller,
-            ),
-            width: size.width
+            )
           ),
           actions: [
             TextButton(
@@ -145,8 +145,8 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
                   },
                 ),
               ),
-              Column(
-                children: const [
+              const Column(
+                children: [
                   SizedBox(height: 24),
                   Text('Внимание'),
                 ],
@@ -154,8 +154,8 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
             ]
           ),
           content: SizedBox(
-            child: const Text('Хотите ли принять оплату?'),
-            width: size.width
+            width: size.width,
+            child: const Text('Хотите ли принять оплату?')
           ),
           actions: [
             TextButton(
@@ -163,16 +163,16 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
                 Navigator.of(context).pop();
                 vm.tryStartPayment(false);
               },
-              child: const Icon(Icons.account_balance_wallet),
               style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+              child: const Icon(Icons.account_balance_wallet),
             ),
             !state.deliveryPointOrderEx.o.cardPaymentAllowed ? Container() : TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 vm.tryStartPayment(true);
               },
-              child: const Icon(Icons.credit_card),
               style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+              child: const Icon(Icons.credit_card),
             ),
           ]
         );
@@ -345,7 +345,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
       order.pickupDateTimeFrom == null ? Container() : InfoRow(
         title: const Text('Время забора'),
         trailing: Text(
-          Format.timeStr(order.pickupDateTimeTo) + ' - ' + Format.timeStr(order.pickupDateTimeTo)
+          '${Format.timeStr(order.pickupDateTimeTo)} - ${Format.timeStr(order.pickupDateTimeTo)}'
         )
       ),
       InfoRow(
@@ -380,8 +380,8 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
             unfocus();
             vm.confirmOrderFacts();
           },
-          child: const Text('Подтвердить'),
           style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+          child: const Text('Подтвердить'),
         )
       ];
     }
@@ -392,16 +392,16 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
           unfocus();
           vm.tryStartPayment(false);
         },
-        child: const Icon(Icons.account_balance_wallet),
         style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+        child: const Icon(Icons.account_balance_wallet),
       ),
       !state.needPayment || !state.deliveryPointOrderEx.o.cardPaymentAllowed ? null : TextButton(
         onPressed: () {
           unfocus();
           vm.tryStartPayment(true);
         },
-        child: const Icon(Icons.credit_card),
         style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+        child: const Icon(Icons.credit_card),
       ),
       deliveryPointOrder.finished ? null : TextButton(
         style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
@@ -446,7 +446,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
       order.deliveryDateTimeFrom == null ? Container() : InfoRow(
         title: const Text('Время доставки'),
         trailing: Text(
-          Format.timeStr(order.deliveryDateTimeFrom) + ' - ' + Format.timeStr(order.deliveryDateTimeTo)
+          '${Format.timeStr(order.deliveryDateTimeFrom)} - ${Format.timeStr(order.deliveryDateTimeTo)}'
         )
       ),
       InfoRow(
@@ -514,7 +514,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
           ),
           Row(
             children: <Widget>[
-              Text(Format.numberStr(orderLine.price) + ' x '),
+              Text('${Format.numberStr(orderLine.price)} x '),
               !editable ? Text(orderLine.factAmount.toString()) : SizedBox(
                 width: 40,
                 height: 36,
@@ -539,7 +539,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
 
   String _formatTypeText(String typeName, bool hasElevator, int? floor, String? flat) {
     return typeName + (hasElevator ? '\nлифт' : '\nпешком') +
-      (floor == null ? '' : '\nэтаж ' + floor.toString()) +
-      (flat == null ? '' : ' квартира ' + flat.toString());
+      (floor == null ? '' : '\nэтаж $floor') +
+      (flat == null ? '' : ' квартира $flat');
   }
 }

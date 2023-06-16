@@ -39,10 +39,10 @@ class PointAddressViewModel extends PageViewModel<PointAddressState, PointAddres
       '${location?.latitude},${location?.longitude}'
       '~'
       '${state.deliveryPointEx.dp.latitude},${state.deliveryPointEx.dp.longitude}';
-    String url = 'yandexmaps://maps.yandex.ru?$params';
+    Uri uri = Uri.parse('yandexmaps://maps.yandex.ru?$params');
 
-    if (await canLaunch(url)) {
-      await launch(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
     } else {
       emit(state.copyWith(status: PointAddressStateStatus.failure, message: Strings.genericErrorMsg));
     }

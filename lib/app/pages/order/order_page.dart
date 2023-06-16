@@ -148,7 +148,7 @@ class _OrderViewState extends State<_OrderView> {
           ),
           Row(
             children: <Widget>[
-              Text(Format.numberStr(orderLine.price) + ' x '),
+              Text('${Format.numberStr(orderLine.price)} x '),
               Text((orderLine.factAmount ?? orderLine.amount).toString())
             ],
           )
