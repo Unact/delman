@@ -4233,258 +4233,6 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
   }
 }
 
-class ApiCredential extends DataClass implements Insertable<ApiCredential> {
-  final int id;
-  final String accessToken;
-  final String refreshToken;
-  final String url;
-  ApiCredential(
-      {required this.id,
-      required this.accessToken,
-      required this.refreshToken,
-      required this.url});
-  factory ApiCredential.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return ApiCredential(
-      id: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      accessToken: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}access_token'])!,
-      refreshToken: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}refresh_token'])!,
-      url: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}url'])!,
-    );
-  }
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['access_token'] = Variable<String>(accessToken);
-    map['refresh_token'] = Variable<String>(refreshToken);
-    map['url'] = Variable<String>(url);
-    return map;
-  }
-
-  ApiCredentialsCompanion toCompanion(bool nullToAbsent) {
-    return ApiCredentialsCompanion(
-      id: Value(id),
-      accessToken: Value(accessToken),
-      refreshToken: Value(refreshToken),
-      url: Value(url),
-    );
-  }
-
-  factory ApiCredential.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return ApiCredential(
-      id: serializer.fromJson<int>(json['id']),
-      accessToken: serializer.fromJson<String>(json['accessToken']),
-      refreshToken: serializer.fromJson<String>(json['refreshToken']),
-      url: serializer.fromJson<String>(json['url']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'accessToken': serializer.toJson<String>(accessToken),
-      'refreshToken': serializer.toJson<String>(refreshToken),
-      'url': serializer.toJson<String>(url),
-    };
-  }
-
-  ApiCredential copyWith(
-          {int? id, String? accessToken, String? refreshToken, String? url}) =>
-      ApiCredential(
-        id: id ?? this.id,
-        accessToken: accessToken ?? this.accessToken,
-        refreshToken: refreshToken ?? this.refreshToken,
-        url: url ?? this.url,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('ApiCredential(')
-          ..write('id: $id, ')
-          ..write('accessToken: $accessToken, ')
-          ..write('refreshToken: $refreshToken, ')
-          ..write('url: $url')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, accessToken, refreshToken, url);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ApiCredential &&
-          other.id == this.id &&
-          other.accessToken == this.accessToken &&
-          other.refreshToken == this.refreshToken &&
-          other.url == this.url);
-}
-
-class ApiCredentialsCompanion extends UpdateCompanion<ApiCredential> {
-  final Value<int> id;
-  final Value<String> accessToken;
-  final Value<String> refreshToken;
-  final Value<String> url;
-  const ApiCredentialsCompanion({
-    this.id = const Value.absent(),
-    this.accessToken = const Value.absent(),
-    this.refreshToken = const Value.absent(),
-    this.url = const Value.absent(),
-  });
-  ApiCredentialsCompanion.insert({
-    this.id = const Value.absent(),
-    required String accessToken,
-    required String refreshToken,
-    required String url,
-  })  : accessToken = Value(accessToken),
-        refreshToken = Value(refreshToken),
-        url = Value(url);
-  static Insertable<ApiCredential> custom({
-    Expression<int>? id,
-    Expression<String>? accessToken,
-    Expression<String>? refreshToken,
-    Expression<String>? url,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (accessToken != null) 'access_token': accessToken,
-      if (refreshToken != null) 'refresh_token': refreshToken,
-      if (url != null) 'url': url,
-    });
-  }
-
-  ApiCredentialsCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? accessToken,
-      Value<String>? refreshToken,
-      Value<String>? url}) {
-    return ApiCredentialsCompanion(
-      id: id ?? this.id,
-      accessToken: accessToken ?? this.accessToken,
-      refreshToken: refreshToken ?? this.refreshToken,
-      url: url ?? this.url,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (accessToken.present) {
-      map['access_token'] = Variable<String>(accessToken.value);
-    }
-    if (refreshToken.present) {
-      map['refresh_token'] = Variable<String>(refreshToken.value);
-    }
-    if (url.present) {
-      map['url'] = Variable<String>(url.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ApiCredentialsCompanion(')
-          ..write('id: $id, ')
-          ..write('accessToken: $accessToken, ')
-          ..write('refreshToken: $refreshToken, ')
-          ..write('url: $url')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class $ApiCredentialsTable extends ApiCredentials
-    with TableInfo<$ApiCredentialsTable, ApiCredential> {
-  final GeneratedDatabase _db;
-  final String? _alias;
-  $ApiCredentialsTable(this._db, [this._alias]);
-  final VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
-      'id', aliasedName, false,
-      type: const IntType(),
-      requiredDuringInsert: false,
-      defaultConstraints: 'PRIMARY KEY AUTOINCREMENT');
-  final VerificationMeta _accessTokenMeta =
-      const VerificationMeta('accessToken');
-  @override
-  late final GeneratedColumn<String?> accessToken = GeneratedColumn<String?>(
-      'access_token', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
-  final VerificationMeta _refreshTokenMeta =
-      const VerificationMeta('refreshToken');
-  @override
-  late final GeneratedColumn<String?> refreshToken = GeneratedColumn<String?>(
-      'refresh_token', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
-  final VerificationMeta _urlMeta = const VerificationMeta('url');
-  @override
-  late final GeneratedColumn<String?> url = GeneratedColumn<String?>(
-      'url', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
-  @override
-  List<GeneratedColumn> get $columns => [id, accessToken, refreshToken, url];
-  @override
-  String get aliasedName => _alias ?? 'api_credentials';
-  @override
-  String get actualTableName => 'api_credentials';
-  @override
-  VerificationContext validateIntegrity(Insertable<ApiCredential> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('access_token')) {
-      context.handle(
-          _accessTokenMeta,
-          accessToken.isAcceptableOrUnknown(
-              data['access_token']!, _accessTokenMeta));
-    } else if (isInserting) {
-      context.missing(_accessTokenMeta);
-    }
-    if (data.containsKey('refresh_token')) {
-      context.handle(
-          _refreshTokenMeta,
-          refreshToken.isAcceptableOrUnknown(
-              data['refresh_token']!, _refreshTokenMeta));
-    } else if (isInserting) {
-      context.missing(_refreshTokenMeta);
-    }
-    if (data.containsKey('url')) {
-      context.handle(
-          _urlMeta, url.isAcceptableOrUnknown(data['url']!, _urlMeta));
-    } else if (isInserting) {
-      context.missing(_urlMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  ApiCredential map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return ApiCredential.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
-  }
-
-  @override
-  $ApiCredentialsTable createAlias(String alias) {
-    return $ApiCredentialsTable(_db, alias);
-  }
-}
-
 class Setting extends DataClass implements Insertable<Setting> {
   final int id;
   final DateTime? lastSync;
@@ -4670,10 +4418,7 @@ abstract class _$AppStorage extends GeneratedDatabase {
   late final $PaymentsTable payments = $PaymentsTable(this);
   late final $OrderInfoLinesTable orderInfoLines = $OrderInfoLinesTable(this);
   late final $UsersTable users = $UsersTable(this);
-  late final $ApiCredentialsTable apiCredentials = $ApiCredentialsTable(this);
   late final $SettingsTable settings = $SettingsTable(this);
-  late final ApiCredentialsDao apiCredentialsDao =
-      ApiCredentialsDao(this as AppStorage);
   late final DeliveriesDao deliveriesDao = DeliveriesDao(this as AppStorage);
   late final OrderStoragesDao orderStoragesDao =
       OrderStoragesDao(this as AppStorage);
@@ -4693,7 +4438,6 @@ abstract class _$AppStorage extends GeneratedDatabase {
         payments,
         orderInfoLines,
         users,
-        apiCredentials,
         settings
       ];
 }
@@ -4702,9 +4446,6 @@ abstract class _$AppStorage extends GeneratedDatabase {
 // DaoGenerator
 // **************************************************************************
 
-mixin _$ApiCredentialsDaoMixin on DatabaseAccessor<AppStorage> {
-  $ApiCredentialsTable get apiCredentials => attachedDatabase.apiCredentials;
-}
 mixin _$DeliveriesDaoMixin on DatabaseAccessor<AppStorage> {
   $DeliveriesTable get deliveries => attachedDatabase.deliveries;
   $DeliveryPointsTable get deliveryPoints => attachedDatabase.deliveryPoints;

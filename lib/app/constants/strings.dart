@@ -3,7 +3,8 @@ class Strings {
   static const ruAppName = 'Курьер';
   static const envDevelopment = 'development';
   static const envProduction = 'production';
-  static const optsKeyword = '5005';
+  static const optsLoginKeyword = '81234567890';
+  static const optsPasswordKeyword = '5005';
 
   static const infoPageName = 'Главная';
   static const deliveryPageName = 'Маршрут';

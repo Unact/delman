@@ -78,7 +78,7 @@ class OrderQRScanViewModel extends PageViewModel<OrderQRScanState, OrderQRScanSt
       Order? order = await app.storage.ordersDao.getOrderByTrackingNumber(trackingNumber);
       if (order != null) return order;
 
-      ApiFindOrderData? data = await Api(storage: app.storage).findOrderData(trackingNumber: trackingNumber);
+      ApiFindOrderData? data = await app.api.findOrderData(trackingNumber: trackingNumber);
 
       if (data != null) {
         order = data.order.toDatabaseEnt();

@@ -12,12 +12,14 @@ class LoginViewModel extends PageViewModel<LoginState, LoginStateStatus> {
   }
 
   Future<void> apiLogin(String url, String login, String password) async {
-    if (login == password && login == Strings.optsKeyword) {
+    if (!state.optsEnabled) login = _formatLogin(login);
+
+    if (password == Strings.optsPasswordKeyword && login == Strings.optsLoginKeyword) {
       emit(state.copyWith(
         status: LoginStateStatus.urlFieldActivated,
         login: '',
         password: '',
-        showUrl: true
+        optsEnabled: true
       ));
 
       return;
@@ -49,6 +51,8 @@ class LoginViewModel extends PageViewModel<LoginState, LoginStateStatus> {
   }
 
   Future<void> getNewPassword(String url, String login) async {
+    if (!state.optsEnabled) login = _formatLogin(login);
+
     if (login == '') {
       emit(state.copyWith(status: LoginStateStatus.failure, message: 'Не заполнено поле с логином'));
       return;
@@ -71,7 +75,7 @@ class LoginViewModel extends PageViewModel<LoginState, LoginStateStatus> {
 
   Future<void> _login(String url, String login, String password) async {
     try {
-      await Api(storage: app.storage).login(url: url, login: login, password: password);
+      await app.api.login(url: url, login: login, password: password);
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {
@@ -84,12 +88,16 @@ class LoginViewModel extends PageViewModel<LoginState, LoginStateStatus> {
 
   Future<void> _resetPassword(String url, String login) async {
     try {
-      await Api(storage: app.storage).resetPassword(url: url, login: login);
+      await app.api.resetPassword(url: url, login: login);
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {
       await app.reportError(e, trace);
       throw AppError(Strings.genericErrorMsg);
     }
+  }
+
+  String _formatLogin(String login) {
+    return login.replaceAll(RegExp(r'[+\s\(\)-]'), '').replaceFirst('7', '8');
   }
 }

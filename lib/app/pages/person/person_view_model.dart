@@ -64,7 +64,7 @@ class PersonViewModel extends PageViewModel<PersonState, PersonStateStatus> {
     try {
       List<Log> logs = await FLog.getAllLogsByFilter(filterType: FilterType.TODAY);
 
-      await Api(storage: app.storage).saveLogs(logs: logs);
+      await app.api.saveLogs(logs: logs);
       await FLog.clearLogs();
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
@@ -76,7 +76,7 @@ class PersonViewModel extends PageViewModel<PersonState, PersonStateStatus> {
 
   Future<void> _apiLogout() async {
     try {
-      await Api(storage: app.storage).logout();
+      await app.api.logout();
       await app.storage.clearData();
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);

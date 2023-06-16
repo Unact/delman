@@ -80,7 +80,7 @@ class InfoViewModel extends PageViewModel<InfoState, InfoStateStatus> {
 
   Future<void> _closeDelivery() async {
     try {
-      await Api(storage: app.storage).closeDelivery();
+      await app.api.closeDelivery();
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {
@@ -101,7 +101,7 @@ class InfoViewModel extends PageViewModel<InfoState, InfoStateStatus> {
     await app.loadUserData();
 
     try {
-      ApiData data = await Api(storage: app.storage).getData();
+      ApiData data = await app.api.getData();
       AppStorage storage = app.storage;
       Setting setting = await storage.getSetting();
 

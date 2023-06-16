@@ -199,7 +199,7 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
     }
 
     try {
-      await Api(storage: app.storage).cancelOrder(
+      await app.api.cancelOrder(
         deliveryPointOrderId: state.deliveryPointOrderEx.dpo.id,
         location: location
       );
@@ -220,7 +220,7 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
 
   Future<void> _confirmOrderFacts() async {
     try {
-      await Api(storage: app.storage).confirmOrderFacts(
+      await app.api.confirmOrderFacts(
         deliveryPointOrderId: state.deliveryPointOrderEx.dpo.id,
         orderLines: state.orderLines.map((e) => {'id': e.id, 'factAmount': e.factAmount}).toList(),
       );
@@ -240,7 +240,7 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
     }
 
     try {
-      await Api(storage: app.storage).confirmOrder(
+      await app.api.confirmOrder(
         deliveryPointOrderId: state.deliveryPointOrderEx.dpo.id,
         location: location
       );
@@ -266,7 +266,7 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
 
   Future<void> _addOrderInfo(String comment) async {
     try {
-      await Api(storage: app.storage).addOrderInfo(orderId: state.deliveryPointOrderEx.o.id, comment: comment);
+      await app.api.addOrderInfo(orderId: state.deliveryPointOrderEx.o.id, comment: comment);
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {

@@ -49,7 +49,7 @@ class OrderStoragesViewModel extends PageViewModel<OrderStoragesState, OrderStor
 
   Future<void> _takeNewOrder(Order order) async {
     try {
-      await Api(storage: app.storage).takeNewOrder(orderId: order.id);
+      await app.api.takeNewOrder(orderId: order.id);
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {

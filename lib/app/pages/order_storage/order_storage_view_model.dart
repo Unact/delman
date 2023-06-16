@@ -129,7 +129,7 @@ class OrderStorageViewModel extends PageViewModel<OrderStorageState, OrderStorag
 
   Future<void> _acceptOrder(Order order) async {
     try {
-      await Api(storage: app.storage).acceptOrder(
+      await app.api.acceptOrder(
         orderId: order.id
       );
     } on ApiException catch(e) {
@@ -147,7 +147,7 @@ class OrderStorageViewModel extends PageViewModel<OrderStorageState, OrderStorag
 
   Future<void> _transferOrder(Order order) async {
     try {
-      await Api(storage: app.storage).transferOrder(
+      await app.api.transferOrder(
         orderId: order.id,
         orderStorageId: state.orderStorage.id
       );

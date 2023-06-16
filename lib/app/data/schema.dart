@@ -114,13 +114,6 @@ class Users extends Table {
   TextColumn get version => text()();
 }
 
-class ApiCredentials extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get accessToken => text()();
-  TextColumn get refreshToken => text()();
-  TextColumn get url => text()();
-}
-
 class Settings extends Table {
   IntColumn get id => integer().autoIncrement()();
   DateTimeColumn get lastSync => dateTime().nullable()();
