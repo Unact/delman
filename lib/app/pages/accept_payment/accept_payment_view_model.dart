@@ -182,7 +182,7 @@ class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState, AcceptPay
     }
 
     try {
-      await Api(storage: app.storage).acceptPayment(
+      await app.api.acceptPayment(
         deliveryPointOrderId: state.deliveryPointOrderEx.dpo.id,
         summ: state.total,
         transaction: transaction,
@@ -209,7 +209,7 @@ class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState, AcceptPay
 
   Future<ApiPaymentCredentials> _getApiPaymentCredentials() async {
     try {
-      return await Api(storage: app.storage).getPaymentCredentials();
+      return await app.api.getPaymentCredentials();
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {

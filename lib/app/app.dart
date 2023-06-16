@@ -19,12 +19,14 @@ class App {
   final String version;
   final String buildNumber;
   final AppStorage storage;
+  final Api api;
 
   App._({
     required this.isDebug,
     required this.version,
     required this.buildNumber,
-    required this.storage
+    required this.storage,
+    required this.api
   }) {
     _instance = this;
   }
@@ -52,7 +54,8 @@ class App {
       isDebug: isDebug,
       version: packageInfo.version,
       buildNumber: packageInfo.buildNumber,
-      storage: storage
+      storage: storage,
+      api: await Api.init()
     );
   }
 
@@ -81,7 +84,7 @@ class App {
 
   Future<void> loadUserData() async {
     try {
-      ApiUserData userData = await Api(storage: storage).getUserData();
+      ApiUserData userData = await api.getUserData();
 
       await storage.usersDao.loadUser(userData.toDatabaseEnt());
     } on ApiException catch(e) {

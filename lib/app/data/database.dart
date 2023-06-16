@@ -10,7 +10,6 @@ import 'package:delman/app/constants/strings.dart';
 
 part 'schema.dart';
 part 'database.g.dart';
-part 'api_credentials_dao.dart';
 part 'deliveries_dao.dart';
 part 'order_storages_dao.dart';
 part 'orders_dao.dart';
@@ -28,11 +27,9 @@ part 'users_dao.dart';
     OrderStorages,
     OrderInfoLines,
     Users,
-    ApiCredentials,
     Settings
   ],
   daos: [
-    ApiCredentialsDao,
     DeliveriesDao,
     OrderStoragesDao,
     OrdersDao,
@@ -58,7 +55,6 @@ class AppStorage extends _$AppStorage {
     await batch((batch) {
       batch.deleteWhere(users, (row) => const Constant(true));
       batch.deleteWhere(settings, (row) => const Constant(true));
-      batch.deleteWhere(apiCredentials, (row) => const Constant(true));
       batch.deleteWhere(orderInfoLines, (row) => const Constant(true));
       batch.deleteWhere(orderLines, (row) => const Constant(true));
       batch.deleteWhere(deliveryPointOrders, (row) => const Constant(true));
@@ -81,7 +77,6 @@ class AppStorage extends _$AppStorage {
         storageQR: '',
         version: '0.0.0'
       ));
-
       batch.insert(settings, Setting(
         id: kSingleRecordId
       ));
@@ -97,7 +92,7 @@ class AppStorage extends _$AppStorage {
   }
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(

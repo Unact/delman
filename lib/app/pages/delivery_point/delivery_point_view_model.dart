@@ -64,7 +64,7 @@ class DeliveryPointViewModel extends PageViewModel<DeliveryPointState, DeliveryP
     }
 
     try {
-      await Api(storage: app.storage).arriveAtDeliveryPoint(
+      await app.api.arriveAtDeliveryPoint(
         deliveryPointId: state.deliveryPointEx.dp.id,
         factArrival: factArrival,
         location: location

@@ -6,63 +6,80 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fk_user_agent/fk_user_agent.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '/app/constants/strings.dart';
 import '/app/entities/entities.dart';
-import '/app/data/database.dart';
 
 class Api {
   static const String authSchema = 'Renew';
+  static const _kAccessTokenKey = 'accessToken';
+  static const _kRefreshTokenKey = 'refreshToken';
+  static const _kUrlKey = 'url';
+  static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
-  final AppStorage storage;
+  late Dio _dio;
+  final String _version;
+  String _refreshToken;
+  String _url;
+  String _accessToken;
 
-  Api({
-    required this.storage
-  });
+  Api._(
+    this._url,
+    this._accessToken,
+    this._refreshToken,
+    this._version
+  ) {
+    _dio = _createDio(_url, _version, _accessToken);
+  }
+
+  Future<void> _setApiData(String url, String accessToken, String refreshToken) async {
+    await _storage.write(key: _kUrlKey, value: url);
+    await _storage.write(key: _kAccessTokenKey, value: accessToken);
+    await _storage.write(key: _kRefreshTokenKey, value: refreshToken);
+
+    _url = url;
+    _accessToken = accessToken;
+    _refreshToken = refreshToken;
+    _dio = _createDio(_url, _version, _accessToken);
+  }
+
+  static Future<Api> init() async {
+    return Api._(
+      await _storage.read(key: _kUrlKey) ?? '',
+      await _storage.read(key: _kAccessTokenKey) ?? '',
+      await _storage.read(key: _kRefreshTokenKey) ?? '',
+      (await PackageInfo.fromPlatform()).version
+    );
+  }
+
+  bool get isLoggedIn => _accessToken != '';
 
   Future<void> login({
     required String url,
     required String login,
     required String password
   }) async {
-    Map<String, dynamic> result = await _sendRawRequest(() async {
-      Dio dio = await _createDio(url, null);
+    await _setApiData(url, '', '');
+    Map<String, dynamic> result = await _sendRawRequest(() => _dio.post(
+      'v2/authenticate',
+      options: Options(headers: { 'Authorization': '$authSchema login=$login,password=$password' })
+    ));
 
-      return await dio.post(
-        'v2/authenticate',
-        options: Options(headers: { 'Authorization': '$authSchema login=$login,password=$password' })
-      );
-    });
-
-    ApiCredential apiCredential = (await _getApiCredentials()).copyWith(
-      accessToken: result['access_token'],
-      refreshToken: result['refresh_token'],
-      url: url
-    );
-
-    await storage.apiCredentialsDao.updateApiCredential(apiCredential);
+    await _setApiData(url, result['access_token'], result['refresh_token']);
   }
 
   Future<void> refresh() async {
-    ApiCredential apiCredential = await _getApiCredentials();
-    Map<String, dynamic> result = await _sendRawRequest(() async {
-      Dio dio = await _createDio(apiCredential.url, apiCredential.refreshToken);
+    await _setApiData(_url, _refreshToken, '');
+    Map<String, dynamic> result = await _sendRawRequest(() => _dio.post('v2/refresh'));
 
-      return await dio.post('v2/refresh');
-    });
-
-    ApiCredential newApiCredential = apiCredential.copyWith(
-      accessToken: result['access_token'],
-      refreshToken: result['refresh_token']
-    );
-
-    await storage.apiCredentialsDao.updateApiCredential(newApiCredential);
+    await _setApiData(_url, result['access_token'], result['refresh_token']);
   }
 
   Future<void> logout() async {
-    await storage.apiCredentialsDao.deleteApiCredential();
+    await _setApiData('', '', '');
   }
 
   Future<void> resetPassword({
@@ -70,9 +87,9 @@ class Api {
     required String login
   }) async {
     await _sendRawRequest(() async {
-      Dio dio = await _createDio(url, null);
+      _dio = _createDio(_url, _version, null);
 
-      return await dio.post(
+      return await _dio.post(
         'v2/reset_password',
         options: Options(headers: { 'Authorization': '$authSchema login=$login' })
       );
@@ -80,17 +97,17 @@ class Api {
   }
 
   Future<ApiUserData> getUserData() async {
-    return ApiUserData.fromJson(await _sendRequest((dio) => dio.get('v1/delman/user_info')));
+    return ApiUserData.fromJson(await _sendRequest(() => _dio.get('v1/delman/user_info')));
   }
 
   Future<ApiData> getData() async {
-    return ApiData.fromJson(await _sendRequest((dio) => dio.get('v1/delman')));
+    return ApiData.fromJson(await _sendRequest(() => _dio.get('v1/delman')));
   }
 
   Future<ApiFindOrderData?> findOrderData({
     required String trackingNumber
   }) async {
-    final orderData = await _sendRequest((dio) => dio.get(
+    final orderData = await _sendRequest(() => _dio.get(
       'v1/delman/find_order',
       queryParameters: { 'trackingNumber': trackingNumber }
     ));
@@ -103,7 +120,7 @@ class Api {
     required DateTime factArrival,
     required Location location,
   }) async {
-    return await _sendRequest((dio) => dio.post(
+    return await _sendRequest(() => _dio.post(
       'v1/delman/arrive',
       data: {
         'deliveryPointId': deliveryPointId,
@@ -117,7 +134,7 @@ class Api {
     required int deliveryPointOrderId,
     required Location location
   }) async {
-    return await _sendRequest((dio) => dio.post(
+    return await _sendRequest(() => _dio.post(
       'v1/delman/cancel_order',
       data: {
         'deliveryPointOrderId': deliveryPointOrderId,
@@ -130,7 +147,7 @@ class Api {
     required int deliveryPointOrderId,
     required List<Map<String, dynamic>> orderLines,
   }) async {
-    return await _sendRequest((dio) => dio.post(
+    return await _sendRequest(() => _dio.post(
       'v1/delman/confirm_order_facts',
       data: {
         'deliveryPointOrderId': deliveryPointOrderId,
@@ -143,7 +160,7 @@ class Api {
     required int deliveryPointOrderId,
     required Location location,
   }) async {
-    return await _sendRequest((dio) => dio.post(
+    return await _sendRequest(() => _dio.post(
       'v1/delman/confirm_order',
       data: {
         'deliveryPointOrderId': deliveryPointOrderId,
@@ -153,7 +170,7 @@ class Api {
   }
 
   Future<ApiPaymentCredentials> getPaymentCredentials() async {
-    return ApiPaymentCredentials.fromJson(await _sendRequest((dio) => dio.get('v1/delman/credentials')));
+    return ApiPaymentCredentials.fromJson(await _sendRequest(() => _dio.get('v1/delman/credentials')));
   }
 
   Future<void> acceptPayment({
@@ -162,7 +179,7 @@ class Api {
     required Location location,
     Map<dynamic, dynamic>? transaction,
   }) async {
-    return await _sendRequest((dio) => dio.post(
+    return await _sendRequest(() => _dio.post(
       'v1/delman/accept_payment',
       data: {
         'deliveryPointOrderId': deliveryPointOrderId,
@@ -194,7 +211,7 @@ class Api {
       deviceModel = (androidDeviceInfo.brand ?? '') + ' - ' + (androidDeviceInfo.model ?? '');
     }
 
-    return await _sendRequest((dio) => dio.post('v1/delman/save_log',
+    return await _sendRequest(() => _dio.post('v1/delman/save_log',
       data: FormData.fromMap({
         'deviceModel': deviceModel,
         'osVersion': osVersion,
@@ -206,7 +223,7 @@ class Api {
   Future<void> takeNewOrder({
     required int orderId
   }) async {
-    return await _sendRequest((rawApi) => rawApi.post(
+    return await _sendRequest(() => _dio.post(
       'v1/delman/take_new_order',
       data: {
         'orderId': orderId
@@ -217,7 +234,7 @@ class Api {
   Future<void> acceptOrder({
     required int orderId
   }) async {
-    return await _sendRequest((rawApi) => rawApi.post(
+    return await _sendRequest(() => _dio.post(
       'v1/delman/accept_order',
       data: {
         'orderId': orderId
@@ -229,7 +246,7 @@ class Api {
     required int orderId,
     required int orderStorageId
   }) async {
-    return await _sendRequest((dio) => dio.post(
+    return await _sendRequest(() => _dio.post(
       'v1/delman/transfer_order',
       data: {
         'orderId': orderId,
@@ -242,7 +259,7 @@ class Api {
     required int orderId,
     required String comment
   }) async {
-    return await _sendRequest((dio) => dio.post(
+    return await _sendRequest(() => _dio.post(
       'v1/delman/add_order_system_info',
       data: {
         'orderId': orderId,
@@ -252,43 +269,27 @@ class Api {
   }
 
   Future<void> closeDelivery() async {
-    return await _sendRequest((dio) => dio.post('v1/delman/close_delivery'));
+    return await _sendRequest(() => _dio.post('v1/delman/close_delivery'));
   }
 
-  Future<dynamic> _sendRequest(Future<dynamic> Function(Dio) request) async {
-    ApiCredential apiCredential = await _getApiCredentials();
-
+  Future<dynamic> _sendRequest(Future<Response> Function() request) async {
     try {
-      return await _sendRawRequest(() async {
-        Dio dio = await _createDio(apiCredential.url, apiCredential.accessToken);
-
-        return await request.call(dio);
-      });
+      return await _sendRawRequest(request);
     } on AuthException {
       await refresh();
-      ApiCredential newApiCredential = await _getApiCredentials();
-      Dio newDio = await _createDio(newApiCredential.url, newApiCredential.accessToken);
-
-      return await _sendRawRequest(() async {
-        return await request.call(newDio);
-      });
+      return await _sendRawRequest(request);
     }
   }
 
   Future<dynamic> _sendRawRequest(Future<Response> Function() rawRequest) async {
     try {
       return (await rawRequest.call()).data;
-    } on DioError catch(e) {
-      _onDioError(e);
+    } on DioException catch(e) {
+      _onDioException(e);
     }
   }
 
-  Future<ApiCredential> _getApiCredentials() async {
-    return await storage.apiCredentialsDao.getApiCredential();
-  }
-
-  Future<Dio> _createDio(String url, String? token) async {
-    String version = (await PackageInfo.fromPlatform()).version;
+  Dio _createDio(String url, String version, String? token) {
     String appName = Strings.appName;
     Map<String, dynamic> headers = {
       'Accept': 'application/json',
@@ -299,15 +300,15 @@ class Api {
 
     return Dio(BaseOptions(
       baseUrl: url,
-      connectTimeout: 100000,
-      receiveTimeout: 100000,
+      connectTimeout: const Duration(seconds: 100000),
+      receiveTimeout: const Duration(seconds: 100000),
       headers: headers,
       contentType: Headers.jsonContentType,
       responseType: ResponseType.json,
     ));
   }
 
-  static void _onDioError(DioError e) {
+  static void _onDioException(DioException e) {
     if (e.response != null) {
       final int statusCode = e.response!.statusCode!;
       final dynamic body = e.response!.data;
@@ -332,7 +333,12 @@ class Api {
         throw ApiException(body['error'], statusCode);
       }
     } else {
-      if (e.error is SocketException || e.error is HandshakeException || e.type == DioErrorType.connectTimeout) {
+      if (
+        e.error is SocketException ||
+        e.error is HandshakeException ||
+        e.error is HttpException ||
+        e.type == DioExceptionType.connectionTimeout
+      ) {
         throw ApiConnException();
       }
 

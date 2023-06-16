@@ -31,7 +31,7 @@ class _LandingView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<LandingViewModel, LandingState>(
       builder: (context, state) {
-        return state.isLogged ? HomePage() : LoginPage();
+        return state.isLoggedIn ? HomePage() : LoginPage();
       }
     );
   }
