@@ -18,7 +18,9 @@ class Api {
   static const _kAccessTokenKey = 'accessToken';
   static const _kRefreshTokenKey = 'refreshToken';
   static const _kUrlKey = 'url';
-  static const FlutterSecureStorage _storage = FlutterSecureStorage();
+  static const FlutterSecureStorage _storage = FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true, resetOnError: true)
+  );
 
   late Dio _dio;
   final String _version;

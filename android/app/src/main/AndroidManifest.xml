@@ -23,7 +23,9 @@
     <application
         android:name="${applicationName}"
         android:label="Курьер"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:fullBackupContent="false">
         <activity
             android:exported="true"
             android:name=".MainActivity"
