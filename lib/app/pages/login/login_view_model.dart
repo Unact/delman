@@ -79,7 +79,7 @@ class LoginViewModel extends PageViewModel<LoginState, LoginStateStatus> {
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {
-      await app.reportError(e, trace);
+      await Misc.reportError(e, trace);
       throw AppError(Strings.genericErrorMsg);
     }
 
@@ -92,7 +92,7 @@ class LoginViewModel extends PageViewModel<LoginState, LoginStateStatus> {
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {
-      await app.reportError(e, trace);
+      await Misc.reportError(e, trace);
       throw AppError(Strings.genericErrorMsg);
     }
   }

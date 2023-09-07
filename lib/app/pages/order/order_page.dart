@@ -1,11 +1,10 @@
 import 'package:drift/drift.dart' show TableUpdateQuery;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:u_app_utils/u_app_utils.dart';
 
 import '/app/data/database.dart';
 import '/app/pages/shared/page_view_model.dart';
-import '/app/utils/format.dart';
-import '/app/widgets/widgets.dart';
 
 part 'order_state.dart';
 part 'order_view_model.dart';

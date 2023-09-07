@@ -1,8 +1,9 @@
 import 'dart:async';
 
-import 'package:drift/drift.dart' show TableUpdateQuery;
+import 'package:drift/drift.dart' show TableUpdateQuery, Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:u_app_utils/u_app_utils.dart';
 
 import '/app/constants/strings.dart';
 import '/app/data/database.dart';
@@ -10,10 +11,8 @@ import '/app/entities/entities.dart';
 import '/app/pages/home/home_page.dart';
 import '/app/pages/person/person_page.dart';
 import '/app/pages/shared/page_view_model.dart';
-import '/app/services/api.dart';
-import '/app/utils/format.dart';
-import '/app/utils/geo_loc.dart';
-import '/app/widgets/widgets.dart';
+import '/app/services/delman_api.dart';
+import '/app/services/geo_loc.dart';
 
 part 'info_state.dart';
 part 'info_view_model.dart';
@@ -51,10 +50,6 @@ class _InfoViewState extends State<_InfoView> {
   void closeRefresher() {
     _refresherCompleter.complete();
     _refresherCompleter = Completer();
-  }
-
-  void showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -111,12 +106,12 @@ class _InfoViewState extends State<_InfoView> {
               break;
             case InfoStateStatus.closeFailure:
             case InfoStateStatus.closeSuccess:
-              showMessage(state.message);
+              Misc.showMessage(context, state.message);
               _progressDialog.close();
               break;
             case InfoStateStatus.loadFailure:
             case InfoStateStatus.loadSuccess:
-              showMessage(state.message);
+              Misc.showMessage(context, state.message);
               closeRefresher();
               break;
             default:

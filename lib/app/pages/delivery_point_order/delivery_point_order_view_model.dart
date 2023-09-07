@@ -21,7 +21,7 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
   @override
   Future<void> loadData() async {
     List<OrderLine> orderLines = (await app.storage.ordersDao.getOrderLines(state.deliveryPointOrderEx.o.id))
-      .map((e) => e.factAmount != null ? e : e.copyWith(factAmount: e.factAmount ?? e.amount))
+      .map((e) => e.factAmount != null ? e : e.copyWith(factAmount: Value(e.factAmount ?? e.amount)))
       .toList();
 
     emit(state.copyWith(
@@ -38,7 +38,7 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
   }
 
   Future<void> callPhone(String? phone) async {
-    await Misc.callPhone(phone, onFailure: () => emit(state.copyWith(
+    await Misc.callPhone(phone, onError: () => emit(state.copyWith(
       status: DeliveryPointOrderStateStatus.failure,
       message: Strings.genericErrorMsg
     )));
@@ -206,7 +206,7 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {
-      await app.reportError(e, trace);
+      await Misc.reportError(e, trace);
       throw AppError(Strings.genericErrorMsg);
     }
 
@@ -227,7 +227,7 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {
-      await app.reportError(e, trace);
+      await Misc.reportError(e, trace);
       throw AppError(Strings.genericErrorMsg);
     }
   }
@@ -247,7 +247,7 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {
-      await app.reportError(e, trace);
+      await Misc.reportError(e, trace);
       throw AppError(Strings.genericErrorMsg);
     }
 
@@ -270,7 +270,7 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {
-      await app.reportError(e, trace);
+      await Misc.reportError(e, trace);
       throw AppError(Strings.genericErrorMsg);
     }
 

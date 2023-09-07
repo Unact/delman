@@ -3,12 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:u_app_utils/u_app_utils.dart';
 
 import '/app/entities/entities.dart';
 import '/app/constants/strings.dart';
 import '/app/pages/shared/page_view_model.dart';
-import '/app/services/api.dart';
-import '/app/widgets/widgets.dart';
 
 part 'login_state.dart';
 part 'login_view_model.dart';
@@ -37,14 +36,6 @@ class _LoginViewState extends State<_LoginView> {
   final TextEditingController _loginController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _urlController = TextEditingController();
-
-  void unfocus() {
-    FocusScopeNode currentFocus = FocusScope.of(context);
-
-    if (!currentFocus.hasPrimaryFocus) {
-      currentFocus.unfocus();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +71,7 @@ class _LoginViewState extends State<_LoginView> {
           switch (state.status) {
             case LoginStateStatus.passwordSent:
             case LoginStateStatus.failure:
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+              Misc.showMessage(context, state.message);
               _progressDialog.close();
               break;
             case LoginStateStatus.loggedIn:
@@ -171,7 +162,7 @@ class _LoginViewState extends State<_LoginView> {
                       backgroundColor: Colors.blue,
                     ),
                     onPressed: () {
-                      unfocus();
+                      Misc.unfocus(context);
                       vm.apiLogin(_urlController.text, _loginController.text, _passwordController.text);
                     },
                     child: const Text('Войти'),
@@ -188,7 +179,7 @@ class _LoginViewState extends State<_LoginView> {
                       backgroundColor: Colors.blue,
                     ),
                     onPressed: () {
-                      unfocus();
+                      Misc.unfocus(context);
                       vm.getNewPassword(_urlController.text, _loginController.text);
                     },
                     child: const Text('Получить пароль', textAlign: TextAlign.center,),

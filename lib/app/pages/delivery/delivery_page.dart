@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:drift/drift.dart' show TableUpdateQuery;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:u_app_utils/u_app_utils.dart';
 
 import '/app/constants/strings.dart';
 import '/app/data/database.dart';
 import '/app/pages/delivery_point/delivery_point_page.dart';
 import '/app/pages/shared/page_view_model.dart';
-import '/app/utils/format.dart';
 import '/app/utils/styling.dart';
 
 part 'delivery_state.dart';

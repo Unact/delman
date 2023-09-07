@@ -37,29 +37,8 @@ class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState, AcceptPay
     emit(state.copyWith(message: 'Платеж отменен', canceled: true, status: AcceptPaymentStateStatus.failure));
   }
 
-  Future<bool> _checkBluetoothPermissions() async {
-    if (Platform.isIOS) {
-      Map<Permission, PermissionStatus> statuses = await [
-        Permission.bluetooth,
-      ].request();
-
-      return statuses.values.every((element) => element.isGranted);
-    }
-
-    if (Platform.isAndroid) {
-      Map<Permission, PermissionStatus> statuses = await [
-        Permission.bluetoothConnect,
-        Permission.bluetoothScan
-      ].request();
-
-      return statuses.values.every((element) => element.isGranted);
-    }
-
-    return false;
-  }
-
   Future<void> _connectToDevice() async {
-    if (!await _checkBluetoothPermissions()) {
+    if (!await Permissions.hasBluetoothPermission()) {
       emit(state.copyWith(message: 'Не разрешено соединение по Bluetooth', status: AcceptPaymentStateStatus.failure));
       return;
     }
@@ -191,7 +170,7 @@ class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState, AcceptPay
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {
-      await app.reportError(e, trace);
+      await Misc.reportError(e, trace);
       throw AppError(Strings.genericErrorMsg);
     }
 
@@ -213,7 +192,7 @@ class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState, AcceptPay
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {
-      await app.reportError(e, trace);
+      await Misc.reportError(e, trace);
       throw AppError(Strings.genericErrorMsg);
     }
   }

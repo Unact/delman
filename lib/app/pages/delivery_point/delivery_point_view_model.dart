@@ -28,7 +28,7 @@ class DeliveryPointViewModel extends PageViewModel<DeliveryPointState, DeliveryP
   }
 
   Future<void> callPhone() async {
-    await Misc.callPhone(state.deliveryPointEx.dp.phone, onFailure: () {
+    await Misc.callPhone(state.deliveryPointEx.dp.phone, onError: () {
       emit(state.copyWith(status: DeliveryPointStateStatus.failure, message: Strings.genericErrorMsg));
     });
   }
@@ -72,7 +72,7 @@ class DeliveryPointViewModel extends PageViewModel<DeliveryPointState, DeliveryP
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {
-      await app.reportError(e, trace);
+      await Misc.reportError(e, trace);
       throw AppError(Strings.genericErrorMsg);
     }
 

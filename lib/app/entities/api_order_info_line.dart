@@ -18,7 +18,7 @@ class ApiOrderInfoLine {
       id: json['id'],
       orderId: json['orderId'],
       comment: json['comment'],
-      ts: Nullify.parseDate(json['ts'])!
+      ts: Parsing.parseDate(json['ts'])!
     );
   }
 

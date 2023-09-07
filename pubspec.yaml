@@ -1,23 +1,21 @@
 name: delman
-description: An application for couriers
+description: Приложение для курьеров
 publish_to: 'none'
 version: 1.9.1+67
 
 environment:
-  sdk: '>=2.17.0 <3.0.0'
+  sdk: '>=3.1.0 <4.0.0'
 
 dependencies:
-  barcode_widget: ^2.0.2
   collection: ^1.17.1
   device_info_plus: ^9.0.2
   dio: ^5.2.1
-  drift: ^1.5.0
+  drift: ^2.9.0
   equatable: ^2.0.5
-  # https://github.com/zubairehman/Flogs/issues/51
   f_logs:
     git:
-      url: git@github.com:draganjovanovic1/Flogs.git
-      ref: d795d73
+      url: git@github.com:jonik-dev/Flogs.git
+      ref: eb2c180
   flutter:
     sdk: flutter
   flutter_blue_plus: ^1.3.0
@@ -28,31 +26,28 @@ dependencies:
   flutter_bloc: ^8.1.2
   flutter_localizations:
     sdk: flutter
-  flutter_secure_storage: ^8.0.0
   flutter_signature_pad: ^3.0.0
-  fk_user_agent: ^2.1.0
   iboxpro_flutter: ^1.0.2
-  intl: ^0.18.0
   location: ^4.4.0
   mask_text_input_formatter: ^2.4.0
   package_info_plus: ^4.0.2
   path: ^1.8.3
   path_provider: ^2.0.9
-  permission_handler: ^10.2.0
   provider: ^6.0.5
   pub_semver: ^2.1.1
-  qr_code_scanner: ^1.0.1
   quiver: ^3.0.1
-  rxdart: ^0.27.7
-  stack_trace: ^1.10.0
   sentry_flutter: ^7.7.0
   sqlite3_flutter_libs: ^0.5.0
-  url_launcher: ^6.0.6
+  u_app_utils:
+    git:
+      url: git@github.com:Unact/u_app_utils.git
+      ref: 47f85d1
+  url_launcher: ^6.0.20
   yandex_mapkit: ^3.2.0
 
 dev_dependencies:
-  build_runner: ^2.1.8
-  drift_dev: ^1.5.2
+  build_runner: ^2.4.5
+  drift_dev: ^2.9.0
   flutter_lints: ^2.0.1
   flutter_test:
     sdk: flutter

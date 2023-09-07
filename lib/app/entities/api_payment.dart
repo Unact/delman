@@ -17,7 +17,7 @@ class ApiPayment {
     return ApiPayment(
       id: json['id'],
       deliveryPointOrderId: json['deliveryPointOrderId'],
-      summ: Nullify.parseDouble(json['summ'])!,
+      summ: Parsing.parseDouble(json['summ'])!,
       transactionId: json['transactionId']
     );
   }

@@ -4,9 +4,9 @@ import 'package:drift/drift.dart' show TableUpdateQuery;
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:u_app_utils/u_app_utils.dart';
 
 import '/app/app.dart';
-import '/app/utils/misc.dart';
 
 abstract class PageViewModel<T, P> extends Cubit<T> {
   late final StreamSubscription _subscription;

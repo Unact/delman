@@ -41,7 +41,7 @@ class Iboxpro {
     required Function(String) onError,
     required Function() onConnected
   }) async {
-    if (!(await blue.FlutterBluePlus.instance.isOn)) {
+    if (await blue.FlutterBluePlus.adapterState.first != blue.BluetoothAdapterState.on) {
       onError.call('Не включен Bluetooth');
 
       return;
@@ -128,17 +128,16 @@ class Iboxpro {
   }
 
   Future<String?> _findBTDeviceNameIos() async {
-    blue.FlutterBluePlus flutterBlue = blue.FlutterBluePlus.instance;
-    List<blue.ScanResult> results = await flutterBlue.startScan(timeout: _searchTimeout);
+    List<blue.ScanResult> results = await blue.FlutterBluePlus.startScan(timeout: _searchTimeout);
     blue.BluetoothDevice? device = results.firstWhereOrNull(
-      (blue.ScanResult result) => result.device.name.contains(_terminalNamePrefix)
+      (blue.ScanResult result) => result.device.localName.contains(_terminalNamePrefix)
     )?.device;
 
     if (device == null) {
       return null;
     }
 
-    return device.name;
+    return device.localName;
   }
 
   Future<String?> _findBTDeviceNameAndroid() async {
