@@ -4,6 +4,7 @@ import 'package:drift/drift.dart' show TableUpdateQuery, Value;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:u_app_utils/u_app_utils.dart';
 
 import '/app/constants/strings.dart';
 import '/app/entities/entities.dart';
@@ -11,11 +12,8 @@ import '/app/data/database.dart';
 import '/app/pages/delivery_point_order/delivery_point_order_page.dart';
 import '/app/pages/point_address/point_address_page.dart';
 import '/app/pages/shared/page_view_model.dart';
-import '/app/services/api.dart';
-import '/app/utils/format.dart';
-import '/app/utils/geo_loc.dart';
-import '/app/utils/misc.dart';
-import '/app/widgets/widgets.dart';
+import '/app/services/delman_api.dart';
+import '/app/services/geo_loc.dart';
 
 part 'delivery_point_state.dart';
 part 'delivery_point_view_model.dart';
@@ -135,7 +133,7 @@ class _DeliveryPointViewState extends State<_DeliveryPointView> {
           case DeliveryPointStateStatus.orderDataCopied:
           case DeliveryPointStateStatus.arrivalSaved:
           case DeliveryPointStateStatus.failure:
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+            Misc.showMessage(context, state.message);
             break;
           default:
         }
@@ -159,7 +157,7 @@ class _DeliveryPointViewState extends State<_DeliveryPointView> {
       ),
       InfoRow(title: const Text('Доставка'), trailing: Text(deliveryPoint.deliveryTypeName ?? '')),
       InfoRow(title: const Text('Оплата'), trailing: Text(deliveryPoint.paymentTypeName ?? '')),
-      const InfoRow(title: Text('Заказы')),
+      InfoRow(title: const Text('Заказы')),
       ...vm.state.deliveryOrders.map<Widget>((e) => _buildOrderTile(context, e)).toList()
     ];
   }
@@ -178,7 +176,7 @@ class _DeliveryPointViewState extends State<_DeliveryPointView> {
           child: Text(deliveryPoint.senderPhone ?? '', style: const TextStyle(color: Colors.blue))
         )
       ),
-      const InfoRow(title: Text('Заказы')),
+      InfoRow(title: const Text('Заказы')),
       ...vm.state.pickupPointOrders.map<Widget>((e) => _buildOrderTile(context, e)).toList()
     ];
   }

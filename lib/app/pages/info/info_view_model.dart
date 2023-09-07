@@ -84,7 +84,7 @@ class InfoViewModel extends PageViewModel<InfoState, InfoStateStatus> {
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {
-      await app.reportError(e, trace);
+      await Misc.reportError(e, trace);
       throw AppError(Strings.genericErrorMsg);
     }
 
@@ -116,12 +116,12 @@ class InfoViewModel extends PageViewModel<InfoState, InfoStateStatus> {
         );
         await storage.paymentsDao.loadPayments(data.payments.map((e) => e.toDatabaseEnt()).toList());
         await storage.orderStoragesDao.loadOrderStorages(data.orderStorages.map((e) => e.toDatabaseEnt()).toList());
-        await storage.updateSetting(setting.copyWith(lastSync: DateTime.now()));
+        await storage.updateSetting(setting.copyWith(lastSync: Value(DateTime.now())));
       });
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {
-      await app.reportError(e, trace);
+      await Misc.reportError(e, trace);
       throw AppError(Strings.genericErrorMsg);
     }
   }

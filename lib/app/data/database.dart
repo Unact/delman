@@ -68,7 +68,7 @@ class AppStorage extends _$AppStorage {
 
   Future<void> _populateData() async {
     await batch((batch) {
-      batch.insert(users, User(
+      batch.insert(users, const User(
         id: UsersDao.kGuestId,
         username: UsersDao.kGuestUsername,
         email: '',
@@ -77,7 +77,7 @@ class AppStorage extends _$AppStorage {
         storageQR: '',
         version: '0.0.0'
       ));
-      batch.insert(settings, Setting(
+      batch.insert(settings, const Setting(
         id: kSingleRecordId
       ));
     });

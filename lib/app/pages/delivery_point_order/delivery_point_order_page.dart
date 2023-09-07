@@ -1,21 +1,18 @@
 import 'dart:async';
 
-
 import 'package:drift/drift.dart' show Value, TableUpdateQuery;
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:u_app_utils/u_app_utils.dart';
 
 import '/app/constants/strings.dart';
 import '/app/data/database.dart';
 import '/app/entities/entities.dart';
 import '/app/pages/accept_payment/accept_payment_page.dart';
 import '/app/pages/shared/page_view_model.dart';
-import '/app/utils/format.dart';
-import '/app/utils/geo_loc.dart';
-import '/app/utils/misc.dart';
-import '/app/services/api.dart';
-import '/app/widgets/widgets.dart';
+import '/app/services/geo_loc.dart';
+import '/app/services/delman_api.dart';
 
 part 'delivery_point_order_state.dart';
 part 'delivery_point_order_view_model.dart';
@@ -180,14 +177,6 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
     );
   }
 
-  void unfocus() {
-    FocusScopeNode currentFocus = FocusScope.of(context);
-
-    if (!currentFocus.hasPrimaryFocus) {
-      currentFocus.unfocus();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<DeliveryPointOrderViewModel, DeliveryPointOrderState>(
@@ -274,7 +263,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
           case DeliveryPointOrderStateStatus.failure:
           case DeliveryPointOrderStateStatus.confirmed:
           case DeliveryPointOrderStateStatus.canceled:
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+            Misc.showMessage(context, state.message);
             _progressDialog.close();
             break;
           case DeliveryPointOrderStateStatus.inProgress:
@@ -309,7 +298,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
         style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
         child: const Text('Отменить'),
         onPressed: () {
-          unfocus();
+          Misc.unfocus(context);
           vm.tryCancelOrder();
         }
       ),
@@ -317,7 +306,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
         style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
         child: const Text('Завершить'),
         onPressed: () {
-          unfocus();
+          Misc.unfocus(context);
           vm.tryConfirmOrder();
         }
       ),
@@ -377,7 +366,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
       return [
         TextButton(
           onPressed: () {
-            unfocus();
+            Misc.unfocus(context);
             vm.confirmOrderFacts();
           },
           style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
@@ -389,7 +378,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
     return [
       !state.needPayment ? null : TextButton(
         onPressed: () {
-          unfocus();
+          Misc.unfocus(context);
           vm.tryStartPayment(false);
         },
         style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
@@ -397,7 +386,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
       ),
       !state.needPayment || !state.deliveryPointOrderEx.o.cardPaymentAllowed ? null : TextButton(
         onPressed: () {
-          unfocus();
+          Misc.unfocus(context);
           vm.tryStartPayment(true);
         },
         style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
@@ -407,7 +396,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
         style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
         child: const Text('Отменить'),
         onPressed: () {
-          unfocus();
+          Misc.unfocus(context);
           vm.tryCancelOrder();
         }
       ),
@@ -415,7 +404,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
         style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
         child: const Text('Завершить'),
         onPressed: () {
-          unfocus();
+          Misc.unfocus(context);
           vm.tryConfirmOrder();
         }
       ),

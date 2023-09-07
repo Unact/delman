@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:drift/drift.dart' show TableUpdateQuery, Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:u_app_utils/u_app_utils.dart';
 
 import '/app/constants/strings.dart';
 import '/app/entities/entities.dart';
@@ -11,8 +11,7 @@ import '/app/data/database.dart';
 import '/app/pages/order_storage/order_storage_page.dart';
 import '/app/pages/order_qr_scan/order_qr_scan_page.dart';
 import '/app/pages/shared/page_view_model.dart';
-import '/app/services/api.dart';
-import '/app/widgets/widgets.dart';
+import '/app/services/delman_api.dart';
 
 part 'order_storages_state.dart';
 part 'order_storages_view_model.dart';
@@ -84,7 +83,7 @@ class _OrderStoragesViewState extends State<_OrderStoragesView> {
               break;
             case OrderStoragesStateStatus.accepted:
             case OrderStoragesStateStatus.failure:
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+              Misc.showMessage(context, state.message);
               _progressDialog.close();
               break;
             default:

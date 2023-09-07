@@ -14,7 +14,7 @@ class ApiDelivery {
   factory ApiDelivery.fromJson(dynamic json) {
     return ApiDelivery(
       id: json['id'],
-      deliveryDate: Nullify.parseDate(json['deliveryDate'])!,
+      deliveryDate: Parsing.parseDate(json['deliveryDate'])!,
       active: json['active']
     );
   }

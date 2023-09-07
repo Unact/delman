@@ -1,19 +1,16 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:u_app_utils/u_app_utils.dart';
 
 import '/app/constants/strings.dart';
 import '/app/data/database.dart';
 import '/app/entities/entities.dart';
 import '/app/pages/shared/page_view_model.dart';
-import '/app/services/api.dart';
-import '/app/utils/format.dart';
-import '/app/widgets/widgets.dart';
+import '/app/services/delman_api.dart';
 
 part 'person_state.dart';
 part 'person_view_model.dart';
@@ -67,7 +64,8 @@ class _PersonViewState extends State<_PersonView> {
             break;
           case PersonStateStatus.failure:
           case PersonStateStatus.logsSend:
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+            Misc.showMessage(context, state.message);
+            _progressDialog.close();
             break;
           case PersonStateStatus.loggedOut:
             _progressDialog.close();
@@ -98,7 +96,7 @@ class _PersonViewState extends State<_PersonView> {
                 icon: const Icon(Icons.qr_code_2),
                 onPressed: () => QRDialog(context: context, qr: vm.state.user?.storageQR ?? '').open()
               ),
-              Text(state.user?.name ?? '')
+              Expanded(child: Text(state.user?.name ?? ''))
             ]
           )
         ),

@@ -76,10 +76,10 @@ class ApiOrder {
   static ApiOrder fromJson(dynamic json) {
     return ApiOrder(
       id: json['id'],
-      deliveryDateTimeFrom: Nullify.parseDate(json['deliveryDateTimeFrom']),
-      deliveryDateTimeTo: Nullify.parseDate(json['deliveryDateTimeTo']),
-      pickupDateTimeFrom: Nullify.parseDate(json['pickupDateTimeFrom']),
-      pickupDateTimeTo: Nullify.parseDate(json['pickupDateTimeTo']),
+      deliveryDateTimeFrom: Parsing.parseDate(json['deliveryDateTimeFrom']),
+      deliveryDateTimeTo: Parsing.parseDate(json['deliveryDateTimeTo']),
+      pickupDateTimeFrom: Parsing.parseDate(json['pickupDateTimeFrom']),
+      pickupDateTimeTo: Parsing.parseDate(json['pickupDateTimeTo']),
       number: json['number'],
       trackingNumber: json['trackingNumber'],
       senderName: json['senderName'],

@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'package:u_app_utils/u_app_utils.dart';
 
 import '/app/data/database.dart';
-import '/app/utils/nullify.dart';
 
 part 'api_data.dart';
 part 'api_delivery.dart';

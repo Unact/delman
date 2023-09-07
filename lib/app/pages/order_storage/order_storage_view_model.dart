@@ -32,9 +32,7 @@ class OrderStorageViewModel extends PageViewModel<OrderStorageState, OrderStorag
   }
 
   Future<void> startQRScan() async {
-    PermissionStatus status = await Permission.camera.request();
-
-    if (status.isPermanentlyDenied || status.isDenied) {
+    if (!await Permissions.hasCameraPermissions()) {
       emit(state.copyWith(
         status: OrderStorageStateStatus.failure,
         message: 'Для сканирования QR кода необходимо разрешить использование камеры'
@@ -135,7 +133,7 @@ class OrderStorageViewModel extends PageViewModel<OrderStorageState, OrderStorag
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {
-      await app.reportError(e, trace);
+      await Misc.reportError(e, trace);
       throw AppError(Strings.genericErrorMsg);
     }
 
@@ -154,7 +152,7 @@ class OrderStorageViewModel extends PageViewModel<OrderStorageState, OrderStorag
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {
-      await app.reportError(e, trace);
+      await Misc.reportError(e, trace);
       throw AppError(Strings.genericErrorMsg);
     }
 

@@ -23,7 +23,7 @@ class ApiOrderLine {
       orderId: json['orderId'],
       name: json['name'],
       amount: json['amount'],
-      price: Nullify.parseDouble(json['price'])!,
+      price: Parsing.parseDouble(json['price'])!,
       factAmount: json['factAmount'],
     );
   }

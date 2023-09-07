@@ -102,7 +102,7 @@ class OrderQRScanViewModel extends PageViewModel<OrderQRScanState, OrderQRScanSt
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);
     } catch(e, trace) {
-      await app.reportError(e, trace);
+      await Misc.reportError(e, trace);
       throw AppError(Strings.genericErrorMsg);
     }
   }
