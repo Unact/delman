@@ -188,7 +188,7 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
       await deliveriesRepository.confirmOrder(
         deliveryPointOrderEx: state.deliveryPointOrderEx,
         isPickup: state.isPickup,
-        location: (await GeoLoc.getCurrentLocation())!,
+        position: await Geolocator.getCurrentPosition(),
         user: state.user!,
       );
 
@@ -217,7 +217,7 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
     try {
       await deliveriesRepository.cancelOrder(
         deliveryPointOrderEx: state.deliveryPointOrderEx,
-        location: (await GeoLoc.getCurrentLocation())!,
+        position: await Geolocator.getCurrentPosition(),
       );
       emit(state.copyWith(status: DeliveryPointOrderStateStatus.canceled, message: 'Заказ отменен'));
     } on AppError catch(e) {

@@ -64,7 +64,7 @@ class DeliveryPointViewModel extends PageViewModel<DeliveryPointState, DeliveryP
     try {
       await deliveriesRepository.arriveAtDeliveryPoint(
         deliveryPointEx: state.deliveryPointEx,
-        location: (await GeoLoc.getCurrentLocation())!,
+        position: await Geolocator.getCurrentPosition(),
         factArrival: DateTime.now()
       );
 

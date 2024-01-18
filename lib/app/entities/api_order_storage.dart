@@ -1,6 +1,6 @@
 part of 'entities.dart';
 
-class ApiOrderStorage {
+class ApiOrderStorage extends Equatable {
   final int id;
   final String name;
 
@@ -22,4 +22,10 @@ class ApiOrderStorage {
       name: name
     );
   }
+
+  @override
+  List<Object> get props => [
+    id,
+    name
+  ];
 }

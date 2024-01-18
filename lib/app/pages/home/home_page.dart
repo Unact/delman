@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:location/location.dart' as geo_loc;
 import 'package:u_app_utils/u_app_utils.dart';
 
 import '/app/constants/strings.dart';
@@ -40,7 +39,6 @@ class _HomeViewState extends State<_HomeView> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    geo_loc.Location().requestService();
     Permissions.hasLocationPermissions().then((value) => setState(() => permission = value));
   }
 

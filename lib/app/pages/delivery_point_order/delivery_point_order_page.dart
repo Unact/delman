@@ -5,6 +5,7 @@ import 'package:delman/app/repositories/orders_repository.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:u_app_utils/u_app_utils.dart';
 
 import '/app/constants/strings.dart';
@@ -15,7 +16,6 @@ import '/app/pages/shared/page_view_model.dart';
 import '/app/repositories/deliveries_repository.dart';
 import '/app/repositories/users_repository.dart';
 import '/app/repositories/payments_repository.dart';
-import '/app/services/geo_loc.dart';
 
 part 'delivery_point_order_state.dart';
 part 'delivery_point_order_view_model.dart';

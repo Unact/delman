@@ -1,6 +1,6 @@
 part of 'entities.dart';
 
-class ApiOrderInfoLine {
+class ApiOrderInfoLine extends Equatable {
   final int id;
   final int orderId;
   final String comment;
@@ -30,4 +30,13 @@ class ApiOrderInfoLine {
       ts: ts
     );
   }
+
+
+  @override
+  List<Object> get props => [
+    id,
+    orderId,
+    comment,
+    ts,
+  ];
 }

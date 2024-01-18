@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart' show Value;
+import 'package:geolocator/geolocator.dart';
 import 'package:u_app_utils/u_app_utils.dart';
 
 import '/app/constants/strings.dart';
@@ -18,8 +19,18 @@ class PaymentsRepository extends BaseRepository {
     required Map<dynamic, dynamic>? transaction,
     required double summ,
     required DeliveryPointOrderExResult deliveryPointOrderEx,
-    required Location location
+    required Position position
   }) async {
+    Map<String, dynamic> location = {
+      'latitude': position.latitude,
+      'longitude': position.longitude,
+      'accuracy': position.accuracy,
+      'altitude': position.altitude,
+      'heading': position.heading,
+      'speed': position.speed,
+      'pointTs': position.timestamp.toIso8601String()
+    };
+
     try {
       await api.acceptPayment(
         deliveryPointOrderId: deliveryPointOrderEx.dpo.id,

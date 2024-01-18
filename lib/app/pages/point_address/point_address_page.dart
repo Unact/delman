@@ -6,16 +6,15 @@ import 'dart:ui';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:u_app_utils/u_app_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 import '/app/constants/strings.dart';
 import '/app/data/database.dart';
-import '/app/entities/entities.dart';
 import '/app/pages/shared/page_view_model.dart';
 import '/app/repositories/deliveries_repository.dart';
-import '/app/services/geo_loc.dart';
 import '/app/utils/styling.dart';
 
 part 'point_address_state.dart';

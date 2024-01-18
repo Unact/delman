@@ -61,7 +61,7 @@ class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState, AcceptPay
   }
 
   Future<void> _getLocation() async {
-    emit(state.copyWith(location: await GeoLoc.getCurrentLocation()));
+    emit(state.copyWith(position: await Geolocator.getCurrentPosition()));
 
     if (!state.cardPayment) {
       _savePayment();
@@ -141,7 +141,7 @@ class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState, AcceptPay
     try {
       await paymentsRepository.acceptPayment(
         transaction: transaction,
-        location: state.location!,
+        position: state.position!,
         summ: state.total,
         deliveryPointOrderEx: state.deliveryPointOrderEx
       );

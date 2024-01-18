@@ -43,9 +43,9 @@ class PointAddressViewModel extends PageViewModel<PointAddressState, PointAddres
   }
 
   void routeTo() async {
-    Location? location = await GeoLoc.getCurrentLocation();
+    final position = await Geolocator.getCurrentPosition();
     String params = 'rtext='
-      '${location?.latitude},${location?.longitude}'
+      '${position.latitude},${position.longitude}'
       '~'
       '${state.deliveryPointEx.dp.latitude},${state.deliveryPointEx.dp.longitude}';
     Uri uri = Uri.parse('yandexmaps://maps.yandex.ru?$params');

@@ -1,6 +1,6 @@
 part of 'entities.dart';
 
-class ApiPaymentCredentials {
+class ApiPaymentCredentials extends Equatable {
   final String login;
   final String password;
 
@@ -15,4 +15,10 @@ class ApiPaymentCredentials {
       password: json['password']
     );
   }
+
+  @override
+  List<Object> get props => [
+    login,
+    password
+  ];
 }

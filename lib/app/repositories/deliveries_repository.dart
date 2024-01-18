@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart' show Value;
+import 'package:geolocator/geolocator.dart';
 import 'package:u_app_utils/u_app_utils.dart';
 
 import '/app/constants/strings.dart';
@@ -36,8 +37,18 @@ class DeliveriesRepository extends BaseRepository {
   Future<void> arriveAtDeliveryPoint({
     required DeliveryPointExResult deliveryPointEx,
     required DateTime factArrival,
-    required Location location
+    required Position position
   }) async {
+    Map<String, dynamic> location = {
+      'latitude': position.latitude,
+      'longitude': position.longitude,
+      'accuracy': position.accuracy,
+      'altitude': position.altitude,
+      'heading': position.heading,
+      'speed': position.speed,
+      'pointTs': position.timestamp.toIso8601String()
+    };
+
     try {
       await api.arriveAtDeliveryPoint(
         deliveryPointId: deliveryPointEx.dp.id,
@@ -59,8 +70,18 @@ class DeliveriesRepository extends BaseRepository {
 
   Future<void> cancelOrder({
     required DeliveryPointOrderExResult deliveryPointOrderEx,
-    required Location location
+    required Position position
   }) async {
+    Map<String, dynamic> location = {
+      'latitude': position.latitude,
+      'longitude': position.longitude,
+      'accuracy': position.accuracy,
+      'altitude': position.altitude,
+      'heading': position.heading,
+      'speed': position.speed,
+      'pointTs': position.timestamp.toIso8601String()
+    };
+
     try {
       await api.cancelOrder(
         deliveryPointOrderId: deliveryPointOrderEx.dpo.id,
@@ -106,8 +127,18 @@ class DeliveriesRepository extends BaseRepository {
     required DeliveryPointOrderExResult deliveryPointOrderEx,
     required bool isPickup,
     required User user,
-    required Location location
+    required Position position
   }) async {
+    Map<String, dynamic> location = {
+      'latitude': position.latitude,
+      'longitude': position.longitude,
+      'accuracy': position.accuracy,
+      'altitude': position.altitude,
+      'heading': position.heading,
+      'speed': position.speed,
+      'pointTs': position.timestamp.toIso8601String()
+    };
+
     try {
       await api.confirmOrder(
         deliveryPointOrderId: deliveryPointOrderEx.dpo.id,

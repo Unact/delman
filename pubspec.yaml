@@ -28,8 +28,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_signature_pad: ^3.0.0
+  geolocator: ^9.0.2
   iboxpro_flutter: ^2.0.1
-  location: ^5.0.3
   mask_text_input_formatter: ^2.4.0
   package_info_plus: ^4.0.2
   path: ^1.8.3

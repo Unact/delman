@@ -1,6 +1,6 @@
 part of 'entities.dart';
 
-class ApiPayment {
+class ApiPayment extends Equatable {
   final int id;
   final int deliveryPointOrderId;
   final double summ;
@@ -30,4 +30,12 @@ class ApiPayment {
       transactionId: transactionId
     );
   }
+
+  @override
+  List<Object?> get props => [
+    id,
+    deliveryPointOrderId,
+    summ,
+    transactionId
+  ];
 }

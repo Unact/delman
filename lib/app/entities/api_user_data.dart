@@ -1,6 +1,6 @@
 part of 'entities.dart';
 
-class ApiUserData {
+class ApiUserData extends Equatable {
   final int id;
   final String username;
   final String email;
@@ -42,4 +42,15 @@ class ApiUserData {
       version: version
     );
   }
+
+  @override
+  List<Object> get props => [
+    id,
+    username,
+    name,
+    email,
+    storageId,
+    storageQR,
+    version,
+  ];
 }

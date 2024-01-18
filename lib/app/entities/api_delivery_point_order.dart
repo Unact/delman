@@ -1,6 +1,6 @@
 part of 'entities.dart';
 
-class ApiDeliveryPointOrder {
+class ApiDeliveryPointOrder extends Equatable {
   final int id;
   final int deliveryPointId;
   final int orderId;
@@ -38,4 +38,14 @@ class ApiDeliveryPointOrder {
       canceled: canceled == 1
     );
   }
+
+  @override
+  List<Object?> get props => [
+    id,
+    deliveryPointId,
+    orderId,
+    canceled,
+    finished,
+    pickup,
+  ];
 }
