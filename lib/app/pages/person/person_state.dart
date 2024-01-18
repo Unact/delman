@@ -26,8 +26,6 @@ class PersonState {
     PersonStateStatus? status,
     User? user,
     AppInfoResult? appInfo,
-    String? fullVersion,
-    bool? newVersionAvailable,
     String? message
   }) {
     return PersonState(

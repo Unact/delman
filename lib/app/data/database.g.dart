@@ -4292,14 +4292,14 @@ class $PrefsTable extends Prefs with TableInfo<$PrefsTable, Pref> {
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $PrefsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _lastSyncMeta =
-      const VerificationMeta('lastSync');
+  static const VerificationMeta _lastLoadTimeMeta =
+      const VerificationMeta('lastLoadTime');
   @override
-  late final GeneratedColumn<DateTime> lastSync = GeneratedColumn<DateTime>(
-      'last_sync', aliasedName, true,
+  late final GeneratedColumn<DateTime> lastLoadTime = GeneratedColumn<DateTime>(
+      'last_load_time', aliasedName, true,
       type: DriftSqlType.dateTime, requiredDuringInsert: false);
   @override
-  List<GeneratedColumn> get $columns => [lastSync];
+  List<GeneratedColumn> get $columns => [lastLoadTime];
   @override
   String get aliasedName => _alias ?? 'prefs';
   @override
@@ -4309,9 +4309,11 @@ class $PrefsTable extends Prefs with TableInfo<$PrefsTable, Pref> {
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('last_sync')) {
-      context.handle(_lastSyncMeta,
-          lastSync.isAcceptableOrUnknown(data['last_sync']!, _lastSyncMeta));
+    if (data.containsKey('last_load_time')) {
+      context.handle(
+          _lastLoadTimeMeta,
+          lastLoadTime.isAcceptableOrUnknown(
+              data['last_load_time']!, _lastLoadTimeMeta));
     }
     return context;
   }
@@ -4322,8 +4324,8 @@ class $PrefsTable extends Prefs with TableInfo<$PrefsTable, Pref> {
   Pref map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Pref(
-      lastSync: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}last_sync']),
+      lastLoadTime: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}last_load_time']),
     );
   }
 
@@ -4334,22 +4336,22 @@ class $PrefsTable extends Prefs with TableInfo<$PrefsTable, Pref> {
 }
 
 class Pref extends DataClass implements Insertable<Pref> {
-  final DateTime? lastSync;
-  const Pref({this.lastSync});
+  final DateTime? lastLoadTime;
+  const Pref({this.lastLoadTime});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (!nullToAbsent || lastSync != null) {
-      map['last_sync'] = Variable<DateTime>(lastSync);
+    if (!nullToAbsent || lastLoadTime != null) {
+      map['last_load_time'] = Variable<DateTime>(lastLoadTime);
     }
     return map;
   }
 
   PrefsCompanion toCompanion(bool nullToAbsent) {
     return PrefsCompanion(
-      lastSync: lastSync == null && nullToAbsent
+      lastLoadTime: lastLoadTime == null && nullToAbsent
           ? const Value.absent()
-          : Value(lastSync),
+          : Value(lastLoadTime),
     );
   }
 
@@ -4357,60 +4359,61 @@ class Pref extends DataClass implements Insertable<Pref> {
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Pref(
-      lastSync: serializer.fromJson<DateTime?>(json['lastSync']),
+      lastLoadTime: serializer.fromJson<DateTime?>(json['lastLoadTime']),
     );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'lastSync': serializer.toJson<DateTime?>(lastSync),
+      'lastLoadTime': serializer.toJson<DateTime?>(lastLoadTime),
     };
   }
 
-  Pref copyWith({Value<DateTime?> lastSync = const Value.absent()}) => Pref(
-        lastSync: lastSync.present ? lastSync.value : this.lastSync,
+  Pref copyWith({Value<DateTime?> lastLoadTime = const Value.absent()}) => Pref(
+        lastLoadTime:
+            lastLoadTime.present ? lastLoadTime.value : this.lastLoadTime,
       );
   @override
   String toString() {
     return (StringBuffer('Pref(')
-          ..write('lastSync: $lastSync')
+          ..write('lastLoadTime: $lastLoadTime')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => lastSync.hashCode;
+  int get hashCode => lastLoadTime.hashCode;
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Pref && other.lastSync == this.lastSync);
+      (other is Pref && other.lastLoadTime == this.lastLoadTime);
 }
 
 class PrefsCompanion extends UpdateCompanion<Pref> {
-  final Value<DateTime?> lastSync;
+  final Value<DateTime?> lastLoadTime;
   final Value<int> rowid;
   const PrefsCompanion({
-    this.lastSync = const Value.absent(),
+    this.lastLoadTime = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PrefsCompanion.insert({
-    this.lastSync = const Value.absent(),
+    this.lastLoadTime = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   static Insertable<Pref> custom({
-    Expression<DateTime>? lastSync,
+    Expression<DateTime>? lastLoadTime,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (lastSync != null) 'last_sync': lastSync,
+      if (lastLoadTime != null) 'last_load_time': lastLoadTime,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
-  PrefsCompanion copyWith({Value<DateTime?>? lastSync, Value<int>? rowid}) {
+  PrefsCompanion copyWith({Value<DateTime?>? lastLoadTime, Value<int>? rowid}) {
     return PrefsCompanion(
-      lastSync: lastSync ?? this.lastSync,
+      lastLoadTime: lastLoadTime ?? this.lastLoadTime,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -4418,8 +4421,8 @@ class PrefsCompanion extends UpdateCompanion<Pref> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (lastSync.present) {
-      map['last_sync'] = Variable<DateTime>(lastSync.value);
+    if (lastLoadTime.present) {
+      map['last_load_time'] = Variable<DateTime>(lastLoadTime.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -4430,7 +4433,7 @@ class PrefsCompanion extends UpdateCompanion<Pref> {
   @override
   String toString() {
     return (StringBuffer('PrefsCompanion(')
-          ..write('lastSync: $lastSync, ')
+          ..write('lastLoadTime: $lastLoadTime, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4467,7 +4470,7 @@ abstract class _$AppDataStore extends GeneratedDatabase {
           payments,
           prefs,
         }).map((QueryRow row) => AppInfoResult(
-          lastSync: row.readNullable<DateTime>('last_sync'),
+          lastLoadTime: row.readNullable<DateTime>('last_load_time'),
           ownOrders: row.read<int>('own_orders'),
           needTransferOrders: row.read<int>('need_transfer_orders'),
           cashPaymentsTotal: row.read<int>('cash_payments_total'),
@@ -4496,7 +4499,7 @@ abstract class _$AppDataStore extends GeneratedDatabase {
 }
 
 class AppInfoResult {
-  final DateTime? lastSync;
+  final DateTime? lastLoadTime;
   final int ownOrders;
   final int needTransferOrders;
   final int cashPaymentsTotal;
@@ -4504,7 +4507,7 @@ class AppInfoResult {
   final double cashPaymentsSum;
   final double cardPaymentsSum;
   AppInfoResult({
-    this.lastSync,
+    this.lastLoadTime,
     required this.ownOrders,
     required this.needTransferOrders,
     required this.cashPaymentsTotal,

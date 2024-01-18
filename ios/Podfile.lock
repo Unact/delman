@@ -18,6 +18,8 @@ PODS:
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
+  - geolocator_apple (1.2.0):
+    - Flutter
   - iboxpro_flutter (0.0.1):
     - Flutter
   - libwebp (1.3.2):
@@ -32,8 +34,6 @@ PODS:
   - libwebp/sharpyuv (1.3.2)
   - libwebp/webp (1.3.2):
     - libwebp/sharpyuv
-  - location (0.0.1):
-    - Flutter
   - Mantle (2.2.0):
     - Mantle/extobjc (= 2.2.0)
   - Mantle/extobjc (2.2.0)
@@ -103,8 +103,8 @@ DEPENDENCIES:
   - flutter_blue_plus (from `.symlinks/plugins/flutter_blue_plus/ios`)
   - flutter_image_compress_common (from `.symlinks/plugins/flutter_image_compress_common/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
+  - geolocator_apple (from `.symlinks/plugins/geolocator_apple/ios`)
   - iboxpro_flutter (from `.symlinks/plugins/iboxpro_flutter/ios`)
-  - location (from `.symlinks/plugins/location/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
@@ -147,10 +147,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_image_compress_common/ios"
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
+  geolocator_apple:
+    :path: ".symlinks/plugins/geolocator_apple/ios"
   iboxpro_flutter:
     :path: ".symlinks/plugins/iboxpro_flutter/ios"
-  location:
-    :path: ".symlinks/plugins/location/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_foundation:
@@ -187,9 +187,9 @@ SPEC CHECKSUMS:
   flutter_image_compress_common: ec1d45c362c9d30a3f6a0426c297f47c52007e3e
   flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  geolocator_apple: 9157311f654584b9bb72686c55fc02a97b73f461
   iboxpro_flutter: fe944bd0a3f50fa4f18a7c633ead63603611016d
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
-  location: d5cf8598915965547c3f36761ae9cc4f4e87d22e
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
   package_info_plus: fd030dabf36271f146f1f3beacd48f564b0f17f7

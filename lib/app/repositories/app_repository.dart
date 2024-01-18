@@ -41,7 +41,7 @@ class AppRepository extends BaseRepository {
         );
         await dataStore.paymentsDao.loadPayments(data.payments.map((e) => e.toDatabaseEnt()).toList());
         await dataStore.orderStoragesDao.loadOrderStorages(data.orderStorages.map((e) => e.toDatabaseEnt()).toList());
-        await dataStore.updatePref(PrefsCompanion(lastSync: Value(DateTime.now())));
+        await dataStore.updatePref(PrefsCompanion(lastLoadTime: Value(DateTime.now())));
       });
     } on ApiException catch(e) {
       throw AppError(e.errorMsg);

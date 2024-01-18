@@ -66,12 +66,12 @@ class InfoViewModel extends PageViewModel<InfoState, InfoStateStatus> {
 
     final pref = await appRepository.watchAppInfo().first;
 
-    if (pref.lastSync == null) {
+    if (pref.lastLoadTime == null) {
       emit(state.copyWith(status: InfoStateStatus.startLoad));
       return;
     }
 
-    DateTime lastAttempt = pref.lastSync!;
+    DateTime lastAttempt = pref.lastLoadTime!;
     DateTime time = DateTime.now();
 
     if (lastAttempt.year != time.year || lastAttempt.month != time.month || lastAttempt.day != time.day) {
