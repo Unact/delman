@@ -80,33 +80,33 @@ part of 'database.dart';
     '''
   }
 )
-class DeliveriesDao extends DatabaseAccessor<AppStorage> with _$DeliveriesDaoMixin {
-  DeliveriesDao(AppStorage db) : super(db);
+class DeliveriesDao extends DatabaseAccessor<AppDataStore> with _$DeliveriesDaoMixin {
+  DeliveriesDao(AppDataStore db) : super(db);
 
-  Future<List<ExDelivery>> getExDeliveries() async {
-    final query = select(deliveries)..orderBy([(t) => OrderingTerm.asc(t.deliveryDate)]);
-    final exDeliveryPoints = await deliveryPointEx().get();
+  Stream<List<ExDelivery>> watchExDeliveries() {
+    final deliveriesQuery = (select(deliveries)..orderBy([(t) => OrderingTerm.asc(t.deliveryDate)])).watch();
+    final exDeliveryPointsQuery = deliveryPointEx().watch();
 
-    List<Delivery> queryDeliveries = await query.get();
-
-    return queryDeliveries.map((Delivery delivery) {
-      return ExDelivery(
-        delivery: delivery,
-        deliveryPoints: exDeliveryPoints.where((element) => element.dp.deliveryId == delivery.id).toList()
-      );
-    }).toList();
+    return Rx.combineLatest2(
+      deliveriesQuery,
+      exDeliveryPointsQuery,
+      (deliveriesRes, exDeliveryPointsRes) {
+        return deliveriesRes.map((Delivery delivery) {
+          return ExDelivery(
+            delivery: delivery,
+            deliveryPoints: exDeliveryPointsRes.where((element) => element.dp.deliveryId == delivery.id).toList()
+          );
+        }).toList();
+      }
+    );
   }
 
-  Future<List<DeliveryPointExResult>> getExDeliveryPoints(int deliveryId) async {
-    return (await deliveryPointEx().get()).where((el) => el.dp.deliveryId == deliveryId).toList();
+  Stream<List<DeliveryPointExResult>> watchExDeliveryPoints() {
+    return deliveryPointEx().watch();
   }
 
-  Future<DeliveryPointExResult?> getExDeliveryPoint(int id) async {
-    return (await deliveryPointEx().get()).firstWhereOrNull((el) => el.dp.id == id);
-  }
-
-  Future<List<DeliveryPointOrderExResult>> getExDeliveryPointOrders(int deliveryPointId) async {
-    return (await deliveryPointOrderEx().get()).where((el) => el.dpo.deliveryPointId == deliveryPointId).toList();
+  Stream<List<DeliveryPointOrderExResult>> watchExDeliveryPointOrders() {
+    return deliveryPointOrderEx().watch();
   }
 
   Future<DeliveryPointOrderExResult?> getExDeliveryPointOrder(int deliveryPointOrderId) async {

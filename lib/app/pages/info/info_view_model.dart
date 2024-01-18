@@ -1,46 +1,51 @@
 part of 'info_page.dart';
 
 class InfoViewModel extends PageViewModel<InfoState, InfoStateStatus> {
-  final HomeViewModel _homeViewModel;
-  late final Timer _fetchDataTimer;
+  final AppRepository appRepository;
+  final DeliveriesRepository deliveriesRepository;
+  final UsersRepository usersRepository;
+  Timer? fetchDataTimer;
 
-  InfoViewModel(BuildContext context) :
-    _homeViewModel = context.read<HomeViewModel>(),
-    super(context, InfoState()) {
-      _fetchDataTimer = Timer.periodic(
-        const Duration(minutes: 10),
-        (_) => emit(state.copyWith(status: InfoStateStatus.startLoad))
-      );
-    }
+  StreamSubscription<User>? userSubscription;
+  StreamSubscription<AppInfoResult>? appInfoSubscription;
+  StreamSubscription<List<ExDelivery>>? deliveriesSubscription;
+
+  InfoViewModel(
+    this.appRepository,
+    this.deliveriesRepository,
+    this.usersRepository
+  ) : super(InfoState());
 
   @override
   InfoStateStatus get status => state.status;
 
   @override
-  TableUpdateQuery get listenForTables => const TableUpdateQuery.any();
-
-  @override
   Future<void> initViewModel() async {
     await super.initViewModel();
-    await _checkNeedRefresh();
-  }
 
-  @override
-  Future<void> loadData() async {
-    emit(state.copyWith(
-      status: InfoStateStatus.dataLoaded,
-      newVersionAvailable: await app.newVersionAvailable,
-      cashPayments: await app.storage.paymentsDao.getCashPayments(),
-      cardPayments: await app.storage.paymentsDao.getCardPayments(),
-      orders: await app.storage.ordersDao.getOrdersWithTransfer(),
-      deliveries: await app.storage.deliveriesDao.getExDeliveries(),
-    ));
+    userSubscription = usersRepository.watchUser().listen((event) {
+      emit(state.copyWith(status: InfoStateStatus.dataLoaded, user: event));
+    });
+    appInfoSubscription = appRepository.watchAppInfo().listen((event) {
+      emit(state.copyWith(status: InfoStateStatus.dataLoaded, appInfo: event));
+    });
+    deliveriesSubscription = deliveriesRepository.watchExDeliveries().listen((event) {
+      emit(state.copyWith(status: InfoStateStatus.dataLoaded, deliveries: event));
+    });
+
+    await _checkNeedRefresh();
+
+    fetchDataTimer = Timer.periodic(const Duration(minutes: 10), _checkNeedRefresh);
   }
 
   @override
   Future<void> close() async {
-    _fetchDataTimer.cancel();
     await super.close();
+
+    await userSubscription?.cancel();
+    await appInfoSubscription?.cancel();
+    await deliveriesSubscription?.cancel();
+    fetchDataTimer?.cancel();
   }
 
   Future<void> refresh([bool timer = false]) async {
@@ -48,7 +53,7 @@ class InfoViewModel extends PageViewModel<InfoState, InfoStateStatus> {
 
     try {
       emit(state.copyWith(status: InfoStateStatus.inLoadProgress));
-      await _getData();
+      await appRepository.loadData();
 
       emit(state.copyWith(status: InfoStateStatus.loadSuccess, message: 'Данные успешно обновлены'));
     } on AppError catch(e) {
@@ -56,17 +61,17 @@ class InfoViewModel extends PageViewModel<InfoState, InfoStateStatus> {
     }
   }
 
-  Future<void> _checkNeedRefresh() async {
+  Future<void> _checkNeedRefresh([Timer? _]) async {
     if (state.isBusy) return;
 
-    Setting setting = await app.storage.getSetting();
+    final pref = await appRepository.watchAppInfo().first;
 
-    if (setting.lastSync == null) {
+    if (pref.lastSync == null) {
       emit(state.copyWith(status: InfoStateStatus.startLoad));
       return;
     }
 
-    DateTime lastAttempt = setting.lastSync!;
+    DateTime lastAttempt = pref.lastSync!;
     DateTime time = DateTime.now();
 
     if (lastAttempt.year != time.year || lastAttempt.month != time.month || lastAttempt.day != time.day) {
@@ -74,62 +79,11 @@ class InfoViewModel extends PageViewModel<InfoState, InfoStateStatus> {
     }
   }
 
-  void changePage(int index) {
-    _homeViewModel.setCurrentIndex(index);
-  }
-
-  Future<void> _closeDelivery() async {
-    try {
-      await app.api.closeDelivery();
-    } on ApiException catch(e) {
-      throw AppError(e.errorMsg);
-    } catch(e, trace) {
-      await Misc.reportError(e, trace);
-      throw AppError(Strings.genericErrorMsg);
-    }
-
-    await _getData();
-  }
-
-  Future<void> _getData() async {
-    Location? location = await GeoLoc.getCurrentLocation();
-
-    if (location == null) {
-      throw AppError('Для работы с приложением необходимо разрешить определение местоположения');
-    }
-
-    await app.loadUserData();
-
-    try {
-      ApiData data = await app.api.getData();
-      AppStorage storage = app.storage;
-      Setting setting = await storage.getSetting();
-
-      await storage.transaction(() async {
-        await storage.deliveriesDao.loadDeliveries(data.deliveries.map((e) => e.toDatabaseEnt()).toList());
-        await storage.deliveriesDao.loadDeliveryPoints(data.deliveryPoints.map((e) => e.toDatabaseEnt()).toList());
-        await storage.ordersDao.loadOrders(data.orders.map((e) => e.toDatabaseEnt()).toList());
-        await storage.ordersDao.loadOrderLines(data.orderLines.map((e) => e.toDatabaseEnt()).toList());
-        await storage.ordersDao.loadOrderInfoLines(data.orderInfoList.map((e) => e.toDatabaseEnt()).toList());
-        await storage.deliveriesDao.loadDeliveryPointOrders(
-          data.deliveryPointOrders.map((e) => e.toDatabaseEnt()).toList()
-        );
-        await storage.paymentsDao.loadPayments(data.payments.map((e) => e.toDatabaseEnt()).toList());
-        await storage.orderStoragesDao.loadOrderStorages(data.orderStorages.map((e) => e.toDatabaseEnt()).toList());
-        await storage.updateSetting(setting.copyWith(lastSync: Value(DateTime.now())));
-      });
-    } on ApiException catch(e) {
-      throw AppError(e.errorMsg);
-    } catch(e, trace) {
-      await Misc.reportError(e, trace);
-      throw AppError(Strings.genericErrorMsg);
-    }
-  }
-
   Future<void> closeDelivery() async {
     try {
       emit(state.copyWith(status: InfoStateStatus.inCloseProgress));
-      await _closeDelivery();
+      await deliveriesRepository.closeDelivery();
+      await appRepository.loadData();
 
       emit(state.copyWith(status: InfoStateStatus.closeSuccess, message: 'День успешно завершен'));
     } on AppError catch(e) {

@@ -1,5 +1,9 @@
 part of 'database.dart';
 
+class Prefs extends Table {
+  DateTimeColumn get lastSync => dateTime().nullable()();
+}
+
 @DataClassName("Delivery")
 class Deliveries extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -112,9 +116,4 @@ class Users extends Table {
   IntColumn get storageId => integer().references(OrderStorages, #id)();
   TextColumn get storageQR => text()();
   TextColumn get version => text()();
-}
-
-class Settings extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  DateTimeColumn get lastSync => dateTime().nullable()();
 }

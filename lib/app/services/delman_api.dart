@@ -15,7 +15,7 @@ extension DelmanApi on RenewApi {
     return ApiUserData.fromJson(await get('v1/delman/user_info'));
   }
 
-  Future<ApiData> getData() async {
+  Future<ApiData> loadData() async {
     return ApiData.fromJson(await get('v1/delman'));
   }
 

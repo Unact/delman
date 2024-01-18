@@ -1,32 +1,43 @@
 part of 'person_page.dart';
 
 class PersonViewModel extends PageViewModel<PersonState, PersonStateStatus> {
-  PersonViewModel(BuildContext context) : super(context, PersonState());
+  final AppRepository appRepository;
+  final UsersRepository usersRepository;
+
+  StreamSubscription<AppInfoResult>? appInfoSubscription;
+  StreamSubscription<User>? userSubscription;
+
+  PersonViewModel(this.appRepository, this.usersRepository) : super(PersonState());
 
   @override
   PersonStateStatus get status => state.status;
 
   @override
-  TableUpdateQuery get listenForTables => TableUpdateQuery.onAllTables([
-    app.storage.users
-  ]);
+  Future<void> initViewModel() async {
+    await super.initViewModel();
+
+    userSubscription = usersRepository.watchUser().listen((event) {
+      emit(state.copyWith(status: PersonStateStatus.dataLoaded, user: event));
+    });
+    appInfoSubscription = appRepository.watchAppInfo().listen((event) {
+      emit(state.copyWith(status: PersonStateStatus.dataLoaded, appInfo: event));
+    });
+  }
 
   @override
-  Future<void> loadData() async {
-    emit(state.copyWith(
-      status: PersonStateStatus.dataLoaded,
-      user: await app.storage.usersDao.getUser(),
-      lastSyncTime: (await app.storage.getSetting()).lastSync,
-      fullVersion: app.fullVersion,
-      newVersionAvailable: await app.newVersionAvailable,
-    ));
+  Future<void> close() async {
+    await super.close();
+
+    await userSubscription?.cancel();
+    await appInfoSubscription?.cancel();
   }
 
   Future<void> apiLogout() async {
     emit(state.copyWith(status: PersonStateStatus.inProgress));
 
     try {
-      await _apiLogout();
+      await usersRepository.logout();
+      await appRepository.clearData();
       emit(state.copyWith(status: PersonStateStatus.loggedOut));
     } on AppError catch(e) {
       emit(state.copyWith(status: PersonStateStatus.failure, message: e.message));
@@ -45,36 +56,10 @@ class PersonViewModel extends PageViewModel<PersonState, PersonStateStatus> {
     emit(state.copyWith(status: PersonStateStatus.inProgress));
 
     try {
-      await _sendLogs();
+      await appRepository.sendLogs();
       emit(state.copyWith(status: PersonStateStatus.logsSend, message: 'Информация успешно отправлена'));
     } on AppError catch(e) {
       emit(state.copyWith(status: PersonStateStatus.failure, message: e.message));
-    }
-  }
-
-  Future<void> _sendLogs() async {
-    try {
-      List<Log> logs = await FLog.getAllLogsByFilter(filterType: FilterType.TODAY);
-
-      await app.api.saveLogs(logs: logs);
-      await FLog.clearLogs();
-    } on ApiException catch(e) {
-      throw AppError(e.errorMsg);
-    } catch(e, trace) {
-      await Misc.reportError(e, trace);
-      throw AppError(Strings.genericErrorMsg);
-    }
-  }
-
-  Future<void> _apiLogout() async {
-    try {
-      await app.api.logout();
-      await app.storage.clearData();
-    } on ApiException catch(e) {
-      throw AppError(e.errorMsg);
-    } catch(e, trace) {
-      await Misc.reportError(e, trace);
-      throw AppError(Strings.genericErrorMsg);
     }
   }
 }

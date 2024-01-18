@@ -21,6 +21,7 @@ class AcceptPaymentState {
     required this.deliveryPointOrderEx,
     required this.total,
     required this.cardPayment,
+    this.location,
     this.canceled = false,
     this.isCancelable = true,
     this.isRequiredSignature = false,
@@ -31,6 +32,7 @@ class AcceptPaymentState {
   final DeliveryPointOrderExResult deliveryPointOrderEx;
   final bool cardPayment;
   final double total;
+  final Location? location;
   final bool canceled;
   final bool isCancelable;
   final bool isRequiredSignature;
@@ -41,6 +43,7 @@ class AcceptPaymentState {
     DeliveryPointOrderExResult? deliveryPointOrderEx,
     bool? cardPayment,
     double? total,
+    Location? location,
     bool? canceled,
     bool? isCancelable,
     bool? isRequiredSignature,
@@ -51,6 +54,7 @@ class AcceptPaymentState {
       deliveryPointOrderEx: deliveryPointOrderEx ?? this.deliveryPointOrderEx,
       cardPayment: cardPayment ?? this.cardPayment,
       total: total ?? this.total,
+      location: location ?? this.location,
       canceled: canceled ?? this.canceled,
       isCancelable: isCancelable ?? this.isCancelable,
       isRequiredSignature: isRequiredSignature ?? this.isRequiredSignature,

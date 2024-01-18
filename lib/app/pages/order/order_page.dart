@@ -1,10 +1,13 @@
-import 'package:drift/drift.dart' show TableUpdateQuery;
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:u_app_utils/u_app_utils.dart';
 
 import '/app/data/database.dart';
 import '/app/pages/shared/page_view_model.dart';
+import '/app/repositories/orders_repository.dart';
+import '/app/repositories/users_repository.dart';
 
 part 'order_state.dart';
 part 'order_view_model.dart';
@@ -20,7 +23,11 @@ class OrderPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<OrderViewModel>(
-      create: (context) => OrderViewModel(context, order: order),
+      create: (context) => OrderViewModel(
+        RepositoryProvider.of<OrdersRepository>(context),
+        RepositoryProvider.of<UsersRepository>(context),
+        order: order
+      ),
       child: _OrderView(),
     );
   }

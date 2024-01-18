@@ -3,8 +3,11 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:pub_semver/pub_semver.dart';
+import 'package:rxdart/rxdart.dart';
 
 import 'package:delman/app/constants/strings.dart';
 
@@ -27,7 +30,7 @@ part 'users_dao.dart';
     OrderStorages,
     OrderInfoLines,
     Users,
-    Settings
+    Prefs
   ],
   daos: [
     DeliveriesDao,
@@ -35,14 +38,48 @@ part 'users_dao.dart';
     OrdersDao,
     PaymentsDao,
     UsersDao,
-  ]
+  ],
+  queries: {
+    'appInfo': '''
+      SELECT
+        prefs.*,
+        (
+          SELECT COUNT(*)
+          FROM orders
+          WHERE EXISTS(SELECT 1 FROM users WHERE users.storage_id = orders.storage_id)
+        ) AS "own_orders",
+        (
+          SELECT COUNT(*)
+          FROM orders
+          WHERE EXISTS(
+            SELECT 1
+            FROM delivery_point_orders dpo
+            WHERE dpo.order_id = orders.id AND dpo.pickup = 0 AND dpo.finished = 0
+          )
+        ) AS "need_transfer_orders",
+        (SELECT COUNT(*) FROM payments WHERE transaction_id IS NULL) AS "cash_payments_total",
+        (SELECT COUNT(*) FROM payments WHERE transaction_id IS NOT NULL) AS "card_payments_total",
+        COALESCE((SELECT SUM(summ) FROM payments WHERE transaction_id IS NULL), 0) AS "cash_payments_sum",
+        COALESCE((SELECT SUM(summ) FROM payments WHERE transaction_id IS NOT NULL), 0) AS "card_payments_sum"
+      FROM prefs
+    '''
+  },
 )
-class AppStorage extends _$AppStorage {
+
+class AppDataStore extends _$AppDataStore {
   static const int kSingleRecordId = 0;
 
-  AppStorage({
+  AppDataStore({
     required bool logStatements
   }) : super(_openConnection(logStatements));
+
+  Stream<AppInfoResult> watchAppInfo() {
+    return appInfo().watchSingle();
+  }
+
+  Future<int> updatePref(PrefsCompanion pref) {
+    return update(prefs).write(pref);
+  }
 
   Future<void> clearData() async {
     await transaction(() async {
@@ -53,16 +90,9 @@ class AppStorage extends _$AppStorage {
 
   Future<void> _clearData() async {
     await batch((batch) {
-      batch.deleteWhere(users, (row) => const Constant(true));
-      batch.deleteWhere(settings, (row) => const Constant(true));
-      batch.deleteWhere(orderInfoLines, (row) => const Constant(true));
-      batch.deleteWhere(orderLines, (row) => const Constant(true));
-      batch.deleteWhere(deliveryPointOrders, (row) => const Constant(true));
-      batch.deleteWhere(deliveryPoints, (row) => const Constant(true));
-      batch.deleteWhere(deliveries, (row) => const Constant(true));
-      batch.deleteWhere(payments, (row) => const Constant(true));
-      batch.deleteWhere(orders, (row) => const Constant(true));
-      batch.deleteWhere(orderStorages, (row) => const Constant(true));
+      for (var table in allTables) {
+        batch.deleteWhere(table, (row) => const Constant(true));
+      }
     });
   }
 
@@ -77,22 +107,12 @@ class AppStorage extends _$AppStorage {
         storageQR: '',
         version: '0.0.0'
       ));
-      batch.insert(settings, const Setting(
-        id: kSingleRecordId
-      ));
+      batch.insert(prefs, const Pref());
     });
   }
 
-  Future<Setting> getSetting() async {
-    return await (select(settings).getSingle());
-  }
-
-  Future<int> updateSetting(Setting setting) async {
-    return into(settings).insertOnConflictUpdate(setting);
-  }
-
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -115,4 +135,12 @@ LazyDatabase _openConnection(bool logStatements) {
 
     return NativeDatabase(file, logStatements: logStatements);
   });
+}
+
+extension UserX on User {
+  Future<bool> get newVersionAvailable async {
+    final currentVersion = (await PackageInfo.fromPlatform()).version;
+
+    return Version.parse(version) > Version.parse(currentVersion);
+  }
 }

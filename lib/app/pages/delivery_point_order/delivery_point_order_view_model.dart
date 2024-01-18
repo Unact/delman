@@ -1,40 +1,75 @@
 part of 'delivery_point_order_page.dart';
 
 class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState, DeliveryPointOrderStateStatus> {
-  DeliveryPointOrderViewModel(BuildContext context, { required DeliveryPointOrderExResult deliveryPointOrderEx}) :
-    super(context, DeliveryPointOrderState(deliveryPointOrderEx: deliveryPointOrderEx, confirmationCallback: () {}));
+  final DeliveriesRepository deliveriesRepository;
+  final OrdersRepository ordersRepository;
+  final PaymentsRepository paymentsRepository;
+  final UsersRepository usersRepository;
+
+  StreamSubscription<User>? userSubscription;
+  StreamSubscription<List<DeliveryPointExResult>>? deliveryPointExListSubscription;
+  StreamSubscription<List<OrderLine>>? orderLinesSubscription;
+  StreamSubscription<List<OrderInfoLine>>? orderInfoLinesSubscription;
+  StreamSubscription<List<DeliveryPointOrderExResult>>? deliveryPointOrderExListSubscrption;
+  StreamSubscription<List<ExPayment>>? paymentsSubscription;
+
+  DeliveryPointOrderViewModel(
+    this.deliveriesRepository,
+    this.ordersRepository,
+    this.paymentsRepository,
+    this.usersRepository,
+    {
+      required DeliveryPointOrderExResult deliveryPointOrderEx
+    }
+  ) :
+    super(DeliveryPointOrderState(deliveryPointOrderEx: deliveryPointOrderEx, confirmationCallback: () {}));
 
   @override
   DeliveryPointOrderStateStatus get status => state.status;
 
   @override
-  TableUpdateQuery get listenForTables => TableUpdateQuery.onAllTables([
-    app.storage.orders,
-    app.storage.orderInfoLines,
-    app.storage.orderLines,
-    app.storage.deliveryPointOrders,
-    app.storage.deliveryPoints,
-    app.storage.payments,
-    app.storage.users
-  ]);
+  Future<void> initViewModel() async {
+    await super.initViewModel();
+
+    userSubscription = usersRepository.watchUser().listen((event) {
+      emit(state.copyWith(status: DeliveryPointOrderStateStatus.dataLoaded, user: event));
+    });
+    deliveryPointExListSubscription = deliveriesRepository.watchExDeliveryPoints().listen((event) {
+      emit(state.copyWith(
+        status: DeliveryPointOrderStateStatus.dataLoaded,
+        deliveryPointEx: event.firstWhereOrNull((el) => el.dp.id == state.deliveryPointOrderEx.dpo.deliveryPointId)
+      ));
+    });
+    orderLinesSubscription = ordersRepository.watchOrderLines(state.deliveryPointOrderEx.o.id).listen((event) {
+      emit(state.copyWith(status: DeliveryPointOrderStateStatus.dataLoaded, orderLines: event));
+    });
+    orderInfoLinesSubscription = ordersRepository.watchOrderInfoLines(state.deliveryPointOrderEx.o.id).listen((event) {
+      emit(state.copyWith(status: DeliveryPointOrderStateStatus.dataLoaded, orderInfoLines: event));
+    });
+    deliveryPointOrderExListSubscrption = deliveriesRepository.watchExDeliveryPointOrders().listen((event) {
+      emit(state.copyWith(
+        status: DeliveryPointOrderStateStatus.dataLoaded,
+        deliveryPointOrderEx: event.firstWhereOrNull((el) => el.dpo.id == state.deliveryPointOrderEx.dpo.id)
+      ));
+    });
+    paymentsSubscription = paymentsRepository.watchPaymentsWithDPO().listen((event) {
+      emit(state.copyWith(
+        status: DeliveryPointOrderStateStatus.dataLoaded,
+        exPayment: event.firstWhereOrNull((el) => el.deliveryPointOrderEx.dpo.id == state.deliveryPointOrderEx.dpo.id)
+      ));
+    });
+  }
 
   @override
-  Future<void> loadData() async {
-    List<OrderLine> orderLines = (await app.storage.ordersDao.getOrderLines(state.deliveryPointOrderEx.o.id))
-      .map((e) => e.factAmount != null ? e : e.copyWith(factAmount: Value(e.factAmount ?? e.amount)))
-      .toList();
+  Future<void> close() async {
+    await super.close();
 
-    emit(state.copyWith(
-      status: DeliveryPointOrderStateStatus.dataLoaded,
-      user: await app.storage.usersDao.getUser(),
-      deliveryPointOrderEx: await app.storage.deliveriesDao.getExDeliveryPointOrder(state.deliveryPointOrderEx.dpo.id),
-      orderInfoLines: await app.storage.ordersDao.getOrderInfoLines(state.deliveryPointOrderEx.o.id),
-      orderLines: orderLines,
-      deliveryPointEx: await app.storage.deliveriesDao.getExDeliveryPoint(
-        state.deliveryPointOrderEx.dpo.deliveryPointId
-      ),
-      payment: await app.storage.paymentsDao.getPaymentForDPO(state.deliveryPointOrderEx.dpo.id)
-    ));
+    await userSubscription?.cancel();
+    await deliveryPointExListSubscription?.cancel();
+    await orderLinesSubscription?.cancel();
+    await orderInfoLinesSubscription?.cancel();
+    await deliveryPointOrderExListSubscrption?.cancel();
+    await paymentsSubscription?.cancel();
   }
 
   Future<void> callPhone(String? phone) async {
@@ -47,9 +82,9 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
   Future<void> updateOrderLineAmount(OrderLine orderLine, String amount) async {
     int? intAmount = int.tryParse(amount);
 
-    await app.storage.ordersDao.updateOrderLine(
-      orderLine.id,
-      OrderLinesCompanion(factAmount: Value(intAmount))
+    await ordersRepository.updateOrderLine(
+      orderLine,
+      factAmount: intAmount
     );
 
     FLog.debug(text: intAmount.toString());
@@ -110,11 +145,13 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
     emit(state.copyWith(status: DeliveryPointOrderStateStatus.inProgress));
 
     try {
-      await _confirmOrderFacts();
+      for (var orderLine in state.orderLines.where((el) => el.factAmount == null)) {
+        await ordersRepository.updateOrderLine(orderLine, factAmount: orderLine.amount);
+      }
 
-      await app.storage.ordersDao.updateOrder(
-        state.deliveryPointOrderEx.o.id,
-        const OrdersCompanion(factsConfirmed: Value(true))
+      await deliveriesRepository.confirmOrderFacts(
+        deliveryPointOrderEx: state.deliveryPointOrderEx,
+        orderLines: await ordersRepository.watchOrderLines(state.deliveryPointOrderEx.o.id).first
       );
 
       emit(state.copyWith(
@@ -122,7 +159,7 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
         message: 'Факты позиций подтверждены'
       ));
 
-      if (!state.isPickup && state.payment == null && state.total != 0) {
+      if (!state.isPickup && state.exPayment == null && state.total != 0) {
         emit(state.copyWith(status: DeliveryPointOrderStateStatus.askPaymentCollection));
       }
     } on AppError catch(e) {
@@ -148,7 +185,12 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
     emit(state.copyWith(status: DeliveryPointOrderStateStatus.inProgress));
 
     try {
-      await _confirmOrder();
+      await deliveriesRepository.confirmOrder(
+        deliveryPointOrderEx: state.deliveryPointOrderEx,
+        isPickup: state.isPickup,
+        location: (await GeoLoc.getCurrentLocation())!,
+        user: state.user!,
+      );
 
       emit(state.copyWith(
         status: DeliveryPointOrderStateStatus.confirmed,
@@ -173,7 +215,10 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
     emit(state.copyWith(status: DeliveryPointOrderStateStatus.inProgress));
 
     try {
-      await _cancelOrder();
+      await deliveriesRepository.cancelOrder(
+        deliveryPointOrderEx: state.deliveryPointOrderEx,
+        location: (await GeoLoc.getCurrentLocation())!,
+      );
       emit(state.copyWith(status: DeliveryPointOrderStateStatus.canceled, message: 'Заказ отменен'));
     } on AppError catch(e) {
       emit(state.copyWith(status: DeliveryPointOrderStateStatus.failure, message: e.message));
@@ -184,113 +229,10 @@ class DeliveryPointOrderViewModel extends PageViewModel<DeliveryPointOrderState,
     emit(state.copyWith(status: DeliveryPointOrderStateStatus.inProgress));
 
     try {
-      await _addOrderInfo(comment);
+      await deliveriesRepository.addOrderInfo(deliveryPointOrderEx: state.deliveryPointOrderEx, comment: comment);
       emit(state.copyWith(status: DeliveryPointOrderStateStatus.commentAdded, message: 'Комментарий добавлен'));
     } on AppError catch(e) {
       emit(state.copyWith(status: DeliveryPointOrderStateStatus.failure, message: e.message));
     }
-  }
-
-  Future<void> _cancelOrder() async {
-    Location? location = await GeoLoc.getCurrentLocation();
-
-    if (location == null) {
-      throw AppError('Для работы с приложением необходимо разрешить определение местоположения');
-    }
-
-    try {
-      await app.api.cancelOrder(
-        deliveryPointOrderId: state.deliveryPointOrderEx.dpo.id,
-        location: location
-      );
-    } on ApiException catch(e) {
-      throw AppError(e.errorMsg);
-    } catch(e, trace) {
-      await Misc.reportError(e, trace);
-      throw AppError(Strings.genericErrorMsg);
-    }
-
-    await app.storage.deliveriesDao.updateDeliveryPointOrder(
-      state.deliveryPointOrderEx.dpo.id,
-      const DeliveryPointOrdersCompanion(canceled: Value(true), finished: Value(true))
-    );
-
-    await _departFromDeliveryPoint();
-  }
-
-  Future<void> _confirmOrderFacts() async {
-    try {
-      await app.api.confirmOrderFacts(
-        deliveryPointOrderId: state.deliveryPointOrderEx.dpo.id,
-        orderLines: state.orderLines.map((e) => {'id': e.id, 'factAmount': e.factAmount}).toList(),
-      );
-    } on ApiException catch(e) {
-      throw AppError(e.errorMsg);
-    } catch(e, trace) {
-      await Misc.reportError(e, trace);
-      throw AppError(Strings.genericErrorMsg);
-    }
-  }
-
-  Future<void> _confirmOrder() async {
-    Location? location = await GeoLoc.getCurrentLocation();
-
-    if (location == null) {
-      throw AppError('Для работы с приложением необходимо разрешить определение местоположения');
-    }
-
-    try {
-      await app.api.confirmOrder(
-        deliveryPointOrderId: state.deliveryPointOrderEx.dpo.id,
-        location: location
-      );
-    } on ApiException catch(e) {
-      throw AppError(e.errorMsg);
-    } catch(e, trace) {
-      await Misc.reportError(e, trace);
-      throw AppError(Strings.genericErrorMsg);
-    }
-
-    await app.storage.ordersDao.updateOrder(
-      state.deliveryPointOrderEx.o.id,
-      OrdersCompanion(storageId: Value(state.isPickup ? state.user?.storageId : null))
-    );
-
-    await app.storage.deliveriesDao.updateDeliveryPointOrder(
-      state.deliveryPointOrderEx.dpo.id,
-      const DeliveryPointOrdersCompanion(finished: Value(true))
-    );
-
-    await _departFromDeliveryPoint();
-  }
-
-  Future<void> _addOrderInfo(String comment) async {
-    try {
-      await app.api.addOrderInfo(orderId: state.deliveryPointOrderEx.o.id, comment: comment);
-    } on ApiException catch(e) {
-      throw AppError(e.errorMsg);
-    } catch(e, trace) {
-      await Misc.reportError(e, trace);
-      throw AppError(Strings.genericErrorMsg);
-    }
-
-    await app.storage.ordersDao.insertOrderInfoLine(OrderInfoLinesCompanion(
-      orderId: Value(state.deliveryPointOrderEx.o.id),
-      comment: Value(comment),
-      ts: Value(DateTime.now())
-    ));
-  }
-
-  Future<void> _departFromDeliveryPoint() async {
-    List<DeliveryPointOrderExResult> deliveryOrderPointsEx = await app.storage.deliveriesDao.getExDeliveryPointOrders(
-      state.deliveryPointOrderEx.dpo.deliveryPointId
-    );
-
-    if (deliveryOrderPointsEx.any((e) => !e.dpo.finished)) return;
-
-    await app.storage.deliveriesDao.updateDeliveryPoint(
-      state.deliveryPointOrderEx.dpo.deliveryPointId,
-      DeliveryPointsCompanion(factDeparture: Value(DateTime.now()))
-    );
   }
 }

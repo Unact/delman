@@ -1,23 +1,28 @@
 part of 'landing_page.dart';
 
 class LandingViewModel extends PageViewModel<LandingState, LandingStateStatus> {
-  LandingViewModel(BuildContext context) : super(context, LandingState());
+  final UsersRepository usersRepository;
+
+  StreamSubscription<bool>? isLoggedInSubscription;
+
+  LandingViewModel(this.usersRepository) : super(LandingState());
 
   @override
   LandingStateStatus get status => state.status;
 
   @override
-  TableUpdateQuery get listenForTables => TableUpdateQuery.onAllTables([
-    app.storage.users
-  ]);
+  Future<void> initViewModel() async {
+    await super.initViewModel();
+
+    isLoggedInSubscription = usersRepository.isLoggedIn.listen((event) {
+      emit(state.copyWith(status: LandingStateStatus.dataLoaded, isLoggedIn: event));
+    });
+  }
 
   @override
-  Future<void> loadData() async {
-    bool isLoggedIn = app.api.isLoggedIn;
+  Future<void> close() async {
+    await super.close();
 
-    emit(state.copyWith(
-      status: LandingStateStatus.dataLoaded,
-      isLoggedIn: isLoggedIn
-    ));
+    await isLoggedInSubscription?.cancel();
   }
 }

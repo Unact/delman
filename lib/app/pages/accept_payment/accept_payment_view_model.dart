@@ -1,34 +1,74 @@
 part of 'accept_payment_page.dart';
 
 class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState, AcceptPaymentStateStatus> {
-  Iboxpro iboxpro = Iboxpro();
+  final AppRepository appRepository;
+  final PaymentsRepository paymentsRepository;
+  late Iboxpro iboxpro = Iboxpro(
+    onError: (String error) => emit(state.copyWith(message: error, status: AcceptPaymentStateStatus.failure)),
+    onLogin: _startPayment,
+    onConnected: _getPaymentCredentials,
+    onStart: (String id) {
+      emit(state.copyWith(
+        isCancelable: true,
+        message: 'Обработка оплаты',
+        status: AcceptPaymentStateStatus.paymentStarted
+      ));
+    },
+    onComplete: (Map<String, dynamic> transaction, bool requiredSignature) {
+      emit(state.copyWith(
+        isRequiredSignature: requiredSignature,
+        message: 'Подтверждение оплаты',
+        status: AcceptPaymentStateStatus.paymentFinished
+      ));
 
-  AcceptPaymentViewModel(BuildContext context, {
-    required double total,
-    required bool cardPayment,
-    required DeliveryPointOrderExResult deliveryPointOrderEx
-  }) : super(context, AcceptPaymentState(
-    message: 'Инициализация платежа',
-    total: total,
-    cardPayment: cardPayment,
-    deliveryPointOrderEx: deliveryPointOrderEx
-  ));
+      if (!requiredSignature) {
+        _savePayment(transaction);
+      } else {
+        emit(state.copyWith(
+          isRequiredSignature: requiredSignature,
+          message: 'Для завершения оплаты\nнеобходимо указать подпись',
+          status: AcceptPaymentStateStatus.requiredSignature
+        ));
+      }
+    },
+    onAdjust: _savePayment
+  );
+
+  AcceptPaymentViewModel(
+    this.appRepository,
+    this.paymentsRepository,
+    {
+      required double total,
+      required bool cardPayment,
+      required DeliveryPointOrderExResult deliveryPointOrderEx
+    }
+  ) :
+    super(AcceptPaymentState(
+      message: 'Инициализация платежа',
+      total: total,
+      cardPayment: cardPayment,
+      deliveryPointOrderEx: deliveryPointOrderEx
+    ));
 
   @override
   AcceptPaymentStateStatus get status => state.status;
 
   @override
-  Future<void> loadData() async {}
-
-  @override
   Future<void> initViewModel() async {
     super.initViewModel();
 
+    _getLocation();
+  }
+
+  Future<void> _getLocation() async {
+    emit(state.copyWith(location: await GeoLoc.getCurrentLocation()));
+
     if (!state.cardPayment) {
       _savePayment();
-    } else {
-      _connectToDevice();
+      return;
     }
+
+    _connectToDevice();
   }
 
   Future<void> cancelPayment() async {
@@ -43,23 +83,12 @@ class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState, AcceptPay
       return;
     }
 
-    if (await GeoLoc.getCurrentLocation() == null) {
-      emit(state.copyWith(
-        message: 'Для работы с приложением необходимо разрешить определение местоположения',
-        status: AcceptPaymentStateStatus.failure
-      ));
-      return;
-    }
-
     emit(state.copyWith(
       message: 'Установление связи с терминалом',
       status: AcceptPaymentStateStatus.searchingForDevice
     ));
 
-    iboxpro.connectToDevice(
-      onError: (String error) => emit(state.copyWith(message: error, status: AcceptPaymentStateStatus.failure)),
-      onConnected: _getPaymentCredentials
-    );
+    iboxpro.connectToDevice();
   }
 
   Future<void> _getPaymentCredentials() async {
@@ -68,7 +97,7 @@ class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState, AcceptPay
     emit(state.copyWith(message: 'Установление связи с сервером', status: AcceptPaymentStateStatus.gettingCredentials));
 
     try {
-      ApiPaymentCredentials credentials = await _getApiPaymentCredentials();
+      ApiPaymentCredentials credentials = await appRepository.getApiPaymentCredentials();
 
       await _apiLogin(credentials.login, credentials.password);
     } on AppError catch(e) {
@@ -81,12 +110,7 @@ class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState, AcceptPay
 
     emit(state.copyWith(message: 'Авторизация оплаты', status: AcceptPaymentStateStatus.paymentAuthorization));
 
-    await iboxpro.apiLogin(
-      login: login,
-      password: password,
-      onError: (String error) => emit(state.copyWith(message: error, status: AcceptPaymentStateStatus.failure)),
-      onLogin: _startPayment
-    );
+    await iboxpro.apiLogin(login: login, password: password);
   }
 
   Future<void> _startPayment() async {
@@ -97,30 +121,7 @@ class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState, AcceptPay
     await iboxpro.startPayment(
       amount: state.total,
       description: 'Оплата за заказ ${state.deliveryPointOrderEx.o.trackingNumber}',
-      onError: (String error) => emit(state.copyWith(message: error, status: AcceptPaymentStateStatus.failure)),
-      onPaymentStart: (_) {
-        emit(state.copyWith(
-          message: 'Обработка оплаты',
-          status: AcceptPaymentStateStatus.waitingForPayment,
-          isCancelable: false
-        ));
-      },
-      onPaymentComplete: (Map<dynamic, dynamic> transaction, bool requiredSignature) {
-        emit(state.copyWith(
-          message: 'Подтверждение оплаты',
-          status: AcceptPaymentStateStatus.paymentFinished,
-          isRequiredSignature: requiredSignature
-        ));
-
-        if (!requiredSignature) {
-          _savePayment(transaction);
-        } else {
-          emit(state.copyWith(
-            message: 'Для завершения оплаты\nнеобходимо указать подпись',
-            status: AcceptPaymentStateStatus.requiredSignature
-          ));
-        }
-      }
+      isLink: false
     );
   }
 
@@ -131,18 +132,19 @@ class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState, AcceptPay
       isRequiredSignature: false
     ));
 
-    await iboxpro.adjustPayment(
-      signature: signature,
-      onError: (String error) => emit(state.copyWith(message: error, status: AcceptPaymentStateStatus.failure)),
-      onPaymentAdjust: _savePayment
-    );
+    await iboxpro.adjustPayment(signature: signature);
   }
 
   Future<void> _savePayment([Map<dynamic, dynamic>? transaction]) async {
     emit(state.copyWith(message: 'Сохранение информации об оплате', status: AcceptPaymentStateStatus.savingPayment));
 
     try {
-      await _acceptPayment(transaction);
+      await paymentsRepository.acceptPayment(
+        transaction: transaction,
+        location: state.location!,
+        summ: state.total,
+        deliveryPointOrderEx: state.deliveryPointOrderEx
+      );
 
       emit(state.copyWith(message: 'Оплата успешно сохранена', status: AcceptPaymentStateStatus.finished));
     } on AppError catch(e) {
@@ -150,50 +152,6 @@ class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState, AcceptPay
         message: 'Ошибка при сохранении оплаты ${e.message}',
         status: AcceptPaymentStateStatus.failure
       ));
-    }
-  }
-
-  Future<void> _acceptPayment(Map<dynamic, dynamic>? transaction) async {
-    Location? location = await GeoLoc.getCurrentLocation();
-
-    if (location == null) {
-      throw AppError('Для работы с приложением необходимо разрешить определение местоположения');
-    }
-
-    try {
-      await app.api.acceptPayment(
-        deliveryPointOrderId: state.deliveryPointOrderEx.dpo.id,
-        summ: state.total,
-        transaction: transaction,
-        location: location
-      );
-    } on ApiException catch(e) {
-      throw AppError(e.errorMsg);
-    } catch(e, trace) {
-      await Misc.reportError(e, trace);
-      throw AppError(Strings.genericErrorMsg);
-    }
-
-    await app.storage.paymentsDao.insertPayment(PaymentsCompanion(
-      summ: Value(state.total),
-      transactionId: Value(transaction?['id']),
-      deliveryPointOrderId: Value(state.deliveryPointOrderEx.dpo.id)
-    ));
-
-    await app.storage.ordersDao.updateOrder(
-      state.deliveryPointOrderEx.o.id,
-      const OrdersCompanion(needPayment: Value(false))
-    );
-  }
-
-  Future<ApiPaymentCredentials> _getApiPaymentCredentials() async {
-    try {
-      return await app.api.getPaymentCredentials();
-    } on ApiException catch(e) {
-      throw AppError(e.errorMsg);
-    } catch(e, trace) {
-      await Misc.reportError(e, trace);
-      throw AppError(Strings.genericErrorMsg);
     }
   }
 }

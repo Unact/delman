@@ -4287,20 +4287,11 @@ class UsersCompanion extends UpdateCompanion<User> {
   }
 }
 
-class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
+class $PrefsTable extends Prefs with TableInfo<$PrefsTable, Pref> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $SettingsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  $PrefsTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _lastSyncMeta =
       const VerificationMeta('lastSync');
   @override
@@ -4308,19 +4299,16 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
       'last_sync', aliasedName, true,
       type: DriftSqlType.dateTime, requiredDuringInsert: false);
   @override
-  List<GeneratedColumn> get $columns => [id, lastSync];
+  List<GeneratedColumn> get $columns => [lastSync];
   @override
-  String get aliasedName => _alias ?? 'settings';
+  String get aliasedName => _alias ?? 'prefs';
   @override
-  String get actualTableName => 'settings';
+  String get actualTableName => 'prefs';
   @override
-  VerificationContext validateIntegrity(Insertable<Setting> instance,
+  VerificationContext validateIntegrity(Insertable<Pref> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
     if (data.containsKey('last_sync')) {
       context.handle(_lastSyncMeta,
           lastSync.isAcceptableOrUnknown(data['last_sync']!, _lastSyncMeta));
@@ -4329,52 +4317,46 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
+  Set<GeneratedColumn> get $primaryKey => const {};
   @override
-  Setting map(Map<String, dynamic> data, {String? tablePrefix}) {
+  Pref map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Setting(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+    return Pref(
       lastSync: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}last_sync']),
     );
   }
 
   @override
-  $SettingsTable createAlias(String alias) {
-    return $SettingsTable(attachedDatabase, alias);
+  $PrefsTable createAlias(String alias) {
+    return $PrefsTable(attachedDatabase, alias);
   }
 }
 
-class Setting extends DataClass implements Insertable<Setting> {
-  final int id;
+class Pref extends DataClass implements Insertable<Pref> {
   final DateTime? lastSync;
-  const Setting({required this.id, this.lastSync});
+  const Pref({this.lastSync});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
     if (!nullToAbsent || lastSync != null) {
       map['last_sync'] = Variable<DateTime>(lastSync);
     }
     return map;
   }
 
-  SettingsCompanion toCompanion(bool nullToAbsent) {
-    return SettingsCompanion(
-      id: Value(id),
+  PrefsCompanion toCompanion(bool nullToAbsent) {
+    return PrefsCompanion(
       lastSync: lastSync == null && nullToAbsent
           ? const Value.absent()
           : Value(lastSync),
     );
   }
 
-  factory Setting.fromJson(Map<String, dynamic> json,
+  factory Pref.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Setting(
-      id: serializer.fromJson<int>(json['id']),
+    return Pref(
       lastSync: serializer.fromJson<DateTime?>(json['lastSync']),
     );
   }
@@ -4382,88 +4364,81 @@ class Setting extends DataClass implements Insertable<Setting> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
       'lastSync': serializer.toJson<DateTime?>(lastSync),
     };
   }
 
-  Setting copyWith(
-          {int? id, Value<DateTime?> lastSync = const Value.absent()}) =>
-      Setting(
-        id: id ?? this.id,
+  Pref copyWith({Value<DateTime?> lastSync = const Value.absent()}) => Pref(
         lastSync: lastSync.present ? lastSync.value : this.lastSync,
       );
   @override
   String toString() {
-    return (StringBuffer('Setting(')
-          ..write('id: $id, ')
+    return (StringBuffer('Pref(')
           ..write('lastSync: $lastSync')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, lastSync);
+  int get hashCode => lastSync.hashCode;
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Setting &&
-          other.id == this.id &&
-          other.lastSync == this.lastSync);
+      (other is Pref && other.lastSync == this.lastSync);
 }
 
-class SettingsCompanion extends UpdateCompanion<Setting> {
-  final Value<int> id;
+class PrefsCompanion extends UpdateCompanion<Pref> {
   final Value<DateTime?> lastSync;
-  const SettingsCompanion({
-    this.id = const Value.absent(),
+  final Value<int> rowid;
+  const PrefsCompanion({
     this.lastSync = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
-  SettingsCompanion.insert({
-    this.id = const Value.absent(),
+  PrefsCompanion.insert({
     this.lastSync = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
-  static Insertable<Setting> custom({
-    Expression<int>? id,
+  static Insertable<Pref> custom({
     Expression<DateTime>? lastSync,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
       if (lastSync != null) 'last_sync': lastSync,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
-  SettingsCompanion copyWith({Value<int>? id, Value<DateTime?>? lastSync}) {
-    return SettingsCompanion(
-      id: id ?? this.id,
+  PrefsCompanion copyWith({Value<DateTime?>? lastSync, Value<int>? rowid}) {
+    return PrefsCompanion(
       lastSync: lastSync ?? this.lastSync,
+      rowid: rowid ?? this.rowid,
     );
   }
 
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
     if (lastSync.present) {
       map['last_sync'] = Variable<DateTime>(lastSync.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
     }
     return map;
   }
 
   @override
   String toString() {
-    return (StringBuffer('SettingsCompanion(')
-          ..write('id: $id, ')
-          ..write('lastSync: $lastSync')
+    return (StringBuffer('PrefsCompanion(')
+          ..write('lastSync: $lastSync, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
 }
 
-abstract class _$AppStorage extends GeneratedDatabase {
-  _$AppStorage(QueryExecutor e) : super(e);
+abstract class _$AppDataStore extends GeneratedDatabase {
+  _$AppDataStore(QueryExecutor e) : super(e);
   late final $DeliveriesTable deliveries = $DeliveriesTable(this);
   late final $DeliveryPointsTable deliveryPoints = $DeliveryPointsTable(this);
   late final $OrderStoragesTable orderStorages = $OrderStoragesTable(this);
@@ -4474,13 +4449,34 @@ abstract class _$AppStorage extends GeneratedDatabase {
   late final $PaymentsTable payments = $PaymentsTable(this);
   late final $OrderInfoLinesTable orderInfoLines = $OrderInfoLinesTable(this);
   late final $UsersTable users = $UsersTable(this);
-  late final $SettingsTable settings = $SettingsTable(this);
-  late final DeliveriesDao deliveriesDao = DeliveriesDao(this as AppStorage);
+  late final $PrefsTable prefs = $PrefsTable(this);
+  late final DeliveriesDao deliveriesDao = DeliveriesDao(this as AppDataStore);
   late final OrderStoragesDao orderStoragesDao =
-      OrderStoragesDao(this as AppStorage);
-  late final OrdersDao ordersDao = OrdersDao(this as AppStorage);
-  late final PaymentsDao paymentsDao = PaymentsDao(this as AppStorage);
-  late final UsersDao usersDao = UsersDao(this as AppStorage);
+      OrderStoragesDao(this as AppDataStore);
+  late final OrdersDao ordersDao = OrdersDao(this as AppDataStore);
+  late final PaymentsDao paymentsDao = PaymentsDao(this as AppDataStore);
+  late final UsersDao usersDao = UsersDao(this as AppDataStore);
+  Selectable<AppInfoResult> appInfo() {
+    return customSelect(
+        'SELECT prefs.*, (SELECT COUNT(*) FROM orders WHERE EXISTS (SELECT 1 FROM users WHERE users.storage_id = orders.storage_id)) AS own_orders, (SELECT COUNT(*) FROM orders WHERE EXISTS (SELECT 1 FROM delivery_point_orders AS dpo WHERE dpo.order_id = orders.id AND dpo.pickup = 0 AND dpo.finished = 0)) AS need_transfer_orders, (SELECT COUNT(*) FROM payments WHERE transaction_id IS NULL) AS cash_payments_total, (SELECT COUNT(*) FROM payments WHERE transaction_id IS NOT NULL) AS card_payments_total, COALESCE((SELECT SUM(summ) FROM payments WHERE transaction_id IS NULL), 0) AS cash_payments_sum, COALESCE((SELECT SUM(summ) FROM payments WHERE transaction_id IS NOT NULL), 0) AS card_payments_sum FROM prefs',
+        variables: [],
+        readsFrom: {
+          orders,
+          users,
+          deliveryPointOrders,
+          payments,
+          prefs,
+        }).map((QueryRow row) => AppInfoResult(
+          lastSync: row.readNullable<DateTime>('last_sync'),
+          ownOrders: row.read<int>('own_orders'),
+          needTransferOrders: row.read<int>('need_transfer_orders'),
+          cashPaymentsTotal: row.read<int>('cash_payments_total'),
+          cardPaymentsTotal: row.read<int>('card_payments_total'),
+          cashPaymentsSum: row.read<double>('cash_payments_sum'),
+          cardPaymentsSum: row.read<double>('card_payments_sum'),
+        ));
+  }
+
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4495,11 +4491,30 @@ abstract class _$AppStorage extends GeneratedDatabase {
         payments,
         orderInfoLines,
         users,
-        settings
+        prefs
       ];
 }
 
-mixin _$DeliveriesDaoMixin on DatabaseAccessor<AppStorage> {
+class AppInfoResult {
+  final DateTime? lastSync;
+  final int ownOrders;
+  final int needTransferOrders;
+  final int cashPaymentsTotal;
+  final int cardPaymentsTotal;
+  final double cashPaymentsSum;
+  final double cardPaymentsSum;
+  AppInfoResult({
+    this.lastSync,
+    required this.ownOrders,
+    required this.needTransferOrders,
+    required this.cashPaymentsTotal,
+    required this.cardPaymentsTotal,
+    required this.cashPaymentsSum,
+    required this.cardPaymentsSum,
+  });
+}
+
+mixin _$DeliveriesDaoMixin on DatabaseAccessor<AppDataStore> {
   $DeliveriesTable get deliveries => attachedDatabase.deliveries;
   $DeliveryPointsTable get deliveryPoints => attachedDatabase.deliveryPoints;
   $OrderStoragesTable get orderStorages => attachedDatabase.orderStorages;
@@ -4566,11 +4581,11 @@ class DeliveryPointOrderExResult {
   });
 }
 
-mixin _$OrderStoragesDaoMixin on DatabaseAccessor<AppStorage> {
+mixin _$OrderStoragesDaoMixin on DatabaseAccessor<AppDataStore> {
   $OrderStoragesTable get orderStorages => attachedDatabase.orderStorages;
   $UsersTable get users => attachedDatabase.users;
 }
-mixin _$OrdersDaoMixin on DatabaseAccessor<AppStorage> {
+mixin _$OrdersDaoMixin on DatabaseAccessor<AppDataStore> {
   $OrderStoragesTable get orderStorages => attachedDatabase.orderStorages;
   $OrdersTable get orders => attachedDatabase.orders;
   $OrderLinesTable get orderLines => attachedDatabase.orderLines;
@@ -4710,7 +4725,7 @@ class OrderWithTransferResult {
   });
 }
 
-mixin _$PaymentsDaoMixin on DatabaseAccessor<AppStorage> {
+mixin _$PaymentsDaoMixin on DatabaseAccessor<AppDataStore> {
   $DeliveriesTable get deliveries => attachedDatabase.deliveries;
   $DeliveryPointsTable get deliveryPoints => attachedDatabase.deliveryPoints;
   $OrderStoragesTable get orderStorages => attachedDatabase.orderStorages;
@@ -4746,7 +4761,7 @@ class PaymentWithOrderResult {
   });
 }
 
-mixin _$UsersDaoMixin on DatabaseAccessor<AppStorage> {
+mixin _$UsersDaoMixin on DatabaseAccessor<AppDataStore> {
   $OrderStoragesTable get orderStorages => attachedDatabase.orderStorages;
   $UsersTable get users => attachedDatabase.users;
 }

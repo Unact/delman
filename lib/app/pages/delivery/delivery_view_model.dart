@@ -1,23 +1,28 @@
 part of 'delivery_page.dart';
 
 class DeliveryViewModel extends PageViewModel<DeliveryState, DeliveryStateStatus> {
-  DeliveryViewModel(BuildContext context) : super(context, DeliveryState());
+  final DeliveriesRepository deliveriesRepository;
+
+  StreamSubscription<List<ExDelivery>>? deliveryPointExListSubscription;
+
+  DeliveryViewModel(this.deliveriesRepository) : super(DeliveryState());
 
   @override
   DeliveryStateStatus get status => state.status;
 
   @override
-  TableUpdateQuery get listenForTables => TableUpdateQuery.onAllTables([
-    app.storage.deliveryPoints,
-    app.storage.deliveryPointOrders,
-    app.storage.orders,
-  ]);
+  Future<void> initViewModel() async {
+    await super.initViewModel();
+
+    deliveryPointExListSubscription = deliveriesRepository.watchExDeliveries().listen((event) {
+      emit(state.copyWith(status: DeliveryStateStatus.dataLoaded, deliveries: event));
+    });
+  }
 
   @override
-  Future<void> loadData() async {
-    emit(state.copyWith(
-      status: DeliveryStateStatus.dataLoaded,
-      deliveries: await app.storage.deliveriesDao.getExDeliveries()
-    ));
+  Future<void> close() async {
+    await super.close();
+
+    await deliveryPointExListSubscription?.cancel();
   }
 }

@@ -1,35 +1,44 @@
 part of 'point_address_page.dart';
 
 class PointAddressViewModel extends PageViewModel<PointAddressState, PointAddressStateStatus> {
+  final DeliveriesRepository deliveriesRepository;
+
+  StreamSubscription<List<DeliveryPointExResult>>? deliveryPointExListSubscription;
+
   PointAddressViewModel(
-    BuildContext context,
+    this.deliveriesRepository,
     {
       required DeliveryPointExResult deliveryPointEx
     }
-  ) : super(context, PointAddressState(deliveryPointEx: deliveryPointEx));
+  ) : super(PointAddressState(deliveryPointEx: deliveryPointEx));
 
   @override
   PointAddressStateStatus get status => state.status;
 
   @override
-  TableUpdateQuery get listenForTables => TableUpdateQuery.onAllTables([
-    app.storage.deliveryPointOrders,
-    app.storage.deliveryPoints,
-  ]);
+  Future<void> initViewModel() async {
+    await super.initViewModel();
+
+    deliveryPointExListSubscription = deliveriesRepository.watchExDeliveryPoints().listen((event) {
+      emit(state.copyWith(
+        status: PointAddressStateStatus.dataLoaded,
+        allPoints:  event.where((el) => el.dp.id != state.deliveryPointEx.dp.id).toList(),
+        deliveryPointEx: event.firstWhereOrNull((el) => el.dp.id == state.deliveryPointEx.dp.id)
+      ));
+    });
+  }
 
   @override
-  Future<void> loadData() async {
-    emit(state.copyWith(
-      status: PointAddressStateStatus.dataLoaded,
-      deliveryPointEx: await app.storage.deliveriesDao.getExDeliveryPoint(state.deliveryPointEx.dp.id),
-      allPoints: (await app.storage.deliveriesDao.getExDeliveryPoints(state.deliveryPointEx.dp.deliveryId))
-    ));
+  Future<void> close() async {
+    await super.close();
+
+    await deliveryPointExListSubscription?.cancel();
   }
 
   Future<void> changeDeliveryPoint(DeliveryPointExResult newDeliveryPointEx) async {
     emit(state.copyWith(
       status: PointAddressStateStatus.selectionChange,
-      deliveryPointEx: await app.storage.deliveriesDao.getExDeliveryPoint(newDeliveryPointEx.dp.id),
+      deliveryPointEx: newDeliveryPointEx
     ));
   }
 

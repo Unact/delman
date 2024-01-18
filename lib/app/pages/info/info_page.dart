@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:drift/drift.dart' show TableUpdateQuery, Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:u_app_utils/u_app_utils.dart';
@@ -11,8 +10,9 @@ import '/app/entities/entities.dart';
 import '/app/pages/home/home_page.dart';
 import '/app/pages/person/person_page.dart';
 import '/app/pages/shared/page_view_model.dart';
-import '/app/services/delman_api.dart';
-import '/app/services/geo_loc.dart';
+import '/app/repositories/app_repository.dart';
+import '/app/repositories/deliveries_repository.dart';
+import '/app/repositories/users_repository.dart';
 
 part 'info_state.dart';
 part 'info_view_model.dart';
@@ -25,7 +25,11 @@ class InfoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<InfoViewModel>(
-      create: (context) => InfoViewModel(context),
+      create: (context) => InfoViewModel(
+        RepositoryProvider.of<AppRepository>(context),
+        RepositoryProvider.of<DeliveriesRepository>(context),
+        RepositoryProvider.of<UsersRepository>(context),
+      ),
       child: _InfoView(),
     );
   }
@@ -40,6 +44,18 @@ class _InfoViewState extends State<_InfoView> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   Completer<void> _refresherCompleter = Completer();
   late final ProgressDialog _progressDialog = ProgressDialog(context: context);
+
+  @override
+  void dispose() {
+    _progressDialog.close();
+    super.dispose();
+  }
+
+  void changePage(int index) {
+    final homeVm = context.read<HomeViewModel>();
+
+    homeVm.setCurrentIndex(index);
+  }
 
   Future<void> openRefresher() async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -138,7 +154,7 @@ class _InfoViewState extends State<_InfoView> {
 
     return Card(
       child: ListTile(
-        onTap: () => vm.changePage(3),
+        onTap: () => changePage(3),
         isThreeLine: true,
         title: const Text(Strings.orderStoragesPageName),
         subtitle: RichText(
@@ -163,7 +179,7 @@ class _InfoViewState extends State<_InfoView> {
 
     return Card(
       child: ListTile(
-        onTap: () => vm.changePage(1),
+        onTap: () => changePage(1),
         isThreeLine: true,
         title: const Text(Strings.deliveryPageName),
         subtitle: RichText(
@@ -182,7 +198,7 @@ class _InfoViewState extends State<_InfoView> {
         trailing: ElevatedButton(
           style: ElevatedButton.styleFrom(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
-            backgroundColor: Colors.blue,
+            backgroundColor: Theme.of(context).colorScheme.primary,
           ),
           onPressed: state.deliveryPointsCnt == 0 ? null : vm.closeDelivery,
           child: const Text('Завершить день')
@@ -197,7 +213,7 @@ class _InfoViewState extends State<_InfoView> {
 
     return Card(
       child: ListTile(
-        onTap: () => vm.changePage(2),
+        onTap: () => changePage(2),
         isThreeLine: true,
         title: const Text(Strings.paymentsPageName),
         subtitle: RichText(
@@ -242,18 +258,20 @@ class _InfoViewState extends State<_InfoView> {
 
   Widget _buildInfoCard(BuildContext context) {
     InfoViewModel vm = context.read<InfoViewModel>();
-    InfoState state = vm.state;
 
-    if (state.newVersionAvailable) {
-      return const Card(
-        child: ListTile(
-          isThreeLine: true,
-          title: Text('Информация'),
-          subtitle: Text('Доступна новая версия приложения'),
-        )
-      );
-    } else {
-      return Container();
-    }
+    return FutureBuilder(
+      future: vm.state.user?.newVersionAvailable,
+      builder: (context, snapshot) {
+        if (!(snapshot.data ?? false)) return Container();
+
+        return const Card(
+          child: ListTile(
+            isThreeLine: true,
+            title: Text('Информация'),
+            subtitle: Text('Доступна новая версия приложения'),
+          )
+        );
+      }
+    );
   }
 }

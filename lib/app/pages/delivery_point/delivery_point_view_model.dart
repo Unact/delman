@@ -1,30 +1,45 @@
 part of 'delivery_point_page.dart';
 
 class DeliveryPointViewModel extends PageViewModel<DeliveryPointState, DeliveryPointStateStatus> {
+  final DeliveriesRepository deliveriesRepository;
+
+  StreamSubscription<List<DeliveryPointExResult>>? deliveryPointExListSubscription;
+  StreamSubscription<List<DeliveryPointOrderExResult>>? deliveryPointOrderExListSubscription;
+
   DeliveryPointViewModel(
-    BuildContext context,
+    this.deliveriesRepository,
     {
       required DeliveryPointExResult deliveryPointEx
     }
-  ) : super(context, DeliveryPointState(deliveryPointEx: deliveryPointEx));
+  ) : super(DeliveryPointState(deliveryPointEx: deliveryPointEx));
 
   @override
   DeliveryPointStateStatus get status => state.status;
 
   @override
-  TableUpdateQuery get listenForTables => TableUpdateQuery.onAllTables([
-    app.storage.deliveryPoints,
-    app.storage.deliveryPointOrders,
-    app.storage.orders,
-  ]);
+  Future<void> initViewModel() async {
+    await super.initViewModel();
+
+    deliveryPointExListSubscription = deliveriesRepository.watchExDeliveryPoints().listen((event) {
+      emit(state.copyWith(
+        status: DeliveryPointStateStatus.dataLoaded,
+        deliveryPointEx: event.firstWhereOrNull((el) => el.dp.id == state.deliveryPointEx.dp.id)
+      ));
+    });
+    deliveryPointOrderExListSubscription = deliveriesRepository.watchExDeliveryPointOrders().listen((event) {
+      emit(state.copyWith(
+        status: DeliveryPointStateStatus.dataLoaded,
+        deliveryPointOrdersEx: event.where((el) => el.dpo.deliveryPointId == state.deliveryPointEx.dp.id).toList()
+      ));
+    });
+  }
 
   @override
-  Future<void> loadData() async {
-    emit(state.copyWith(
-      status: DeliveryPointStateStatus.dataLoaded,
-      deliveryPointEx: await app.storage.deliveriesDao.getExDeliveryPoint(state.deliveryPointEx.dp.id),
-      deliveryPointOrdersEx: await app.storage.deliveriesDao.getExDeliveryPointOrders(state.deliveryPointEx.dp.id)
-    ));
+  Future<void> close() async {
+    await super.close();
+
+    await deliveryPointExListSubscription?.cancel();
+    await deliveryPointOrderExListSubscription?.cancel();
   }
 
   Future<void> callPhone() async {
@@ -47,38 +62,15 @@ class DeliveryPointViewModel extends PageViewModel<DeliveryPointState, DeliveryP
     emit(state.copyWith(status: DeliveryPointStateStatus.inProgress));
 
     try {
-      await _arriveAtDeliveryPoint();
+      await deliveriesRepository.arriveAtDeliveryPoint(
+        deliveryPointEx: state.deliveryPointEx,
+        location: (await GeoLoc.getCurrentLocation())!,
+        factArrival: DateTime.now()
+      );
 
       emit(state.copyWith(status: DeliveryPointStateStatus.arrivalSaved, message: 'Прибытие успешно отмечено'));
     } on AppError catch(e) {
       emit(state.copyWith(status: DeliveryPointStateStatus.failure, message: e.message));
     }
-  }
-
-  Future<void> _arriveAtDeliveryPoint() async {
-    Location? location = await GeoLoc.getCurrentLocation();
-    DateTime factArrival = DateTime.now();
-
-    if (location == null) {
-      throw AppError('Для работы с приложением необходимо разрешить определение местоположения');
-    }
-
-    try {
-      await app.api.arriveAtDeliveryPoint(
-        deliveryPointId: state.deliveryPointEx.dp.id,
-        factArrival: factArrival,
-        location: location
-      );
-    } on ApiException catch(e) {
-      throw AppError(e.errorMsg);
-    } catch(e, trace) {
-      await Misc.reportError(e, trace);
-      throw AppError(Strings.genericErrorMsg);
-    }
-
-    await app.storage.deliveriesDao.updateDeliveryPoint(
-      state.deliveryPointEx.dp.id,
-      DeliveryPointsCompanion(factArrival: Value(factArrival))
-    );
   }
 }
