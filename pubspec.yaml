@@ -11,6 +11,7 @@ dependencies:
   device_info_plus: ^9.0.2
   dio: ^5.2.1
   drift: ^2.9.0
+  easy_refresh: ^3.3.2
   equatable: ^2.0.5
   f_logs:
     git:
@@ -41,9 +42,10 @@ dependencies:
   sentry_flutter: ^7.14.0
   sqlite3_flutter_libs: ^0.5.0
   u_app_utils:
-    git:
-      url: git@github.com:Unact/u_app_utils.git
-      ref: 2736e9c
+    path: ../u_app_utils
+    #git:
+    #  url: git@github.com:Unact/u_app_utils.git
+    #  ref: 2736e9c
   url_launcher: ^6.0.20
   yandex_mapkit: ^3.4.0
 

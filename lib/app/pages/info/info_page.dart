@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:u_app_utils/u_app_utils.dart';
@@ -41,8 +42,8 @@ class _InfoView extends StatefulWidget {
 }
 
 class _InfoViewState extends State<_InfoView> {
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
-  Completer<void> _refresherCompleter = Completer();
+  final ScrollController scrollController = ScrollController();
+  final EasyRefreshController refreshController = EasyRefreshController();
   late final ProgressDialog _progressDialog = ProgressDialog(context: context);
 
   @override
@@ -55,17 +56,6 @@ class _InfoViewState extends State<_InfoView> {
     final homeVm = context.read<HomeViewModel>();
 
     homeVm.setCurrentIndex(index);
-  }
-
-  Future<void> openRefresher() async {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _refreshIndicatorKey.currentState!.show();
-    });
-  }
-
-  void closeRefresher() {
-    _refresherCompleter.complete();
-    _refresherCompleter = Completer();
   }
 
   @override
@@ -92,15 +82,21 @@ class _InfoViewState extends State<_InfoView> {
       body: BlocConsumer<InfoViewModel, InfoState>(
         builder: (context, state) {
           InfoViewModel vm = context.read<InfoViewModel>();
+          final lastLoadTime = state.appInfo?.lastLoadTime != null ?
+            Format.dateTimeStr(state.appInfo?.lastLoadTime) :
+            'Загрузка не проводилась';
 
-          return RefreshIndicator(
-            key: _refreshIndicatorKey,
-            onRefresh: () async {
-              vm.refresh();
-              return _refresherCompleter.future;
+          return Refreshable(
+            scrollController: scrollController,
+            refreshController: refreshController,
+            confirmRefresh: false,
+            messageText: 'Последнее обновление: $lastLoadTime',
+            onRefresh: vm.getData,
+            onError: (error, stackTrace) {
+              if (error is! AppError) Misc.reportError(error, stackTrace);
             },
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
+            childBuilder: (context, physics) => ListView(
+              physics: physics,
               padding: const EdgeInsets.only(top: 24, left: 8, right: 8, bottom: 24),
               children: <Widget>[
                 Column(
@@ -114,21 +110,16 @@ class _InfoViewState extends State<_InfoView> {
         },
         listener: (context, state) async {
           switch (state.status) {
-            case InfoStateStatus.inCloseProgress:
+            case InfoStateStatus.closeInProgress:
               await _progressDialog.open();
               break;
             case InfoStateStatus.startLoad:
-              await openRefresher();
+              refreshController.callRefresh(scrollController: scrollController);
               break;
             case InfoStateStatus.closeFailure:
             case InfoStateStatus.closeSuccess:
               Misc.showMessage(context, state.message);
               _progressDialog.close();
-              break;
-            case InfoStateStatus.loadFailure:
-            case InfoStateStatus.loadSuccess:
-              Misc.showMessage(context, state.message);
-              closeRefresher();
               break;
             default:
               break;
@@ -143,7 +134,6 @@ class _InfoViewState extends State<_InfoView> {
       _buildDeliveriesCard(context),
       _buildPaymentsCard(context),
       _buildOrderStoragesCard(context),
-      _buildFailureCard(context),
       _buildInfoCard(context),
     ];
   }
@@ -237,23 +227,6 @@ class _InfoViewState extends State<_InfoView> {
         )
       ),
     );
-  }
-
-  Widget _buildFailureCard(BuildContext context) {
-    InfoViewModel vm = context.read<InfoViewModel>();
-    InfoState state = vm.state;
-
-    if (state.status == InfoStateStatus.loadFailure) {
-      return Card(
-        child: ListTile(
-          isThreeLine: true,
-          title: const Text('Ошибки'),
-          subtitle: Text(state.message, style: TextStyle(color: Colors.red[300])),
-        )
-      );
-    } else {
-      return Container();
-    }
   }
 
   Widget _buildInfoCard(BuildContext context) {

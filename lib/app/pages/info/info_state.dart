@@ -5,12 +5,9 @@ enum InfoStateStatus {
   initial,
   dataLoaded,
   startLoad,
-  inCloseProgress,
+  closeInProgress,
   closeSuccess,
-  closeFailure,
-  inLoadProgress,
-  loadSuccess,
-  loadFailure
+  closeFailure
 }
 
 class InfoState {
@@ -27,11 +24,6 @@ class InfoState {
   final String message;
   final User? user;
   final AppInfoResult? appInfo;
-
-  bool get isBusy => [
-    InfoStateStatus.inLoadProgress,
-    InfoStateStatus.inCloseProgress
-  ].contains(status);
 
   int get deliveryPointsCnt => deliveries.map((el) => el.deliveryPoints.length).fold(0, (prev, el) => prev + el);
   int get deliveryPointsLeftCnt => deliveries

@@ -35,7 +35,10 @@ class InfoViewModel extends PageViewModel<InfoState, InfoStateStatus> {
 
     await _checkNeedRefresh();
 
-    fetchDataTimer = Timer.periodic(const Duration(minutes: 10), _checkNeedRefresh);
+    fetchDataTimer = Timer.periodic(
+      const Duration(minutes: 10),
+      (_) => emit(state.copyWith(status: InfoStateStatus.startLoad))
+    );
   }
 
   @override
@@ -48,22 +51,12 @@ class InfoViewModel extends PageViewModel<InfoState, InfoStateStatus> {
     fetchDataTimer?.cancel();
   }
 
-  Future<void> refresh([bool timer = false]) async {
-    if (state.isBusy) return;
-
-    try {
-      emit(state.copyWith(status: InfoStateStatus.inLoadProgress));
-      await appRepository.loadData();
-
-      emit(state.copyWith(status: InfoStateStatus.loadSuccess, message: 'Данные успешно обновлены'));
-    } on AppError catch(e) {
-      emit(state.copyWith(status: InfoStateStatus.loadFailure, message: e.message));
-    }
+  Future<void> getData() async {
+    await usersRepository.loadUserData();
+    await appRepository.loadData();
   }
 
-  Future<void> _checkNeedRefresh([Timer? _]) async {
-    if (state.isBusy) return;
-
+  Future<void> _checkNeedRefresh() async {
     final pref = await appRepository.watchAppInfo().first;
 
     if (pref.lastLoadTime == null) {
@@ -81,9 +74,9 @@ class InfoViewModel extends PageViewModel<InfoState, InfoStateStatus> {
 
   Future<void> closeDelivery() async {
     try {
-      emit(state.copyWith(status: InfoStateStatus.inCloseProgress));
+      emit(state.copyWith(status: InfoStateStatus.closeInProgress));
       await deliveriesRepository.closeDelivery();
-      await appRepository.loadData();
+      await getData();
 
       emit(state.copyWith(status: InfoStateStatus.closeSuccess, message: 'День успешно завершен'));
     } on AppError catch(e) {
