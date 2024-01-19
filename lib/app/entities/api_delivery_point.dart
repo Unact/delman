@@ -1,6 +1,6 @@
 part of 'entities.dart';
 
-class ApiDeliveryPoint {
+class ApiDeliveryPoint extends Equatable {
   final int id;
   final int deliveryId;
   final int seq;
@@ -88,4 +88,26 @@ class ApiDeliveryPoint {
       senderPhone: senderPhone,
     );
   }
+
+  @override
+  List<Object?> get props => [
+    id,
+    deliveryId,
+    seq,
+    planArrival,
+    planDeparture,
+    factArrival,
+    factDeparture,
+    addressName,
+    latitude,
+    longitude,
+    sellerName,
+    buyerName,
+    phone,
+    paymentTypeName,
+    deliveryTypeName,
+    pickupSellerName,
+    senderName,
+    senderPhone,
+  ];
 }

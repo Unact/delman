@@ -1,9 +1,11 @@
 import 'dart:async';
 
-import 'package:drift/drift.dart' show Value, TableUpdateQuery;
+import 'package:collection/collection.dart';
+import 'package:delman/app/repositories/orders_repository.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:u_app_utils/u_app_utils.dart';
 
 import '/app/constants/strings.dart';
@@ -11,8 +13,9 @@ import '/app/data/database.dart';
 import '/app/entities/entities.dart';
 import '/app/pages/accept_payment/accept_payment_page.dart';
 import '/app/pages/shared/page_view_model.dart';
-import '/app/services/geo_loc.dart';
-import '/app/services/delman_api.dart';
+import '/app/repositories/deliveries_repository.dart';
+import '/app/repositories/users_repository.dart';
+import '/app/repositories/payments_repository.dart';
 
 part 'delivery_point_order_state.dart';
 part 'delivery_point_order_view_model.dart';
@@ -29,7 +32,10 @@ class DeliveryPointOrderPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<DeliveryPointOrderViewModel>(
       create: (context) => DeliveryPointOrderViewModel(
-        context,
+        RepositoryProvider.of<DeliveriesRepository>(context),
+        RepositoryProvider.of<OrdersRepository>(context),
+        RepositoryProvider.of<PaymentsRepository>(context),
+        RepositoryProvider.of<UsersRepository>(context),
         deliveryPointOrderEx: deliveryPointOrderEx
       ),
       child: _DeliveryPointOrderView(),
@@ -45,6 +51,12 @@ class _DeliveryPointOrderView extends StatefulWidget {
 class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late final ProgressDialog _progressDialog = ProgressDialog(context: context);
+
+  @override
+  void dispose() {
+    _progressDialog.close();
+    super.dispose();
+  }
 
   Future<void> showAddOrderInfoDialog(BuildContext context) async {
     DeliveryPointOrderViewModel vm = context.read<DeliveryPointOrderViewModel>();
@@ -129,27 +141,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
       builder: (context) {
         return AlertDialog(
           titlePadding: const EdgeInsets.only(top: 0, left: 24, bottom: 12),
-          title: Stack(
-            children: [
-              Align(
-                alignment: Alignment.topRight,
-                child: IconButton(
-                  icon: const Icon(Icons.close),
-                  color: Colors.red,
-                  iconSize: 24,
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ),
-              const Column(
-                children: [
-                  SizedBox(height: 24),
-                  Text('Внимание'),
-                ],
-              )
-            ]
-          ),
+          title: const Text('Внимание'),
           content: SizedBox(
             width: size.width,
             child: const Text('Хотите ли принять оплату?')
@@ -508,7 +500,7 @@ class _DeliveryPointOrderViewState extends State<_DeliveryPointOrderView> {
                 width: 40,
                 height: 36,
                 child: TextFormField(
-                  initialValue: orderLine.factAmount?.toString(),
+                  initialValue: (orderLine.factAmount ?? orderLine.amount).toString(),
                   textAlign: TextAlign.center,
                   onChanged: (newValue) async => await vm.updateOrderLineAmount(orderLine, newValue),
                   keyboardType: const TextInputType.numberWithOptions(signed: true),

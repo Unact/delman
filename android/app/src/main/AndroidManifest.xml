@@ -21,7 +21,7 @@
     </queries>
 
     <application
-        android:name="${applicationName}"
+        android:name=".MainApplication"
         android:label="Курьер"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"

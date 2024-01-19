@@ -2,18 +2,17 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_signature_pad/flutter_signature_pad.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:u_app_utils/u_app_utils.dart';
 
 import '/app/data/database.dart';
-import '/app/constants/strings.dart';
 import '/app/entities/entities.dart';
 import '/app/pages/shared/page_view_model.dart';
-import '/app/services/delman_api.dart';
-import '/app/services/geo_loc.dart';
+import '/app/repositories/app_repository.dart';
+import '/app/repositories/payments_repository.dart';
 import '/app/services/iboxpro.dart';
 
 part 'accept_payment_state.dart';
@@ -35,7 +34,8 @@ class AcceptPaymentPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<AcceptPaymentViewModel>(
       create: (context) => AcceptPaymentViewModel(
-        context,
+        RepositoryProvider.of<AppRepository>(context),
+        RepositoryProvider.of<PaymentsRepository>(context),
         deliveryPointOrderEx: deliveryPointOrderEx,
         total: total,
         cardPayment: cardPayment

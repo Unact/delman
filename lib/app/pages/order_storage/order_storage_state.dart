@@ -18,24 +18,24 @@ class OrderStorageState {
     this.user,
     this.message = '',
     required this.confirmationCallback,
-    this.ordersInOwnStorage = const [],
-    this.ordersInOrderStorage = const [],
+    this.orders = const []
   });
 
   final OrderStorage orderStorage;
   final OrderStorageStateStatus status;
   final String message;
   final Function confirmationCallback;
-  final List<Order> ordersInOwnStorage;
-  final List<Order> ordersInOrderStorage;
+  final List<Order> orders;
   final User? user;
+
+  List<Order> get ordersInOwnStorage => orders.where((el) => el.storageId == user?.storageId).toList();
+  List<Order> get ordersInOrderStorage =>  orders.where((el) => el.storageId == orderStorage.id).toList();
 
   OrderStorageState copyWith({
     OrderStorageStateStatus? status,
     User? user,
     OrderStorage? orderStorage,
-    List<Order>? ordersInOwnStorage,
-    List<Order>? ordersInOrderStorage,
+    List<Order>? orders,
     String? message,
     Function? confirmationCallback
   }) {
@@ -43,8 +43,7 @@ class OrderStorageState {
       status: status ?? this.status,
       user: user ?? this.user,
       orderStorage: orderStorage ?? this.orderStorage,
-      ordersInOwnStorage: ordersInOwnStorage ?? this.ordersInOwnStorage,
-      ordersInOrderStorage: ordersInOrderStorage ?? this.ordersInOrderStorage,
+      orders: orders ?? this.orders,
       message: message ?? this.message,
       confirmationCallback: confirmationCallback ?? this.confirmationCallback
     );

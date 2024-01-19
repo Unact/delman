@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:drift/drift.dart' show TableUpdateQuery, Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:u_app_utils/u_app_utils.dart';
@@ -11,7 +10,8 @@ import '/app/data/database.dart';
 import '/app/pages/order/order_page.dart';
 import '/app/pages/order_qr_scan/order_qr_scan_page.dart';
 import '/app/pages/shared/page_view_model.dart';
-import '/app/services/delman_api.dart';
+import '/app/repositories/orders_repository.dart';
+import '/app/repositories/users_repository.dart';
 
 part 'order_storage_state.dart';
 part 'order_storage_view_model.dart';
@@ -27,7 +27,11 @@ class OrderStoragePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<OrderStorageViewModel>(
-      create: (context) => OrderStorageViewModel(context, orderStorage: orderStorage),
+      create: (context) => OrderStorageViewModel(
+        RepositoryProvider.of<OrdersRepository>(context),
+        RepositoryProvider.of<UsersRepository>(context),
+        orderStorage: orderStorage
+      ),
       child: _OrderStorageView(),
     );
   }
@@ -40,6 +44,12 @@ class _OrderStorageView extends StatefulWidget {
 
 class _OrderStorageViewState extends State<_OrderStorageView> {
   late final ProgressDialog _progressDialog = ProgressDialog(context: context);
+
+  @override
+  void dispose() {
+    _progressDialog.close();
+    super.dispose();
+  }
 
   Future<void> showConfirmationDialog(String message, Function callback) async {
     bool result = await showDialog<bool>(

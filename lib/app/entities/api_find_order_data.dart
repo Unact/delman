@@ -1,9 +1,9 @@
 part of 'entities.dart';
 
-class ApiFindOrderData {
-  List<ApiOrderInfoLine> orderInfoList;
-  List<ApiOrderLine> orderLines;
-  ApiOrder order;
+class ApiFindOrderData extends Equatable {
+  final List<ApiOrderInfoLine> orderInfoList;
+  final List<ApiOrderLine> orderLines;
+  final ApiOrder order;
 
   ApiFindOrderData({
     required this.orderInfoList,
@@ -18,4 +18,11 @@ class ApiFindOrderData {
       order: ApiOrder.fromJson(json['order'])
     );
   }
+
+  @override
+  List<Object> get props => [
+    orderInfoList,
+    orderLines,
+    order
+  ];
 }

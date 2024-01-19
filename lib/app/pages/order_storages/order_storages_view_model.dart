@@ -1,25 +1,40 @@
 part of 'order_storages_page.dart';
 
 class OrderStoragesViewModel extends PageViewModel<OrderStoragesState, OrderStoragesStateStatus> {
-  OrderStoragesViewModel(BuildContext context) : super(context, OrderStoragesState());
+  final OrderStoragesRepository orderStoragesRepository;
+  final OrdersRepository ordersRepository;
+  final UsersRepository usersRepository;
+
+  StreamSubscription<List<OrderStorage>>? orderStoragesSubscription;
+  StreamSubscription<User>? userSubscription;
+
+  OrderStoragesViewModel(
+    this.orderStoragesRepository,
+    this.ordersRepository,
+    this.usersRepository
+  ) : super(OrderStoragesState());
 
   @override
   OrderStoragesStateStatus get status => state.status;
 
   @override
-  TableUpdateQuery get listenForTables => TableUpdateQuery.onAllTables([
-    app.storage.users,
-    app.storage.orderStorages,
-    app.storage.orders
-  ]);
+  Future<void> initViewModel() async {
+    await super.initViewModel();
+
+    orderStoragesSubscription = orderStoragesRepository.watchForeignOrderStorages().listen((event) {
+      emit(state.copyWith(status: OrderStoragesStateStatus.dataLoaded, orderStorages: event));
+    });
+    userSubscription = usersRepository.watchUser().listen((event) {
+      emit(state.copyWith(status: OrderStoragesStateStatus.dataLoaded, user: event));
+    });
+  }
 
   @override
-  Future<void> loadData() async {
-    emit(state.copyWith(
-      status: OrderStoragesStateStatus.dataLoaded,
-      user: await app.storage.usersDao.getUser(),
-      orderStorages: await app.storage.orderStoragesDao.getForeignOrderStorages()
-    ));
+  Future<void> close() async {
+    await super.close();
+
+    await orderStoragesSubscription?.cancel();
+    await userSubscription?.cancel();
   }
 
   Future<void> startQRScan() async {
@@ -38,26 +53,10 @@ class OrderStoragesViewModel extends PageViewModel<OrderStoragesState, OrderStor
     emit(state.copyWith(status: OrderStoragesStateStatus.inProgress));
 
     try {
-      await _takeNewOrder(order);
+      await ordersRepository.takeNewOrder(order, state.user!);
       emit(state.copyWith(status: OrderStoragesStateStatus.accepted, message: 'Заказ успешно принят'));
     } on AppError catch(e) {
       emit(state.copyWith(status: OrderStoragesStateStatus.failure, message: e.message));
     }
-  }
-
-  Future<void> _takeNewOrder(Order order) async {
-    try {
-      await app.api.takeNewOrder(orderId: order.id);
-    } on ApiException catch(e) {
-      throw AppError(e.errorMsg);
-    } catch(e, trace) {
-      await Misc.reportError(e, trace);
-      throw AppError(Strings.genericErrorMsg);
-    }
-
-    await app.storage.ordersDao.updateOrder(
-      order.id,
-      OrdersCompanion(storageId: Value(state.user!.storageId))
-    );
   }
 }

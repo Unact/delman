@@ -1,8 +1,8 @@
 part of 'database.dart';
 
 @DriftAccessor(tables: [OrderStorages, Users])
-class OrderStoragesDao extends DatabaseAccessor<AppStorage> with _$OrderStoragesDaoMixin {
-  OrderStoragesDao(AppStorage db) : super(db);
+class OrderStoragesDao extends DatabaseAccessor<AppDataStore> with _$OrderStoragesDaoMixin {
+  OrderStoragesDao(AppDataStore db) : super(db);
 
   Future<void> loadOrderStorages(List<OrderStorage> orderStorageList) async {
     await batch((batch) {
@@ -11,10 +11,10 @@ class OrderStoragesDao extends DatabaseAccessor<AppStorage> with _$OrderStorages
     });
   }
 
-  Future<List<OrderStorage>> getForeignOrderStorages() async {
+  Stream<List<OrderStorage>> watchForeignOrderStorages() {
     JoinedSelectStatement userStorageSelect = (selectOnly(users)..addColumns([users.storageId]));
 
-    return (select(orderStorages)..where((tbl) => tbl.id.isNotInQuery(userStorageSelect))).get();
+    return (select(orderStorages)..where((tbl) => tbl.id.isNotInQuery(userStorageSelect))).watch();
   }
 
   Future<OrderStorage?> getOrderStorage(int id) async {

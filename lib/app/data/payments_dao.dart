@@ -14,18 +14,16 @@ part of 'database.dart';
     '''
   }
 )
-class PaymentsDao extends DatabaseAccessor<AppStorage> with _$PaymentsDaoMixin {
-  PaymentsDao(AppStorage db) : super(db);
+class PaymentsDao extends DatabaseAccessor<AppDataStore> with _$PaymentsDaoMixin {
+  PaymentsDao(AppDataStore db) : super(db);
 
-  Future<List<ExPayment>> getPaymentsWithDPO() async {
-    final exPaymentsWithOrder = await paymentWithOrder().get();
-
-    return exPaymentsWithOrder.map((PaymentWithOrderResult payment) {
+  Stream<List<ExPayment>> watchPaymentsWithDPO() {
+    return paymentWithOrder().watch().map((event) => event.map((PaymentWithOrderResult payment) {
       return ExPayment(
         payment: payment.p,
         deliveryPointOrderEx: DeliveryPointOrderExResult(dpo: payment.dpo, o: payment.o)
       );
-    }).toList();
+    }).toList());
   }
 
   Future<List<Payment>> getCardPayments() async {

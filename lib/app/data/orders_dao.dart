@@ -21,15 +21,11 @@ part of 'database.dart';
     '''
   }
 )
-class OrdersDao extends DatabaseAccessor<AppStorage> with _$OrdersDaoMixin {
-  OrdersDao(AppStorage db) : super(db);
+class OrdersDao extends DatabaseAccessor<AppDataStore> with _$OrdersDaoMixin {
+  OrdersDao(AppDataStore db) : super(db);
 
-  Future<List<OrderWithTransferResult>> getOrdersWithTransfer() async {
-    return await orderWithTransfer().get();
-  }
-
-  Future<List<Order>> getOrdersInStorage(int storageId) async {
-    return (select(orders)..where((tbl) => tbl.storageId.equals(storageId))).get();
+  Stream<List<Order>> watchOrders() {
+    return select(orders).watch();
   }
 
   Future<void> loadOrders(List<Order> orderList) async {
@@ -73,24 +69,24 @@ class OrdersDao extends DatabaseAccessor<AppStorage> with _$OrdersDaoMixin {
     return (select(orders)..where((tbl) => tbl.trackingNumber.equals(trackingNumber))).getSingleOrNull();
   }
 
-  Future<Order> getOrderById(int id) {
-    return (select(orders)..where((tbl) => tbl.id.equals(id))).getSingle();
+  Stream<Order> watchOrderById(int id) {
+    return (select(orders)..where((tbl) => tbl.id.equals(id))).watchSingle();
   }
 
-  Future<List<OrderLine>> getOrderLines(int orderId) async {
+  Stream<List<OrderLine>> watchOrderLines(int orderId) {
     final query = select(orderLines)..where((tbl) => tbl.orderId.equals(orderId))..orderBy([
       (u) => OrderingTerm.asc(u.name)
     ]);
 
-    return query.get();
+    return query.watch();
   }
 
-  Future<List<OrderInfoLine>> getOrderInfoLines(int orderId) async {
+  Stream<List<OrderInfoLine>> watchOrderInfoLines(int orderId) {
     final query = select(orderInfoLines)..where((tbl) => tbl.orderId.equals(orderId))..orderBy([
       (u) => OrderingTerm.asc(u.ts)
     ]);
 
-    return query.get();
+    return query.watch();
   }
 
   Future<int> insertOrderInfoLine(OrderInfoLinesCompanion orderInfoLine) async {

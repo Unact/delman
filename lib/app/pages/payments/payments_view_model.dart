@@ -1,23 +1,28 @@
 part of 'payments_page.dart';
 
 class PaymentsViewModel extends PageViewModel<PaymentsState, PaymentsStateStatus> {
-  PaymentsViewModel(BuildContext context) : super(context, PaymentsState());
+  final PaymentsRepository paymentsRepository;
+
+  StreamSubscription<List<ExPayment>>? exPaymentsSubscription;
+
+  PaymentsViewModel(this.paymentsRepository) : super(PaymentsState());
 
   @override
   PaymentsStateStatus get status => state.status;
 
   @override
-  TableUpdateQuery get listenForTables => TableUpdateQuery.onAllTables([
-    app.storage.payments,
-    app.storage.deliveryPointOrders,
-    app.storage.orders
-  ]);
+  Future<void> initViewModel() async {
+    await super.initViewModel();
+
+    exPaymentsSubscription = paymentsRepository.watchPaymentsWithDPO().listen((event) {
+      emit(state.copyWith(status: PaymentsStateStatus.dataLoaded, exPayments: event));
+    });
+  }
 
   @override
-  Future<void> loadData() async {
-    emit(state.copyWith(
-      status: PaymentsStateStatus.dataLoaded,
-      exPayments: await app.storage.paymentsDao.getPaymentsWithDPO()
-    ));
+  Future<void> close() async {
+    await super.close();
+
+    await exPaymentsSubscription?.cancel();
   }
 }

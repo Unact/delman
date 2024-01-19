@@ -1,32 +1,50 @@
 part of 'order_page.dart';
 
 class OrderViewModel extends PageViewModel<OrderState, OrderStateStatus> {
+  final OrdersRepository ordersRepository;
+  final UsersRepository usersRepository;
+
+  StreamSubscription<Order>? orderSubscription;
+  StreamSubscription<List<OrderLine>>? orderLinesSubscription;
+  StreamSubscription<List<OrderInfoLine>>? orderInfoLinesSubscription;
+  StreamSubscription<User>? userSubscription;
+
   OrderViewModel(
-    BuildContext context,
+    this.ordersRepository,
+    this.usersRepository,
     {
       required Order order
     }
-  ) : super(context, OrderState(order: order));
+  ) : super(OrderState(order: order));
 
   @override
   OrderStateStatus get status => state.status;
 
   @override
-  TableUpdateQuery get listenForTables => TableUpdateQuery.onAllTables([
-    app.storage.users,
-    app.storage.orderLines,
-    app.storage.orderInfoLines,
-    app.storage.orders
-  ]);
+  Future<void> initViewModel() async {
+    await super.initViewModel();
+
+    userSubscription = usersRepository.watchUser().listen((event) {
+      emit(state.copyWith(status: OrderStateStatus.dataLoaded, user: event));
+    });
+    orderSubscription = ordersRepository.watchOrderById(state.order.id).listen((event) {
+      emit(state.copyWith(status: OrderStateStatus.dataLoaded, order: event));
+    });
+    orderLinesSubscription = ordersRepository.watchOrderLines(state.order.id).listen((event) {
+      emit(state.copyWith(status: OrderStateStatus.dataLoaded, orderLines: event));
+    });
+    orderInfoLinesSubscription = ordersRepository.watchOrderInfoLines(state.order.id).listen((event) {
+      emit(state.copyWith(status: OrderStateStatus.dataLoaded, orderInfoLines: event));
+    });
+  }
 
   @override
-  Future<void> loadData() async {
-    emit(state.copyWith(
-      status: OrderStateStatus.dataLoaded,
-      user: await app.storage.usersDao.getUser(),
-      order: await app.storage.ordersDao.getOrderById(state.order.id),
-      orderInfoLines: await app.storage.ordersDao.getOrderInfoLines(state.order.id),
-      orderLines: await app.storage.ordersDao.getOrderLines(state.order.id),
-    ));
+  Future<void> close() async {
+    await super.close();
+
+    await orderSubscription?.cancel();
+    await orderLinesSubscription?.cancel();
+    await orderInfoLinesSubscription?.cancel();
+    await userSubscription?.cancel();
   }
 }

@@ -1,6 +1,6 @@
 part of 'entities.dart';
 
-class ApiOrder {
+class ApiOrder extends Equatable {
   final int id;
   final DateTime? deliveryDateTimeFrom;
   final DateTime? deliveryDateTimeTo;
@@ -150,4 +150,42 @@ class ApiOrder {
       productArrivalQR: productArrivalQR
     );
   }
+
+  @override
+  List<Object?> get props => [
+    id,
+    deliveryDateTimeFrom,
+    deliveryDateTimeTo,
+    pickupDateTimeFrom,
+    pickupDateTimeTo,
+    number,
+    trackingNumber,
+    senderName,
+    buyerName,
+    senderPhone,
+    buyerPhone,
+    comment,
+    deliveryTypeName,
+    pickupTypeName,
+    senderFloor,
+    buyerFloor,
+    senderFlat,
+    buyerFlat,
+    senderElevator,
+    buyerElevator,
+    paymentTypeName,
+    sellerName,
+    documentsReturn,
+    cardPaymentAllowed,
+    storageId,
+    deliveryAddressName,
+    pickupAddressName,
+    packages,
+    needPayment,
+    factsConfirmed,
+    deliveryLoadDuration,
+    pickupLoadDuration,
+    productArrivalName,
+    productArrivalQR,
+  ];
 }

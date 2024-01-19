@@ -1,4 +1,5 @@
-import 'package:drift/drift.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:u_app_utils/u_app_utils.dart';
@@ -7,6 +8,7 @@ import '/app/data/database.dart';
 import '/app/constants/strings.dart';
 import '/app/pages/delivery_point_order/delivery_point_order_page.dart';
 import '/app/pages/shared/page_view_model.dart';
+import '/app/repositories/payments_repository.dart';
 
 part 'payments_state.dart';
 part 'payments_view_model.dart';
@@ -19,7 +21,9 @@ class PaymentsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<PaymentsViewModel>(
-      create: (context) => PaymentsViewModel(context),
+      create: (context) => PaymentsViewModel(
+        RepositoryProvider.of<PaymentsRepository>(context),
+      ),
       child: _PaymentsView(),
     );
   }

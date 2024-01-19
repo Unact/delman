@@ -15,7 +15,7 @@ extension DelmanApi on RenewApi {
     return ApiUserData.fromJson(await get('v1/delman/user_info'));
   }
 
-  Future<ApiData> getData() async {
+  Future<ApiData> loadData() async {
     return ApiData.fromJson(await get('v1/delman'));
   }
 
@@ -30,7 +30,7 @@ extension DelmanApi on RenewApi {
   Future<void> arriveAtDeliveryPoint({
     required int deliveryPointId,
     required DateTime factArrival,
-    required Location location,
+    required Map<String, dynamic> location,
   }) async {
     return await post(
       'v1/delman/arrive',
@@ -44,7 +44,7 @@ extension DelmanApi on RenewApi {
 
   Future<void> cancelOrder({
     required int deliveryPointOrderId,
-    required Location location
+    required Map<String, dynamic> location
   }) async {
     return await post(
       'v1/delman/cancel_order',
@@ -70,7 +70,7 @@ extension DelmanApi on RenewApi {
 
   Future<void> confirmOrder({
     required int deliveryPointOrderId,
-    required Location location,
+    required Map<String, dynamic> location,
   }) async {
     return await post(
       'v1/delman/confirm_order',
@@ -88,7 +88,7 @@ extension DelmanApi on RenewApi {
   Future<void> acceptPayment({
     required int deliveryPointOrderId,
     required double summ,
-    required Location location,
+    required Map<String, dynamic> location,
     Map<dynamic, dynamic>? transaction,
   }) async {
     return post(

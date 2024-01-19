@@ -5,70 +5,54 @@ enum InfoStateStatus {
   initial,
   dataLoaded,
   startLoad,
-  inCloseProgress,
+  closeInProgress,
   closeSuccess,
-  closeFailure,
-  inLoadProgress,
-  loadSuccess,
-  loadFailure
+  closeFailure
 }
 
 class InfoState {
   InfoState({
     this.status = InfoStateStatus.initial,
-    this.cashPayments = const [],
-    this.cardPayments = const [],
     this.deliveries = const [],
-    this.orders = const [],
-    this.newVersionAvailable = false,
+    this.user,
+    this.appInfo,
     this.message = ''
   });
 
-  final List<Payment> cashPayments;
-  final List<Payment> cardPayments;
   final List<ExDelivery> deliveries;
-  final List<OrderWithTransferResult> orders;
-  final bool newVersionAvailable;
   final InfoStateStatus status;
   final String message;
-
-  bool get isBusy => [
-    InfoStateStatus.inLoadProgress,
-    InfoStateStatus.inCloseProgress
-  ].contains(status);
+  final User? user;
+  final AppInfoResult? appInfo;
 
   int get deliveryPointsCnt => deliveries.map((el) => el.deliveryPoints.length).fold(0, (prev, el) => prev + el);
   int get deliveryPointsLeftCnt => deliveries
     .map((el) => el.deliveryPoints)
     .expand((el) => el)
     .where((el) => !el.isCompleted).length;
-  int get ordersInOwnStorageCnt => orders.where((el) => el.own).length;
-  int get ordersNotInOwnStorageCnt => orders.where((el) => el.needTransfer).length;
+  int get ordersInOwnStorageCnt => appInfo?.ownOrders ?? 0;
+  int get ordersNotInOwnStorageCnt => appInfo?.needTransferOrders ?? 0;
 
-  int get paymentsCnt => cashPaymentsCnt + cardPaymentsCnt;
-  int get cashPaymentsCnt => cashPayments.length;
-  int get cardPaymentsCnt => cardPayments.length;
+  int get paymentsCnt =>  cashPaymentsCnt + cardPaymentsCnt;
+  int get cashPaymentsCnt => appInfo?.cashPaymentsTotal ?? 0;
+  int get cardPaymentsCnt => appInfo?.cardPaymentsTotal ?? 0;
   double get paymentsSum => cashPaymentsSum + cardPaymentsSum;
-  double get cashPaymentsSum => cashPayments.fold(0, (prev, el) => prev + el.summ);
-  double get cardPaymentsSum => cardPayments.fold(0, (prev, el) => prev + el.summ);
+  double get cashPaymentsSum => appInfo?.cashPaymentsSum ?? 0;
+  double get cardPaymentsSum => appInfo?.cardPaymentsSum ?? 0;
 
   InfoState copyWith({
     InfoStateStatus? status,
-    List<Payment>? cashPayments,
-    List<Payment>? cardPayments,
     List<ExDelivery>? deliveries,
-    List<OrderWithTransferResult>? orders,
-    bool? newVersionAvailable,
-    String? message
+    String? message,
+    User? user,
+    AppInfoResult? appInfo,
   }) {
     return InfoState(
       status: status ?? this.status,
-      cashPayments: cashPayments ?? this.cashPayments,
-      cardPayments: cardPayments ?? this.cardPayments,
       deliveries: deliveries ?? this.deliveries,
-      orders: orders ?? this.orders,
-      newVersionAvailable: newVersionAvailable ?? this.newVersionAvailable,
-      message: message ?? this.message
+      message: message ?? this.message,
+      user: user ?? this.user,
+      appInfo: appInfo ?? this.appInfo,
     );
   }
 }

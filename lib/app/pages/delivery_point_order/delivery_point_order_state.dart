@@ -25,7 +25,7 @@ class DeliveryPointOrderState {
     this.message = '',
     required this.confirmationCallback,
     this.user,
-    this.payment
+    this.exPayment
   });
 
   final DeliveryPointOrderStateStatus status;
@@ -37,9 +37,10 @@ class DeliveryPointOrderState {
   final String message;
   final Function confirmationCallback;
   final User? user;
-  final Payment? payment;
+  final ExPayment? exPayment;
 
-  double get total => payment?.summ ?? orderLines.fold(0, (prev, el) => prev + (el.factAmount ?? 0) * el.price);
+  double get total => exPayment?.payment.summ ??
+    orderLines.fold(0, (prev, el) => prev + (el.factAmount ?? 0) * el.price);
   bool get isPickup => deliveryPointOrderEx.dpo.pickup;
   bool get factsConfirmed => deliveryPointOrderEx.o.factsConfirmed;
   bool get withCourier => deliveryPointOrderEx.o.storageId == user?.storageId;
@@ -47,7 +48,7 @@ class DeliveryPointOrderState {
   bool get needPayment => !isPickup &&
     !deliveryPointOrderEx.dpo.finished &&
     !deliveryPointOrderEx.dpo.canceled &&
-    payment == null &&
+    exPayment == null &&
     total != 0;
 
   DeliveryPointOrderState copyWith({
@@ -60,7 +61,7 @@ class DeliveryPointOrderState {
     String? message,
     Function? confirmationCallback,
     User? user,
-    Payment? payment
+    ExPayment? exPayment
   }) {
     return DeliveryPointOrderState(
       status: status ?? this.status,
@@ -72,7 +73,7 @@ class DeliveryPointOrderState {
       message: message ?? this.message,
       confirmationCallback: confirmationCallback ?? this.confirmationCallback,
       user: user ?? this.user,
-      payment: payment ?? this.payment
+      exPayment: exPayment ?? this.exPayment
     );
   }
 }

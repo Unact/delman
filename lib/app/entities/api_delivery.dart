@@ -1,6 +1,6 @@
 part of 'entities.dart';
 
-class ApiDelivery {
+class ApiDelivery extends Equatable {
   final int id;
   final int active;
   final DateTime deliveryDate;
@@ -26,4 +26,11 @@ class ApiDelivery {
       deliveryDate: deliveryDate
     );
   }
+
+  @override
+  List<Object> get props => [
+    id,
+    active,
+    deliveryDate
+  ];
 }

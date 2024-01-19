@@ -1,9 +1,10 @@
 import 'dart:async';
 
-import 'package:drift/drift.dart' show TableUpdateQuery, Value;
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:u_app_utils/u_app_utils.dart';
 
 import '/app/constants/strings.dart';
@@ -12,8 +13,7 @@ import '/app/data/database.dart';
 import '/app/pages/delivery_point_order/delivery_point_order_page.dart';
 import '/app/pages/point_address/point_address_page.dart';
 import '/app/pages/shared/page_view_model.dart';
-import '/app/services/delman_api.dart';
-import '/app/services/geo_loc.dart';
+import '/app/repositories/deliveries_repository.dart';
 
 part 'delivery_point_state.dart';
 part 'delivery_point_view_model.dart';
@@ -30,7 +30,7 @@ class DeliveryPointPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<DeliveryPointViewModel>(
       create: (context) => DeliveryPointViewModel(
-        context,
+        RepositoryProvider.of<DeliveriesRepository>(context),
         deliveryPointEx: deliveryPointEx
       ),
       child: _DeliveryPointView(),
@@ -95,7 +95,7 @@ class _DeliveryPointViewState extends State<_DeliveryPointView> {
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-                              backgroundColor: Colors.blue
+                              backgroundColor: Theme.of(context).colorScheme.primary,
                             ),
                             child: const Text('Отметить'),
                             onPressed: () => vm.arrive(),

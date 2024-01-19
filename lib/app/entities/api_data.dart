@@ -1,14 +1,14 @@
 part of 'entities.dart';
 
-class ApiData {
-  List<ApiDeliveryPoint> deliveryPoints;
-  List<ApiDelivery> deliveries;
-  List<ApiOrderInfoLine> orderInfoList;
-  List<ApiOrderLine> orderLines;
-  List<ApiOrder> orders;
-  List<ApiDeliveryPointOrder> deliveryPointOrders;
-  List<ApiOrderStorage> orderStorages;
-  List<ApiPayment> payments;
+class ApiData extends Equatable {
+  final List<ApiDeliveryPoint> deliveryPoints;
+  final List<ApiDelivery> deliveries;
+  final List<ApiOrderInfoLine> orderInfoList;
+  final List<ApiOrderLine> orderLines;
+  final List<ApiOrder> orders;
+  final List<ApiDeliveryPointOrder> deliveryPointOrders;
+  final List<ApiOrderStorage> orderStorages;
+  final List<ApiPayment> payments;
 
   ApiData({
     required this.deliveryPoints,
@@ -41,4 +41,17 @@ class ApiData {
         .map<ApiPayment>((e) => ApiPayment.fromJson(e)).toList(),
     );
   }
+
+
+  @override
+  List<Object> get props => [
+    deliveryPoints,
+    deliveries,
+    orderInfoList,
+    orderLines,
+    orders,
+    deliveryPointOrders,
+    orderStorages,
+    payments,
+  ];
 }

@@ -8,7 +8,7 @@ import '/app/data/database.dart';
 import '/app/constants/strings.dart';
 import '/app/entities/entities.dart';
 import '/app/pages/shared/page_view_model.dart';
-import '/app/services/delman_api.dart';
+import '/app/repositories/orders_repository.dart';
 
 part 'order_qr_scan_state.dart';
 part 'order_qr_scan_view_model.dart';
@@ -21,7 +21,9 @@ class OrderQRScanPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<OrderQRScanViewModel>(
-      create: (context) => OrderQRScanViewModel(context),
+      create: (context) => OrderQRScanViewModel(
+        RepositoryProvider.of<OrdersRepository>(context),
+      ),
       child: _OrderQRScanView(),
     );
   }

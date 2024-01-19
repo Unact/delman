@@ -1,15 +1,13 @@
 part of 'order_qr_scan_page.dart';
 
 class OrderQRScanViewModel extends PageViewModel<OrderQRScanState, OrderQRScanStateStatus> {
+  final OrdersRepository ordersRepository;
   static const String qrType = 'ORDER';
 
-  OrderQRScanViewModel(BuildContext context) : super(context, OrderQRScanState());
+  OrderQRScanViewModel(this.ordersRepository) : super(OrderQRScanState());
 
   @override
   OrderQRScanStateStatus get status => state.status;
-
-  @override
-  Future<void> loadData() async {}
 
   Future<void> readQRCode(String? qrCode) async {
     if (qrCode == null) return;
@@ -50,7 +48,7 @@ class OrderQRScanViewModel extends PageViewModel<OrderQRScanState, OrderQRScanSt
       }
     } else {
       try {
-        Order? order = await _findOrder(qrTrackingNumber);
+        Order? order = await ordersRepository.findOrder(qrTrackingNumber);
 
         if (order == null) {
           emit(state.copyWith(status: OrderQRScanStateStatus.failure, message: 'Не удалось найти заказ'));
@@ -71,39 +69,5 @@ class OrderQRScanViewModel extends PageViewModel<OrderQRScanState, OrderQRScanSt
       OrderQRScanStateStatus.finished;
 
     emit(newState.copyWith(orderPackageScanned: newOrderPackageScanned, status: newStatus));
-  }
-
-  Future<Order?> _findOrder(String trackingNumber) async {
-    try {
-      Order? order = await app.storage.ordersDao.getOrderByTrackingNumber(trackingNumber);
-      if (order != null) return order;
-
-      ApiFindOrderData? data = await app.api.findOrderData(trackingNumber: trackingNumber);
-
-      if (data != null) {
-        order = data.order.toDatabaseEnt();
-
-        await app.storage.transaction(() async {
-          await app.storage.ordersDao.insertOrder(order!.toCompanion(false));
-          await Future.forEach<OrderLinesCompanion>(
-            data.orderLines.map((e) =>e.toDatabaseEnt().toCompanion(false)),
-            (e) => app.storage.ordersDao.insertOrderLine(e)
-          );
-          await Future.forEach<OrderInfoLinesCompanion>(
-            data.orderInfoList.map((e) =>e.toDatabaseEnt().toCompanion(false)),
-            (e) => app.storage.ordersDao.insertOrderInfoLine(e)
-          );
-        });
-
-        return order;
-      }
-
-      return null;
-    } on ApiException catch(e) {
-      throw AppError(e.errorMsg);
-    } catch(e, trace) {
-      await Misc.reportError(e, trace);
-      throw AppError(Strings.genericErrorMsg);
-    }
   }
 }

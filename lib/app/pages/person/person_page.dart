@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:drift/drift.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:u_app_utils/u_app_utils.dart';
@@ -10,7 +8,8 @@ import '/app/constants/strings.dart';
 import '/app/data/database.dart';
 import '/app/entities/entities.dart';
 import '/app/pages/shared/page_view_model.dart';
-import '/app/services/delman_api.dart';
+import '/app/repositories/app_repository.dart';
+import '/app/repositories/users_repository.dart';
 
 part 'person_state.dart';
 part 'person_view_model.dart';
@@ -23,7 +22,10 @@ class PersonPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<PersonViewModel>(
-      create: (context) => PersonViewModel(context),
+      create: (context) => PersonViewModel(
+        RepositoryProvider.of<AppRepository>(context),
+        RepositoryProvider.of<UsersRepository>(context)
+      ),
       child: _PersonView(),
     );
   }
@@ -36,6 +38,12 @@ class _PersonView extends StatefulWidget {
 
 class _PersonViewState extends State<_PersonView> {
   late final ProgressDialog _progressDialog = ProgressDialog(context: context);
+
+  @override
+  void dispose() {
+    _progressDialog.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,28 +109,43 @@ class _PersonViewState extends State<_PersonView> {
           )
         ),
         InfoRow(
-          title: const Text('Обновление БД'),
-          trailing: Text(state.lastSyncTime != null ? Format.dateTimeStr(state.lastSyncTime) : 'Не проводилось')
+          title: const Text('Данные загружены'),
+          trailing: Text(
+            state.appInfo?.lastLoadTime != null ?
+              Format.dateTimeStr(state.appInfo?.lastLoadTime!) :
+              'Загрузка не проводилась',
+          )
         ),
-        InfoRow(title: const Text('Версия'), trailing: Text(state.fullVersion)),
-        !state.newVersionAvailable ?
-          Container() :
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-                    backgroundColor: Colors.blue,
-                  ),
-                  onPressed: vm.launchAppUpdate,
-                  child: const Text('Обновить приложение')
-                )
-              ],
-            )
+        InfoRow(
+          title: const Text('Версия'),
+          trailing: FutureBuilder(
+            future: Misc.fullVersion,
+            builder: (context, snapshot) => Text(snapshot.data ?? ''),
+          )
+        ),
+        FutureBuilder(
+          future: vm.state.user?.newVersionAvailable,
+          builder: (context, snapshot) {
+            if (!(snapshot.data ?? false)) return Container();
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+                      backgroundColor: Theme.of(context).colorScheme.primary
+                    ),
+                    onPressed: vm.launchAppUpdate,
+                    child: const Text('Обновить приложение'),
+                  )
+                ],
+              )
+            );
+          }
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -133,7 +156,7 @@ class _PersonViewState extends State<_PersonView> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-                  backgroundColor: Colors.blue,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                 ),
                 onPressed: vm.apiLogout,
                 child: const Text('Выйти'),

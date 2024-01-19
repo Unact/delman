@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:drift/drift.dart' show TableUpdateQuery, Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:u_app_utils/u_app_utils.dart';
@@ -11,7 +10,9 @@ import '/app/data/database.dart';
 import '/app/pages/order_storage/order_storage_page.dart';
 import '/app/pages/order_qr_scan/order_qr_scan_page.dart';
 import '/app/pages/shared/page_view_model.dart';
-import '/app/services/delman_api.dart';
+import '/app/repositories/order_storages_repository.dart';
+import '/app/repositories/orders_repository.dart';
+import '/app/repositories/users_repository.dart';
 
 part 'order_storages_state.dart';
 part 'order_storages_view_model.dart';
@@ -24,7 +25,11 @@ class OrderStoragesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<OrderStoragesViewModel>(
-      create: (context) => OrderStoragesViewModel(context),
+      create: (context) => OrderStoragesViewModel(
+        RepositoryProvider.of<OrderStoragesRepository>(context),
+        RepositoryProvider.of<OrdersRepository>(context),
+        RepositoryProvider.of<UsersRepository>(context)
+      ),
       child: _OrderStoragesView(),
     );
   }
@@ -37,6 +42,12 @@ class _OrderStoragesView extends StatefulWidget {
 
 class _OrderStoragesViewState extends State<_OrderStoragesView> {
   late final ProgressDialog _progressDialog = ProgressDialog(context: context);
+
+  @override
+  void dispose() {
+    _progressDialog.close();
+    super.dispose();
+  }
 
   Future<void> showQRPage() async {
     OrderStoragesViewModel vm = context.read<OrderStoragesViewModel>();
