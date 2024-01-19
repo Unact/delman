@@ -42,7 +42,6 @@ class ApiData extends Equatable {
     );
   }
 
-
   @override
   List<Object> get props => [
     deliveryPoints,

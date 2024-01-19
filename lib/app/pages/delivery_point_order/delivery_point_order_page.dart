@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:delman/app/repositories/orders_repository.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,6 +13,7 @@ import '/app/entities/entities.dart';
 import '/app/pages/accept_payment/accept_payment_page.dart';
 import '/app/pages/shared/page_view_model.dart';
 import '/app/repositories/deliveries_repository.dart';
+import '/app/repositories/orders_repository.dart';
 import '/app/repositories/users_repository.dart';
 import '/app/repositories/payments_repository.dart';
 

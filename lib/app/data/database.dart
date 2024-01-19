@@ -9,7 +9,7 @@ import 'package:path/path.dart' as p;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:rxdart/rxdart.dart';
 
-import 'package:delman/app/constants/strings.dart';
+import '/app/constants/strings.dart';
 
 part 'schema.dart';
 part 'database.g.dart';
