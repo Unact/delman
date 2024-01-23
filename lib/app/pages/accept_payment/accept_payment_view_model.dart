@@ -91,7 +91,7 @@ class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState, AcceptPay
     iboxpro.connectToDevice();
   }
 
-  Future<void> _getPaymentCredentials() async {
+  Future<void> _getPaymentCredentials([String? _]) async {
     if (state.canceled) return;
 
     emit(state.copyWith(message: 'Установление связи с сервером', status: AcceptPaymentStateStatus.gettingCredentials));
