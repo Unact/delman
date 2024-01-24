@@ -56,25 +56,30 @@ class OrderStorageViewModel extends PageViewModel<OrderStorageState, OrderStorag
   Future<Order?> orderFromManualInput(String trackingNumber, String packageNumberStr) async {
     int packageNumber = int.tryParse(packageNumberStr) ?? 1;
 
-    Order? order = await ordersRepository.findOrder(trackingNumber);
+    try {
+      Order? order = await ordersRepository.findOrder(trackingNumber);
 
-    if (order == null) {
-      emit(state.copyWith(
-        status: OrderStorageStateStatus.failure,
-        message: 'Не удалось найти заказ'
-      ));
+      if (order == null) {
+        emit(state.copyWith(
+          status: OrderStorageStateStatus.failure,
+          message: 'Не удалось найти заказ'
+        ));
+        return null;
+      }
+
+      if (order.packages != packageNumber) {
+        emit(state.copyWith(
+          status: OrderStorageStateStatus.failure,
+          message: 'Указанное кол-во мест не совпадает с кол-вом мест заказа'
+        ));
+        return null;
+      }
+
+      return order;
+    } on AppError catch(e) {
+      emit(state.copyWith(status: OrderStorageStateStatus.failure, message: e.message));
       return null;
     }
-
-    if (order.packages != packageNumber) {
-      emit(state.copyWith(
-        status: OrderStorageStateStatus.failure,
-        message: 'Указанное кол-во мест не совпадает с кол-вом мест заказа'
-      ));
-      return null;
-    }
-
-    return order;
   }
 
   Future<void> tryMoveOrder(Order order) async {
