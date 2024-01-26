@@ -60,6 +60,12 @@ class AcceptPaymentViewModel extends PageViewModel<AcceptPaymentState, AcceptPay
     _getLocation();
   }
 
+  @override
+  Future<void> close() async {
+    iboxpro.dispose();
+    super.close();
+  }
+
   Future<void> _getLocation() async {
     emit(state.copyWith(position: await Geolocator.getCurrentPosition()));
 
