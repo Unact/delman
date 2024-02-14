@@ -25,7 +25,8 @@ class AcceptPaymentState {
     this.canceled = false,
     this.isCancelable = true,
     this.isRequiredSignature = false,
-    this.message = ''
+    this.message = '',
+    this.transaction
   });
 
   final AcceptPaymentStateStatus status;
@@ -37,6 +38,7 @@ class AcceptPaymentState {
   final bool isCancelable;
   final bool isRequiredSignature;
   final String message;
+  final Map<String, dynamic>? transaction;
 
   AcceptPaymentState copyWith({
     AcceptPaymentStateStatus? status,
@@ -47,7 +49,8 @@ class AcceptPaymentState {
     bool? canceled,
     bool? isCancelable,
     bool? isRequiredSignature,
-    String? message
+    String? message,
+    Map<String, dynamic>? transaction
   }) {
     return AcceptPaymentState(
       status: status ?? this.status,
@@ -58,7 +61,8 @@ class AcceptPaymentState {
       canceled: canceled ?? this.canceled,
       isCancelable: isCancelable ?? this.isCancelable,
       isRequiredSignature: isRequiredSignature ?? this.isRequiredSignature,
-      message: message ?? this.message
+      message: message ?? this.message,
+      transaction: transaction ?? this.transaction
     );
   }
 }
